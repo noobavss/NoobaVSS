@@ -23,7 +23,10 @@ PluginLoader::PluginLoader(QObject *parent)
 
 PluginLoader::~PluginLoader()
 {
-   saveSettings(m_activePluginFileName);
+    if(m_activePlugin)
+        m_activePlugin->release();
+
+    saveSettings(m_activePluginFileName);
 }
 
 
@@ -36,8 +39,8 @@ int PluginLoader::loadPluginInfo()
     int api_majorVer;
     int api_minorVer;
     QString errStr;
-    // go through the directory and try to load the plugin files
 
+    // go through the directory and try to load the plugin files
     foreach (QString fileName, m_Dir.entryList(QDir::Files))
     {        
         QPluginLoader pluginLoader(m_Dir.absoluteFilePath(fileName));       // use a scoped pluginLoader (separate from the m_QPluginLoader ) instance so that loading 

@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QMap>
 #include <QList>
+#include <QScopedPointer>
 
 class Property;
 class NoobaPluginAPIBase;
@@ -26,7 +27,7 @@ public:
 
 private:
     // variables
-    QMap<QString, Property* >    _propertyMap;
+    QScopedPointer< QMap<QString, Property* > >    _propertyMap;
 };
 
 #endif // NOOBAPLUGINBASEPRIVATE_H
