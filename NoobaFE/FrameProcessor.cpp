@@ -7,12 +7,10 @@
 FrameProcessor::FrameProcessor(QObject *parent)
 	: QObject(parent)
 {
-
 }
 
 FrameProcessor::~FrameProcessor()
 {
-
 }
 
 // bool FrameProcessor::procFrame( cv::Mat& in, cv::Mat& out, const nooba::ProcParams& params)

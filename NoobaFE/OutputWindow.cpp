@@ -8,5 +8,4 @@ OutputWindow::OutputWindow(QWidget *parent)
 
 OutputWindow::~OutputWindow()
 {
-
 }

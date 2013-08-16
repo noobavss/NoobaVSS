@@ -57,7 +57,7 @@ void PluginsConfigUI::updateUI()
     foreach(const nooba::PluginData& pluginData, m_pluginLoader.getPluginInfo())
     {
         QTreeWidgetItem* level0 = new QTreeWidgetItem(0);
-        QString pluginName = pluginData._pluginInfo._name;
+        QString pluginName = pluginData._pluginInfo.name();
         level0->setText(0, pluginName);
         level0->setData(0, Qt::UserRole+1, pluginData._fileName); // used to set the default plugin
 
@@ -74,8 +74,8 @@ void PluginsConfigUI::updateUI()
 
         QTreeWidgetItem* level1 = new QTreeWidgetItem(1);
         level1->setText(0, tr("Version"));
-        QString str(tr("%1.%2").arg(pluginData._pluginInfo._majorVersion)
-                    .arg(pluginData._pluginInfo._majorVersion));
+        QString str(tr("%1.%2").arg(pluginData._pluginInfo.majorVersion())
+                    .arg(pluginData._pluginInfo.majorVersion()));
         level1->setText(1, str);
         level1->setToolTip(1, str);
         level0->addChild(level1);
@@ -89,14 +89,14 @@ void PluginsConfigUI::updateUI()
 
         level1 = new QTreeWidgetItem(1);
         level1->setText(0, tr("Description"));
-        str = tr("%1").arg(pluginData._pluginInfo._description);
+        str = tr("%1").arg(pluginData._pluginInfo.description());
         level1->setText(1, str);
         level1->setToolTip(1, str);
         level0->addChild(level1);
 
         level1 = new QTreeWidgetItem(1);
         level1->setText(0, tr("Created by"));
-        str = tr("%1").arg(pluginData._pluginInfo._author);
+        str = tr("%1").arg(pluginData._pluginInfo.author());
         level1->setText(1, str);
         level1->setToolTip(1, str);
         level0->addChild(level1);

@@ -51,7 +51,7 @@ void MainWindow::onOpenFile()
         errMsg.exec();
         return;
     }
-    _params._frameId = 0;
+    _params.setFrameId(0);
 }
 
 void MainWindow::onOpenWebCam()
@@ -66,7 +66,7 @@ void MainWindow::onOpenWebCam()
 		errMsg.exec();
 		return;
 	}
-    _params._frameId = 0;
+    _params.setFrameId(0);
 }
 
 QImage MainWindow::convertToQImage(cv::Mat& cvImg)
@@ -103,13 +103,15 @@ void MainWindow::on_controlButton_clicked()
 
     double rate= _vidCapture.get(CV_CAP_PROP_FPS);
 
-    if(rate > 0)
+    if(rate > 0)    // video file
     {
         _delay = 1000/rate;
+        _params.setFrameRate(rate);
     }
-    else
+    else    // on web cam open
     {
-        _delay = 100;
+        _delay = 100;   // assume 10 fps
+        _params.setFrameRate(10);
     }
 
     _timer.start(_delay);
@@ -134,7 +136,8 @@ void MainWindow::updateFrame()
 	}
 
     cv::cvtColor(_frame, _frame,CV_BGR2RGB); // convert layout from BGR to RGB
-    _params._frameId = _vidCapture.get(CV_CAP_PROP_POS_FRAMES) - 1;
+    _params.setFrameId(_vidCapture.get(CV_CAP_PROP_POS_FRAMES) - 1);
+
 
     ui->orgImg->setPixmap(QPixmap::fromImage(
         convertToQImage(_frame))
@@ -179,16 +182,11 @@ void MainWindow::setVideoState( VideoState state )
 	}
 }
 
-
 void MainWindow::onPluginAct_triggerred()
 {
    PluginsConfigUI dlg(_pluginLoader, this);
    dlg.exec();
 }
-
-
-
-
 
 void MainWindow::on_actionAbout_NoobaVSS_triggered()
 {
@@ -201,5 +199,3 @@ void MainWindow::on_actionAbout_NoobaVSS_triggered()
                        .append(".").append(QString::number(nooba::MinorVersion)).append("</p>")
                        );
 }
-
-

@@ -3,12 +3,10 @@
 
 #include "NoobaPluginAPI_global.h"
 #include "noobapluginbase.h"
-
+#include "property.h"
 
 #include <QString>
 #include <QtPlugin>
-
-#include "property.h"
 
 /************************************************************************/
 /* IMPORTANT: ANY CHANGE TO THE API CORRESPOND TO A CHANGE IN THE       */
@@ -24,36 +22,68 @@ namespace cv {
     class Mat;
 }
 
+struct ProcParamsPrivate;
+struct PluginInfoPrivate;
+struct NoobaPluginAPIPrivate;
+
 /*
  * Structure to output extra information other than the output image.
  */
-struct ProcParams
+class ProcParams
 {
-    ProcParams():_ok(true) {}
+public:
 
-    int         _frameId;   // unique frameId for the video
-    QString     _data;      // can be plain text, xml, csv etc
-    bool        _ok;        // frame process status, successful or not
-    QString     _err;       // error details
+    ProcParams();
+    ProcParams(const ProcParams& rhs);                // copy constructor
+    ProcParams& operator=(const ProcParams& rhs);     // assignment operator
+
+    ~ProcParams();
+
+    void setFrameId(int id);
+    int frameId() const;
+
+    void setFrameRate(double rate);
+    double frameRate() const;
+
+    void setErrorState(bool isError);
+    bool isError() const;
+
+    void setErrorMsg(const QString& errMsg);
+    QString errMsg() const;
+
+private:
+
+    ProcParamsPrivate* createPrivateStruct(const ProcParams& rhs);
+    ProcParamsPrivate*   d;  // d pointer
+
 };
 
-struct PluginInfo
+/**
+ * @brief Plugin information are stored in this structure
+ */
+class PluginInfo
 {
-    PluginInfo(const QString& name, const int majorVersion, const int minorVersion, const QString& description):
-        _name(name),
-        _description(description),
-        _majorVersion(majorVersion),
-        _minorVersion(minorVersion) {}
+public:
 
-        QString     _name;          // name of the plugin
-        QString     _description;   // small explanation of the plugin
-        QString     _author;        // creator(s) of the plugin
+    PluginInfo(const QString& name, const int majorVersion, const int minorVersion,
+               const QString& description, const QString& author);
+    PluginInfo(const PluginInfo& rhs);                // copy constructor
+    PluginInfo& operator=(const PluginInfo& rhs);     // assignment operator
 
-       /* version numbers of a processing class has a major version and a minor version
-        * eg: 1.5 , here 1 is the major version and 5 is the minor version
-        */
-        int         _majorVersion; // major version of plugin, different from API version
-        int         _minorVersion; // minor version of plugin, different from API version
+    ~PluginInfo();
+
+    QString name() const;
+    QString description() const;
+    QString author() const;
+
+    int majorVersion() const;
+    int minorVersion() const;
+
+private:
+
+    PluginInfoPrivate *createPrivateStruct(const PluginInfo& rhs);
+    PluginInfoPrivate*  d;
+
 };
 
 class NOOBAPLUGINAPISHARED_EXPORT NoobaPluginAPI: public NoobaPluginAPIBase
@@ -61,6 +91,7 @@ class NOOBAPLUGINAPISHARED_EXPORT NoobaPluginAPI: public NoobaPluginAPIBase
     Q_OBJECT
 
 public:
+
     virtual ~NoobaPluginAPI(){}
 
     /**
@@ -69,13 +100,13 @@ public:
      *          use setProperty(const Property& property)
      *
      */
-    virtual void init() = 0;
+    virtual bool init() = 0;
 
     /**
      * @brief release   This member function is called before unloading the plugin. Resources that need to be
      *                  released before unloading need to be called here.
      */
-    virtual void release() = 0;
+    virtual bool release() = 0;
     /**
      * @brief Each Plugin has to implement this function. Each frame is processed using this function.
      * @param in        input image as a opencv mat object
@@ -91,18 +122,32 @@ public:
      */
     virtual PluginInfo getPluginInfo() const = 0;
 
+    /**
+     * @brief errMsg On failure of the plugin this error message should be used to state the error
+     * @return QString error details
+     */
+    QString errMsg() const;
+
 protected:
 
     /* private constructor so that this class could never be instantiated. Only be casted to this
        interface type to get the API version details.
      */
-    NoobaPluginAPI(): NoobaPluginAPIBase() {}
+    NoobaPluginAPI();
+
+    /**
+     * @brief setErrMsg on plugin error set the error message
+     * @param errMsg details of the error
+     */
+    void setErrMsg(const QString& errMsg);
 
 private:
 
     NoobaPluginAPI(const NoobaPluginAPI& rhs);                // private copy constructor
     NoobaPluginAPI& operator=(const NoobaPluginAPI& rhs);     // private assignment operator
+
+    NoobaPluginAPIPrivate*      d;                            // d pointer
 };
 
-Q_DECLARE_INTERFACE(NoobaPluginAPI, "NoobaVSS.NoobaPluginAPI/" );
+Q_DECLARE_INTERFACE(NoobaPluginAPI, "NoobaVSS.NoobaPluginAPI/" )
 #endif // NOOBAPLUGINAPI_H

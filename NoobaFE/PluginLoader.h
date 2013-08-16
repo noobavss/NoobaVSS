@@ -46,7 +46,6 @@ public:
     /* Returns the plugins file name (Note: plugin file name and plugin name may be different)
      */
     QString getActivePluginFilename() const { return m_activePluginFileName; }
-    
 
 private:
 

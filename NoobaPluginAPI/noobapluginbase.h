@@ -6,7 +6,7 @@
 #include "property.h"
 
 #define API_MAJOR_VERSION   0
-#define API_MINOR_VERSION   2
+#define API_MINOR_VERSION   3
 
 class NoobaPluginAPIBasePrivate;
 

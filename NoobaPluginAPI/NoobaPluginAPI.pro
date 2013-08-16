@@ -16,7 +16,8 @@ SOURCES += \
     noobapluginbaseprivate.cpp \
     property.cpp \
     intproperty.cpp \
-    port.cpp
+    port.cpp \
+    noobapluginapi.cpp
 
 HEADERS += noobapluginapi.h\
         NoobaPluginAPI_global.h \

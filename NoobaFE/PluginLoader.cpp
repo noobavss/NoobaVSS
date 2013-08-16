@@ -36,8 +36,8 @@ int PluginLoader::loadPluginInfo()
     pluginInfoList.clear();
     int pluginCount = 0;
 
-    int api_majorVer;
-    int api_minorVer;
+    int pluginAPIMajorVer;
+    int pluginAPIMinorVer;
     QString errStr;
 
     // go through the directory and try to load the plugin files
@@ -53,25 +53,25 @@ int PluginLoader::loadPluginInfo()
         if (!apiBase)
             break;
 
-        api_majorVer = apiBase->APIMajorVersion();
-        api_minorVer = apiBase->APIMinorVersion();
+        pluginAPIMajorVer = apiBase->APIMajorVersion();
+        pluginAPIMinorVer = apiBase->APIMinorVersion();
         bool ok = true;
-        if(api_majorVer > API_MAJOR_VERSION)
+        if(pluginAPIMajorVer > API_MAJOR_VERSION)
             ok = false;
 
-        if(api_majorVer == API_MAJOR_VERSION && api_minorVer > API_MINOR_VERSION)
+        if(pluginAPIMajorVer == API_MAJOR_VERSION && pluginAPIMinorVer > API_MINOR_VERSION)
             ok = false;
 
         if(!ok)
         {
             errStr.append( tr("\n%1 version(%2.%3) is newer than the program version (%4.%5). Plugin not loaded ").
-                  arg(fileName).arg(api_majorVer).arg(api_minorVer).arg(API_MAJOR_VERSION).arg(API_MINOR_VERSION));
+                  arg(fileName).arg(pluginAPIMajorVer).arg(pluginAPIMinorVer).arg(API_MAJOR_VERSION).arg(API_MINOR_VERSION));
             break;
         }
 
         // add the plugin details to the list
         NoobaPluginAPI* api = qobject_cast<NoobaPluginAPI* >(plugin);
-        nooba::PluginData pluginData(fileName, api->getPluginInfo(),api_majorVer, api_minorVer);
+        nooba::PluginData pluginData(fileName, api->getPluginInfo(),pluginAPIMajorVer, pluginAPIMinorVer);
         pluginInfoList.append(pluginData);
         pluginLoader.unload();  // unload after getting the details of the plugin
         pluginCount++;
