@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoobaFE", "NoobaFE\NoobaFE.vcxproj", "{0294E1C5-F0FD-3D38-A2FA-A0438D5CE0FB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoobaPluginAPI", "NoobaPluginAPI\NoobaPluginAPI.vcxproj", "{C6BB6D03-5922-3ACB-9A8C-6AC0CD7232E0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0294E1C5-F0FD-3D38-A2FA-A0438D5CE0FB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0294E1C5-F0FD-3D38-A2FA-A0438D5CE0FB}.Debug|Win32.Build.0 = Debug|Win32
+		{0294E1C5-F0FD-3D38-A2FA-A0438D5CE0FB}.Debug|x64.ActiveCfg = Debug|x64
+		{0294E1C5-F0FD-3D38-A2FA-A0438D5CE0FB}.Debug|x64.Build.0 = Debug|x64
+		{0294E1C5-F0FD-3D38-A2FA-A0438D5CE0FB}.Release|Win32.ActiveCfg = Release|Win32
+		{0294E1C5-F0FD-3D38-A2FA-A0438D5CE0FB}.Release|Win32.Build.0 = Release|Win32
+		{0294E1C5-F0FD-3D38-A2FA-A0438D5CE0FB}.Release|x64.ActiveCfg = Release|x64
+		{0294E1C5-F0FD-3D38-A2FA-A0438D5CE0FB}.Release|x64.Build.0 = Release|x64
+		{C6BB6D03-5922-3ACB-9A8C-6AC0CD7232E0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C6BB6D03-5922-3ACB-9A8C-6AC0CD7232E0}.Debug|Win32.Build.0 = Debug|Win32
+		{C6BB6D03-5922-3ACB-9A8C-6AC0CD7232E0}.Debug|x64.ActiveCfg = Debug|x64
+		{C6BB6D03-5922-3ACB-9A8C-6AC0CD7232E0}.Debug|x64.Build.0 = Debug|x64
+		{C6BB6D03-5922-3ACB-9A8C-6AC0CD7232E0}.Release|Win32.ActiveCfg = Release|Win32
+		{C6BB6D03-5922-3ACB-9A8C-6AC0CD7232E0}.Release|Win32.Build.0 = Release|Win32
+		{C6BB6D03-5922-3ACB-9A8C-6AC0CD7232E0}.Release|x64.ActiveCfg = Release|x64
+		{C6BB6D03-5922-3ACB-9A8C-6AC0CD7232E0}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

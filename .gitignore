@@ -1,4 +1,17 @@
 *.user
+NoobaFE/Debug/*
+NoobaFE/GeneratedFiles/*
+NoobaFE/Win32/*
+NoobaFE/release/*
+NoobaFE/x64/*
+NoobaPluginAPI/Debug/*
+NoobaPluginAPI/Win32/*
+NoobaPluginAPI/release/*
+NoobaPluginAPI/x64/*
+
+*.sdf
+*.opensdf
+*.suo
 
 # Compiled source #
 ###################
