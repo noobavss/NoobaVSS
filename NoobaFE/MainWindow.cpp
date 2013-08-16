@@ -35,7 +35,7 @@ MainWindow::~MainWindow()
 void MainWindow::onOpenFile()
 {
     QString path = QFileDialog::getOpenFileName(this, tr("Open file"),
-                      QDesktopServices::storageLocation(QDesktopServices::PicturesLocation));
+                      QDesktopServices::storageLocation(QDesktopServices::DesktopLocation));
 
     if(path.isEmpty())
         return;
@@ -133,7 +133,7 @@ void MainWindow::updateFrame()
 		return;
 	}
 
-    cv::cvtColor(_frame, _frame,CV_BGR2RGB);
+    cv::cvtColor(_frame, _frame,CV_BGR2RGB); // convert layout from BGR to RGB
     _params._frameId = _vidCapture.get(CV_CAP_PROP_POS_FRAMES) - 1;
 
     ui->orgImg->setPixmap(QPixmap::fromImage(
@@ -188,3 +188,15 @@ void MainWindow::onPluginAct_triggerred()
 
 
 
+
+void MainWindow::on_actionAbout_NoobaVSS_triggered()
+{
+    QMessageBox::about(this, "Nooba VSS",
+                       QString("<h5>Nooba is an open source surveillance video analysis tool</h5><p>API Version:\t\t\t")
+                       .append(QString::number(API_MAJOR_VERSION)).append(".").append(QString::number(API_MINOR_VERSION))
+                       .append("</p><p>OpenCV version:\t\t\t").append(QString::number(CV_MAJOR_VERSION))
+                       .append(".").append(QString::number(CV_MINOR_VERSION))
+                       .append("</p><p>Version:\t\t\t").append(QString("").number(nooba::MajorVersion))
+                       .append(".").append(QString::number(nooba::MinorVersion)).append("</p>")
+                       );
+}

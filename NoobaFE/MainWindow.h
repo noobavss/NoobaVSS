@@ -39,6 +39,8 @@ private slots:
 	void updateFrame();
     void onPluginAct_triggerred();
     
+    void on_actionAbout_NoobaVSS_triggered();
+
 private:
 
 	/*
