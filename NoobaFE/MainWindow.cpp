@@ -93,27 +93,27 @@ void MainWindow::on_prevButton_clicked()
     updateFrame();
 }
 
-void MainWindow::on_playButton_clicked()
+void MainWindow::on_controlButton_clicked()
 {
     if(_vidState == PlayingState)
-	{
-		setVideoState(PausedState);
-		return;
-	}
+    {
+        setVideoState(PausedState);
+        return;
+    }
 
     double rate= _vidCapture.get(CV_CAP_PROP_FPS);
 
-	if(rate > 0)
-	{
+    if(rate > 0)
+    {
         _delay = 1000/rate;
-	}
-	else
-	{
+    }
+    else
+    {
         _delay = 100;
-	}
-	
+    }
+
     _timer.start(_delay);
-	setVideoState(PlayingState);
+    setVideoState(PlayingState);
 }
 
 void MainWindow::updateFrame()
@@ -179,6 +179,7 @@ void MainWindow::setVideoState( VideoState state )
 	}
 }
 
+
 void MainWindow::onPluginAct_triggerred()
 {
    PluginsConfigUI dlg(_pluginLoader, this);
@@ -200,3 +201,5 @@ void MainWindow::on_actionAbout_NoobaVSS_triggered()
                        .append(".").append(QString::number(nooba::MinorVersion)).append("</p>")
                        );
 }
+
+

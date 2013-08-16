@@ -74,23 +74,31 @@ void PluginsConfigUI::updateUI()
 
         QTreeWidgetItem* level1 = new QTreeWidgetItem(1);
         level1->setText(0, tr("Version"));
-        level1->setText(1, tr("%1.%2").arg(pluginData._pluginInfo._majorVersion)
-                        .arg(pluginData._pluginInfo._majorVersion));
+        QString str(tr("%1.%2").arg(pluginData._pluginInfo._majorVersion)
+                    .arg(pluginData._pluginInfo._majorVersion));
+        level1->setText(1, str);
+        level1->setToolTip(1, str);
         level0->addChild(level1);
 
         level1 = new QTreeWidgetItem(1);
         level1->setText(0, tr("FileName"));
-        level1->setText(1, pluginData._fileName);
+        str = pluginData._fileName;
+        level1->setText(1, str );
+        level1->setToolTip(1, str);
         level0->addChild(level1);
 
         level1 = new QTreeWidgetItem(1);
         level1->setText(0, tr("Description"));
-        level1->setText(1, tr("%1").arg(pluginData._pluginInfo._description));
+        str = tr("%1").arg(pluginData._pluginInfo._description);
+        level1->setText(1, str);
+        level1->setToolTip(1, str);
         level0->addChild(level1);
 
         level1 = new QTreeWidgetItem(1);
         level1->setText(0, tr("Created by"));
-        level1->setText(1, tr("%1").arg(pluginData._pluginInfo._author));
+        str = tr("%1").arg(pluginData._pluginInfo._author);
+        level1->setText(1, str);
+        level1->setToolTip(1, str);
         level0->addChild(level1);
 
         int count = ui.pluginListTree->columnCount();

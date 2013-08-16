@@ -35,11 +35,11 @@ private slots:
 	void onOpenWebCam();	
     void on_nextButton_clicked();
     void on_prevButton_clicked();
-	void on_playButton_clicked();
 	void updateFrame();
     void onPluginAct_triggerred();
     
     void on_actionAbout_NoobaVSS_triggered();
+    void on_controlButton_clicked();
 
 private:
 

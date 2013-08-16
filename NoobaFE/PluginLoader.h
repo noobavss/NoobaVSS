@@ -34,7 +34,7 @@ public:
      */
     NoobaPluginAPI* loadPlugin(const QString fileName);
 
-    NoobaPluginAPI* getActivePlugin() const { return m_activePlugin; };
+    NoobaPluginAPI* getActivePlugin() const { return m_activePlugin; }
 
     /**
      * @brief unloadActivePlugin    unloads the actvie plugin.

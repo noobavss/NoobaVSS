@@ -103,6 +103,8 @@
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionWeb_Cam"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuImage">
     <property name="title">
@@ -125,20 +127,37 @@
    <property name="text">
     <string>Open File</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="actionWeb_Cam">
    <property name="text">
     <string>Web Cam</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
   </action>
   <action name="actionPlugins">
    <property name="text">
-    <string>Plugins</string>
+    <string>Plugins Configuration</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionAbout_NoobaVSS">
    <property name="text">
     <string>About NoobaVSS</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
    </property>
   </action>
  </widget>
@@ -158,22 +177,6 @@
     <hint type="destinationlabel">
      <x>345</x>
      <y>251</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>controlButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>on_playButton_clicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>184</x>
-     <y>470</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>199</x>
-     <y>563</y>
     </hint>
    </hints>
   </connection>
@@ -198,6 +201,22 @@
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onPluginAct_triggerred()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>345</x>
+     <y>251</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
