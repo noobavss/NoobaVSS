@@ -13,8 +13,11 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="toolTip">
+   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tile view&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+  </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
      <number>0</number>
     </property>
@@ -22,69 +25,142 @@
      <number>0</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-      <item>
-       <widget class="QLabel" name="orgImg">
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(91, 91, 91);</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="editedImg">
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(91, 91, 91);</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <widget class="QMdiArea" name="mdiArea"/>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QPushButton" name="prevButton">
-        <property name="text">
-         <string>prev</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="nextButton">
-        <property name="text">
-         <string>next</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="controlButton">
-        <property name="text">
-         <string>Play</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
+     <widget class="QFrame" name="toolbar">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>3</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>3</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QToolButton" name="prevButton">
+         <property name="toolTip">
+          <string>Previous Frame</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../Resources/mainwind.qrc">
+           <normaloff>:/Resources/super-mono-iconset/navigation-left.png</normaloff>:/Resources/super-mono-iconset/navigation-left.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>32</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="autoRaise">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="nextButton">
+         <property name="toolTip">
+          <string>Next Frame</string>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../Resources/mainwind.qrc">
+           <normaloff>:/Resources/super-mono-iconset/navigation-right.png</normaloff>:/Resources/super-mono-iconset/navigation-right.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>32</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="autoRaise">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="controlButton">
+         <property name="toolTip">
+          <string>Play</string>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../Resources/mainwind.qrc">
+           <normaloff>:/Resources/super-mono-iconset/button-play.png</normaloff>:/Resources/super-mono-iconset/button-play.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>32</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="autoRaise">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>507</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QToolButton" name="TileviewButton">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../Resources/mainwind.qrc">
+           <normaloff>:/Resources/super-mono-iconset/tileview_modified.png</normaloff>:/Resources/super-mono-iconset/tileview_modified.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>32</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="autoRaise">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -124,6 +200,10 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="../Resources/mainwind.qrc">
+     <normaloff>:/Resources/super-mono-iconset/folder.png</normaloff>:/Resources/super-mono-iconset/folder.png</iconset>
+   </property>
    <property name="text">
     <string>Open File</string>
    </property>
@@ -132,6 +212,10 @@
    </property>
   </action>
   <action name="actionWeb_Cam">
+   <property name="icon">
+    <iconset resource="../Resources/mainwind.qrc">
+     <normaloff>:/Resources/super-mono-iconset/web-cam.png</normaloff>:/Resources/super-mono-iconset/web-cam.png</iconset>
+   </property>
    <property name="text">
     <string>Web Cam</string>
    </property>
@@ -140,6 +224,10 @@
    </property>
   </action>
   <action name="actionPlugins">
+   <property name="icon">
+    <iconset resource="../Resources/mainwind.qrc">
+     <normaloff>:/Resources/super-mono-iconset/gears.png</normaloff>:/Resources/super-mono-iconset/gears.png</iconset>
+   </property>
    <property name="text">
     <string>Plugins Configuration</string>
    </property>
@@ -148,11 +236,19 @@
    </property>
   </action>
   <action name="actionAbout_NoobaVSS">
+   <property name="icon">
+    <iconset resource="../Resources/mainwind.qrc">
+     <normaloff>:/Resources/super-mono-iconset/information-balloon.png</normaloff>:/Resources/super-mono-iconset/information-balloon.png</iconset>
+   </property>
    <property name="text">
     <string>About NoobaVSS</string>
    </property>
   </action>
   <action name="actionExit">
+   <property name="icon">
+    <iconset resource="../Resources/mainwind.qrc">
+     <normaloff>:/Resources/super-mono-iconset/button-cross.png</normaloff>:/Resources/super-mono-iconset/button-cross.png</iconset>
+   </property>
    <property name="text">
     <string>Exit</string>
    </property>
@@ -162,7 +258,9 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../Resources/mainwind.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>actionOpen</sender>

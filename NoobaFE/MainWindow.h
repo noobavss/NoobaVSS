@@ -4,6 +4,7 @@
 // project files
 #include "NoobaEye.h"
 #include "PluginLoader.h"
+#include "vidoutputsubwind.h"
 
 // Qt includes
 #include <QMainWindow>
@@ -28,7 +29,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    
+public slots:
+    void closeEvent(QCloseEvent *event);
+
 private slots:
 
     void onOpenFile();
@@ -40,6 +43,8 @@ private slots:
     
     void on_actionAbout_NoobaVSS_triggered();
     void on_controlButton_clicked();
+
+    void on_TileviewButton_clicked();
 
 private:
 
@@ -68,9 +73,12 @@ private:
 	 *  \param state 
 	 */
 	void setVideoState(VideoState state);
+
+    void initMDIArea();
 	
 
     Ui::MainWindow                  *ui;
+    int                             _delay;
     QScopedPointer<FrameProcessor>  _FrameProc;
 
     cv::VideoCapture                _vidCapture;
@@ -79,7 +87,8 @@ private:
     VideoState			            _vidState;
     ProcParams                      _params;
     PluginLoader                    _pluginLoader;
-    int                             _delay;
+    VidOutputSubWind                _inputWind;
+    VidOutputSubWind                _outputWind;
 
 };
 

@@ -13,14 +13,18 @@ HEADERS += FrameProcessor.h \
            NoobaEye.h \
            OutputWindow.h \
            PluginLoader.h \
-           PluginsConfigUI.h
-FORMS += Forms/MainWindow.ui Forms/OutputWindow.ui Forms/PluginsConfigUI.ui
+           PluginsConfigUI.h \
+    vidoutputsubwind.h
+FORMS += Forms/MainWindow.ui Forms/OutputWindow.ui Forms/PluginsConfigUI.ui \
+    Forms/vidoutputsubwind.ui
+
 SOURCES += FrameProcessor.cpp \
            main.cpp \
            MainWindow.cpp \
            OutputWindow.cpp \
            PluginLoader.cpp \
-           PluginsConfigUI.cpp
+           PluginsConfigUI.cpp \
+    vidoutputsubwind.cpp
 RESOURCES += Resources/mainwind.qrc
 
 unix {

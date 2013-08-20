@@ -8,6 +8,8 @@
 #include <QFileDialog>
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QMdiSubWindow>
+#include <QCloseEvent>
 
 // opencv includes
 #include <opencv2/highgui/highgui.hpp>
@@ -16,20 +18,32 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    _delay(0),
     _FrameProc(new FrameProcessor(parent)),
-    _vidState(StoppedState)
+    _vidState(StoppedState),
+    _inputWind("Input"),
+    _outputWind("output")
 {
 	ui->setupUi(this);
-	// align the labels to center
-	ui->orgImg->setAlignment(Qt::AlignCenter);
-	ui->editedImg->setAlignment(Qt::AlignCenter);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateFrame()));
     _pluginLoader.loadPluginInfo();
+    initMDIArea();
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    int ret  = QMessageBox::warning(this, tr("Close Request"),
+              tr("Are you sure you want to close the application?"), QMessageBox::Yes | QMessageBox::No);
+
+    if(ret == QMessageBox::No)
+        event->ignore();
+
 }
 
 void MainWindow::onOpenFile()
@@ -52,6 +66,7 @@ void MainWindow::onOpenFile()
         return;
     }
     _params.setFrameId(0);
+    ui->statusBar->showMessage(tr("file opened: %1").arg(path), 6000);
 }
 
 void MainWindow::onOpenWebCam()
@@ -67,6 +82,7 @@ void MainWindow::onOpenWebCam()
 		return;
 	}
     _params.setFrameId(0);
+    ui->statusBar->showMessage(tr("Web cam is set as default input source."));
 }
 
 QImage MainWindow::convertToQImage(cv::Mat& cvImg)
@@ -138,18 +154,14 @@ void MainWindow::updateFrame()
     cv::cvtColor(_frame, _frame,CV_BGR2RGB); // convert layout from BGR to RGB
     _params.setFrameId(_vidCapture.get(CV_CAP_PROP_POS_FRAMES) - 1);
 
+    _inputWind.updateFrame(convertToQImage(_frame));
 
-    ui->orgImg->setPixmap(QPixmap::fromImage(
-        convertToQImage(_frame))
-		);
 	cv::Mat editedFrame;
 
     ;
     if(_pluginLoader.getActivePlugin()->procFrame(_frame, editedFrame, _params))
 	{
-		ui->editedImg->setPixmap(
-			QPixmap::fromImage(grayQImage(editedFrame))
-			);
+        _outputWind.updateFrame(grayQImage(editedFrame));
 	}
 }
 
@@ -161,25 +173,40 @@ void MainWindow::setVideoState( VideoState state )
 		{
             _vidState = StoppedState;
             _timer.stop();
-			ui->controlButton->setText(tr("Play"));
+            ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-play.png"));
+            ui->controlButton->setToolTip(tr("Play"));
 			return;
 		}
 	case PausedState:
 		{
             _vidState = PausedState;
-			ui->controlButton->setText(tr("Play"));
+            ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-play.png"));
+            ui->controlButton->setToolTip(tr("Play"));
             _timer.stop();
 			return;
 		}
 	case PlayingState:
 		{
             _vidState = PlayingState;
-			ui->controlButton->setText(tr("Pause"));
+            ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-pause.png"));
+            ui->controlButton->setToolTip(tr("Pause"));
 			return;
 		}
 	default:
 		return;
-	}
+    }
+}
+
+void MainWindow::initMDIArea()
+{
+    ui->mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    ui->mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    QMdiSubWindow *sw = ui->mdiArea->addSubWindow(&_outputWind);
+    sw->setContentsMargins(0,0,0,0);
+    sw = ui->mdiArea->addSubWindow(&_inputWind);
+    sw->setContentsMargins(0,0,0,0);
+    ui->mdiArea->tileSubWindows();
 }
 
 void MainWindow::onPluginAct_triggerred()
@@ -198,4 +225,9 @@ void MainWindow::on_actionAbout_NoobaVSS_triggered()
                        .append("</p><p>Version:\t\t\t").append(QString("").number(nooba::MajorVersion))
                        .append(".").append(QString::number(nooba::MinorVersion)).append("</p>")
                        );
+}
+
+void MainWindow::on_TileviewButton_clicked()
+{
+    ui->mdiArea->tileSubWindows();
 }

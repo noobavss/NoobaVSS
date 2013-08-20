@@ -1,3 +1,16 @@
 <RCC>
-    <qresource prefix="/"/>
+    <qresource prefix="/Resources">
+        <file>stylesheet.css</file>
+        <file>super-mono-iconset/navigation-right.png</file>
+        <file>super-mono-iconset/navigation-left.png</file>
+        <file>super-mono-iconset/button-play.png</file>
+        <file>super-mono-iconset/button-pause.png</file>
+        <file>super-mono-iconset/tileview_modified.png</file>
+        <file>super-mono-iconset/gears.png</file>
+        <file>super-mono-iconset/folder.png</file>
+        <file>super-mono-iconset/camcorder.png</file>
+        <file>super-mono-iconset/button-cross.png</file>
+        <file>super-mono-iconset/web-cam.png</file>
+        <file>super-mono-iconset/information-balloon.png</file>
+    </qresource>
 </RCC>
