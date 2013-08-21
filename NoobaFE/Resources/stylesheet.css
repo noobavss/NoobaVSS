@@ -25,6 +25,12 @@ QStatusBar {
     color: white;
  }
 
+QTreeView
+{
+    border: 1px solid #616161;
+    border-top: none;
+}
+
 /************************************************************/
 
 QMenu {

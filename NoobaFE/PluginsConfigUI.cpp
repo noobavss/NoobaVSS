@@ -61,7 +61,7 @@ void PluginsConfigUI::updateUI()
         level0->setText(0, pluginName);
         level0->setData(0, Qt::UserRole+1, pluginData._fileName); // used to set the default plugin
 
-        if(m_pluginLoader.getActivePlugin()) // if plugin available
+        if(m_pluginLoader.getActivePluginFilename().compare(pluginData._fileName) == 0) // if plugin available
         {
             level0->setText(1, ACTIVE);
         }

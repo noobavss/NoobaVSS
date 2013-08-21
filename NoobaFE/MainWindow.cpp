@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateFrame()));
     _pluginLoader.loadPluginInfo();
     initMDIArea();
-
+    setWindowTitle(nooba::ProgramName);
 }
 
 MainWindow::~MainWindow()
@@ -78,6 +78,7 @@ void MainWindow::onOpenWebCam()
 	{
 		QMessageBox errMsg;
 		errMsg.setText(tr("Failed to open web-cam"));
+        errMsg.setIcon(QMessageBox::Critical);
 		errMsg.exec();
 		return;
 	}
@@ -141,6 +142,7 @@ void MainWindow::updateFrame()
         setVideoState(StoppedState);
         QMessageBox msgBox;
         msgBox.setText(tr("No video processing plugin is set. Set a plugin before playing the video stream."));
+        msgBox.setIcon(QMessageBox::Warning);
         msgBox.exec();
         onPluginAct_triggerred(); // pop plugin config window
     }

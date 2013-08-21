@@ -13,9 +13,6 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <property name="toolTip">
-   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tile view&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
@@ -141,6 +138,9 @@
        </item>
        <item>
         <widget class="QToolButton" name="TileviewButton">
+         <property name="toolTip">
+          <string>tileview</string>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -190,7 +190,7 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>About</string>
     </property>
     <addaction name="actionAbout_NoobaVSS"/>
    </widget>

@@ -12,5 +12,6 @@
         <file>super-mono-iconset/button-cross.png</file>
         <file>super-mono-iconset/web-cam.png</file>
         <file>super-mono-iconset/information-balloon.png</file>
+        <file>logo.png</file>
     </qresource>
 </RCC>
