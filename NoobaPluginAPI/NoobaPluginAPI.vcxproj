@@ -275,6 +275,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="intproperty.cpp" />
+    <ClCompile Include="noobapluginapi.cpp" />
     <ClCompile Include="noobapluginbase.cpp" />
     <ClCompile Include="noobapluginbaseprivate.cpp" />
     <ClCompile Include="port.cpp" />
