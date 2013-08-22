@@ -12,6 +12,7 @@ class VidOutputSubWind : public QWidget
     Q_OBJECT
     
 public:
+
     explicit VidOutputSubWind(const QString& title, QWidget *parent = 0);
     ~VidOutputSubWind();
 
@@ -21,6 +22,7 @@ public slots:
     bool updateFrame(const QImage& in);
 
 private:
+
     Ui::VidOutputSubWind *ui;
 };
 

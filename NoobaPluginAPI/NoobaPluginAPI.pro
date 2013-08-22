@@ -8,6 +8,7 @@ QT       -= gui
 
 TARGET = NoobaPluginAPI
 TEMPLATE = lib
+CONFIG += staticlib
 
 DEFINES += NOOBAPLUGINAPI_LIBRARY
 

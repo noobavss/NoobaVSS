@@ -1,7 +1,7 @@
 #ifndef NOOBAPLUGINAPI_H
 #define NOOBAPLUGINAPI_H
 
-#include "NoobaPluginAPI_global.h"
+//#include "NoobaPluginAPI_global.h"
 #include "noobapluginbase.h"
 #include "property.h"
 
@@ -86,7 +86,7 @@ private:
 
 };
 
-class NOOBAPLUGINAPISHARED_EXPORT NoobaPluginAPI: public NoobaPluginAPIBase
+class NoobaPluginAPI: public NoobaPluginAPIBase
 {
     Q_OBJECT
 
