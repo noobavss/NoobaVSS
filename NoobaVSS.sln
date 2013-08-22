@@ -1,6 +1,9 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoobaFE", "NoobaFE\NoobaFE.vcxproj", "{0294E1C5-F0FD-3D38-A2FA-A0438D5CE0FB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C6BB6D03-5922-3ACB-9A8C-6AC0CD7232E0} = {C6BB6D03-5922-3ACB-9A8C-6AC0CD7232E0}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoobaPluginAPI", "NoobaPluginAPI\NoobaPluginAPI.vcxproj", "{C6BB6D03-5922-3ACB-9A8C-6AC0CD7232E0}"
 EndProject
