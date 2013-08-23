@@ -1,7 +1,9 @@
 #ifndef NOOBAPLUGINAPI_H
 #define NOOBAPLUGINAPI_H
 
+
 //#include "NoobaPluginAPI_global.h"
+
 #include "noobapluginbase.h"
 #include "property.h"
 
@@ -85,6 +87,7 @@ private:
     PluginInfoPrivate*  d;
 
 };
+
 
 class NoobaPluginAPI: public NoobaPluginAPIBase
 {
