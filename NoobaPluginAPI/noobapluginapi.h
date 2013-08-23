@@ -1,7 +1,10 @@
 #ifndef NOOBAPLUGINAPI_H
 #define NOOBAPLUGINAPI_H
 
+<<<<<<< HEAD
 //#include "NoobaPluginAPI_global.h"
+=======
+>>>>>>> be530094dfbe07b3699c032fb09050f0761fd037
 #include "noobapluginbase.h"
 #include "property.h"
 
@@ -86,7 +89,10 @@ private:
 
 };
 
+<<<<<<< HEAD
 class NoobaPluginAPI: public NoobaPluginAPIBase
+=======
+>>>>>>> be530094dfbe07b3699c032fb09050f0761fd037
 {
     Q_OBJECT
 
