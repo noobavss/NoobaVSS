@@ -4,7 +4,8 @@
 // project files
 #include "NoobaEye.h"
 #include "PluginLoader.h"
-#include "vidoutputsubwind.h"
+#include "VidOutputSubWind.h"
+#include "OutputWind.h"
 
 // Qt includes
 #include <QMainWindow>
@@ -16,7 +17,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 // forward declarations
-class FrameProcessor;
+class ParamConfigWind;
 
 namespace Ui {
     class MainWindow;
@@ -46,6 +47,9 @@ private slots:
 
     void on_TileviewButton_clicked();
 
+    void onPluginLoad(NoobaPlugin *plugin);
+    void onPluginUnload();
+
 private:
 
 	/*
@@ -74,12 +78,14 @@ private:
 	 */
 	void setVideoState(VideoState state);
 
+    void updateDockWidgets();
+
     void initMDIArea();
 	
 
     Ui::MainWindow                  *ui;
+    ParamConfigWind                 *_paramConfigUI;
     int                             _delay;
-    QScopedPointer<FrameProcessor>  _FrameProc;
 
     cv::VideoCapture                _vidCapture;
     cv::Mat                         _frame;
@@ -89,7 +95,7 @@ private:
     PluginLoader                    _pluginLoader;
     VidOutputSubWind                _inputWind;
     VidOutputSubWind                _outputWind;
-
+    OutputWind                      _dbugOutWind;
 };
 
 #endif // MAINWINDOW_H

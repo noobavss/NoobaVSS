@@ -6,37 +6,28 @@
 
 QT       -= gui
 
-TARGET = NoobaPluginAPI
 TEMPLATE = lib
-
 CONFIG += staticlib
+
+win32:TEMPLATE = vclib
+
+CONFIG(debug, debug|release):    message(Debug build!)
+CONFIG(release, debug|release):    message(Release build!)
+
+CONFIG(release, debug|release):    TARGET = NoobaPluginAPI
+CONFIG(debug, debug|release): TARGET = NoobaPluginAPId
+
+CONFIG(debug, debug|release):    DESTDIR = ../../NoobaVSS_build/NoobaPluginAPI/Debug/
+CONFIG(release, debug|release):    DESTDIR = ../../NoobaVSS_build/NoobaPluginAPI/Release/
 
 DEFINES += NOOBAPLUGINAPI_LIBRARY
 
 SOURCES += \
     noobapluginbase.cpp \
     noobapluginbaseprivate.cpp \
-    property.cpp \
-    intproperty.cpp \
-    port.cpp \
     noobapluginapi.cpp
 
 HEADERS += noobapluginapi.h\
         NoobaPluginAPI_global.h \
     noobapluginbase.h \
-    noobapluginbaseprivate.h \
-    property.h \
-    propertyprivate.h \
-    intproperty.h \
-    port.h \
-    portprivate.h \
-    apiglobal.h
-
-unix:!symbian {
-    maemo5 {
-        target.path = /opt/usr/lib
-    } else {
-        target.path = /usr/lib
-    }
-    INSTALLS += target
-}
+    noobapluginbaseprivate.h

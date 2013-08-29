@@ -1,5 +1,6 @@
+#include <noobapluginapi.h>
+
 #include "PluginLoader.h"
-#include "intproperty.h"
 
 // Qt includes 
 #include <QDir>
@@ -12,10 +13,10 @@
 
 PluginLoader::PluginLoader(QObject *parent)
 	: QObject(parent),
-    m_activePlugin(NULL),
-    m_Dir(QApplication::instance()->applicationDirPath())
+    _activePlugin(NULL),
+    _dir(QApplication::instance()->applicationDirPath())
 {
-    m_Dir.cd("plugins");    // look in plugins directory
+    _dir.cd("plugins");    // look in plugins directory
     // init plugin loader
     loadPluginInfo();
     loadPlugin(prevLoadedPluginfileName());
@@ -23,17 +24,17 @@ PluginLoader::PluginLoader(QObject *parent)
 
 PluginLoader::~PluginLoader()
 {
-    if(m_activePlugin)
-        m_activePlugin->release();
+    if(_activePlugin)
+        _activePlugin->release();
 
-    saveSettings(m_activePluginFileName);
+    saveSettings(_activePluginFileName);
 }
 
 
 int PluginLoader::loadPluginInfo()
 {
     /*QDir pluginsDir(QApplication::instance()->applicationDirPath());*/
-    pluginInfoList.clear();
+    _pluginInfoList.clear();
     int pluginCount = 0;
 
     int pluginAPIMajorVer;
@@ -41,9 +42,9 @@ int PluginLoader::loadPluginInfo()
     QString errStr;
 
     // go through the directory and try to load the plugin files
-    foreach (QString fileName, m_Dir.entryList(QDir::Files))
+    foreach (QString fileName, _dir.entryList(QDir::Files))
     {        
-        QPluginLoader pluginLoader(m_Dir.absoluteFilePath(fileName));       // use a scoped pluginLoader (separate from the m_QPluginLoader ) instance so that loading 
+        QPluginLoader pluginLoader(_dir.absoluteFilePath(fileName));       // use a scoped pluginLoader (separate from the m_QPluginLoader ) instance so that loading
                                                                             // plugins to retrieve information and unloading doesn't affect the currently loaded plugin
         QObject *plugin = pluginLoader.instance();
         if (!plugin)
@@ -72,7 +73,7 @@ int PluginLoader::loadPluginInfo()
         // add the plugin details to the list
         NoobaPluginAPI* api = qobject_cast<NoobaPluginAPI* >(plugin);
         nooba::PluginData pluginData(fileName, api->getPluginInfo(),pluginAPIMajorVer, pluginAPIMinorVer);
-        pluginInfoList.append(pluginData);
+        _pluginInfoList.append(pluginData);
         pluginLoader.unload();  // unload after getting the details of the plugin
         pluginCount++;
 
@@ -89,7 +90,7 @@ int PluginLoader::loadPluginInfo()
     return pluginCount;
 }
 
-NoobaPluginAPI *PluginLoader::loadPlugin( const QString fileName )
+NoobaPlugin *PluginLoader::loadPlugin( const QString fileName )
 {
     unloadActivePlugin();
     // call with empty filename will occur when app is run for the first time in a 
@@ -102,30 +103,19 @@ NoobaPluginAPI *PluginLoader::loadPlugin( const QString fileName )
     }
 
 
-    m_QPluginLoader.setFileName(m_Dir.absoluteFilePath(fileName));
-    QObject *plugin = m_QPluginLoader.instance();
+    _QPluginLoader.setFileName(_dir.absoluteFilePath(fileName));
+    QObject *plugin = _QPluginLoader.instance();
 
     if (plugin)
     {
-        NoobaPluginAPI* apiBase = qobject_cast<NoobaPluginAPI* >(plugin);
-        if (apiBase)
+        NoobaPluginAPI* api = qobject_cast<NoobaPluginAPI* >(plugin);
+        if (api)
         {
-            m_activePlugin = apiBase;
-            m_activePluginFileName = fileName;
-            m_activePlugin->init();
-            //TODO: Code crash property
-//            QList<Property *> lst = apiBase->getPropertyList();
-//            foreach(Property *p, lst)
-//            {
-//                if( p->getType() == intProperty)
-//                {
-////                    IntProperty* ip =(IntProperty *)p;
-////                    qDebug() << ip->getName() << "\nMax " << ip->getMaxValue() << "\nMin";
-
-//                }
-//            }
-
-            return apiBase; // return plugin, successful
+            _activePlugin = new NoobaPlugin(api, this);
+            _activePluginFileName = fileName;
+            _activePlugin->init();
+            emit pluginLoaded(_activePlugin);
+            return _activePlugin; // return plugin, successful
         }
     }    
     
@@ -138,11 +128,15 @@ NoobaPluginAPI *PluginLoader::loadPlugin( const QString fileName )
 
 bool PluginLoader::unloadActivePlugin()
 {
-    if(m_activePlugin) m_activePlugin->release();
+    if(_activePlugin)
+    {
+        delete _activePlugin;
+        _activePlugin = NULL;
+    }
 
-    m_QPluginLoader.unload();
-    m_activePlugin = NULL;
-    m_activePluginFileName.clear();
+    _QPluginLoader.unload();
+    _activePluginFileName.clear();
+    emit pluginUnloaded();
     return true;
 }
 

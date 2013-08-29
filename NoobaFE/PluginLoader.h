@@ -2,8 +2,8 @@
 #define PLUGINLOADER_H
 
 // projects includes
-#include "noobapluginapi.h"
 #include "NoobaEye.h"
+#include "NoobaPlugin.h"
 
 // Qt includes
 #include <QObject>
@@ -20,21 +20,24 @@ public:
     PluginLoader(QObject *parent = 0);
 	~PluginLoader();
 
-    /* Get plugin details of plugins in the plugins directory
+    /**
+     * Get plugin details of plugins in the plugins directory
      */
     int loadPluginInfo();
 
-    /* Returns currently available plugins information
-       NOTE: Need to call loadPlugins before this if you need to get an upto date 
-       plugins information.
+    /**
+     * Returns currently available plugins information
+     * NOTE: Need to call loadPlugins before this if you need to get an upto date
+     * plugins information.
      */
-    const QList<nooba::PluginData> getPluginInfo() const { return pluginInfoList; }
+    const QList<nooba::PluginData> getPluginInfo() const { return _pluginInfoList; }
 
-    /* Load the plugin in the plugins directory with the file name fileName
+    /**
+     * Load the plugin in the plugins directory with the file name fileName
      */
-    NoobaPluginAPI* loadPlugin(const QString fileName);
+    NoobaPlugin* loadPlugin(const QString fileName);
 
-    NoobaPluginAPI* getActivePlugin() const { return m_activePlugin; }
+    NoobaPlugin* getActivePlugin() const { return _activePlugin; }
 
     /**
      * @brief unloadActivePlugin    unloads the actvie plugin.
@@ -45,18 +48,23 @@ public:
 
     /* Returns the plugins file name (Note: plugin file name and plugin name may be different)
      */
-    QString getActivePluginFilename() const { return m_activePluginFileName; }
+    QString getActivePluginFilename() const { return _activePluginFileName; }
+
+signals:
+
+    void pluginLoaded(NoobaPlugin *plugin);
+    void pluginUnloaded();
 
 private:
 
     void saveSettings(const QString& pluginFileName );
     QString prevLoadedPluginfileName() const;
     	
-    QList<nooba::PluginData>    pluginInfoList;
-    NoobaPluginAPI             *m_activePlugin;
-    QString                     m_activePluginFileName;
-    QPluginLoader               m_QPluginLoader;
-    QDir                        m_Dir;
+    QList<nooba::PluginData>    _pluginInfoList;
+    NoobaPlugin                 *_activePlugin;
+    QString                     _activePluginFileName;
+    QPluginLoader               _QPluginLoader;
+    QDir                        _dir;
 };
 
 #endif // PLUGINLOADER_H

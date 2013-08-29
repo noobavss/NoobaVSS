@@ -1,5 +1,5 @@
-#include "vidoutputsubwind.h"
-#include "ui_vidoutputsubwind.h"
+#include "VidOutputSubWind.h"
+#include "ui_VidOutputSubWind.h"
 
 #include <QCloseEvent>
 

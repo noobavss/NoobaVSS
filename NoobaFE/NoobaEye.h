@@ -5,6 +5,7 @@
 
 // Qt includes
 #include <QMetaType>
+#include <Qt/qnamespace.h>
 
 namespace nooba
 {
@@ -33,6 +34,12 @@ namespace nooba
         int             _apiMinorVersion;
         QString         _fileName;   // name of the dynamic link library file
         PluginInfo      _pluginInfo;
+    };
+
+    enum DataRoles         // user roles for data models
+    {
+        ParamTypeRole   = Qt::UserRole + 1,
+        ParamDataRole   = Qt::UserRole + 2
     };
 }
 

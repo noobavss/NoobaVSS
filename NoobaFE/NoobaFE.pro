@@ -3,28 +3,46 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = 
-DEPENDPATH += . Forms Resources
-INCLUDEPATH += .
+
+CONFIG(debug, debug|release): message(Debug build!)
+CONFIG(release, debug|release): message(Release build!)
+
+CONFIG(debug, debug|release): TARGET =  NoobaVSS_Debug
+CONFIG(release, debug|release): TARGET =  NoobaVSS_Release
+
+CONFIG(debug, debug|release): DESTDIR = ../../NoobaVSS_build/NoobaFE/Debug/
+CONFIG(release, debug|release): DESTDIR = ../../NoobaVSS_build/NoobaFE/Release/
+
+win32:TEMPLATE = vcapp
 
 # Input
-HEADERS += FrameProcessor.h \
+HEADERS += \
            MainWindow.h \
            NoobaEye.h \
-           OutputWindow.h \
            PluginLoader.h \
            PluginsConfigUI.h \
-    vidoutputsubwind.h
-FORMS += Forms/MainWindow.ui Forms/OutputWindow.ui Forms/PluginsConfigUI.ui \
-    Forms/vidoutputsubwind.ui
+    NoobaPlugin.h \
+    OutputWind.h \
+    ParamConfigWind.h \
+    VidOutputSubWind.h \
+    ParamDelegate.h
 
-SOURCES += FrameProcessor.cpp \
+FORMS += Forms/MainWindow.ui Forms/PluginsConfigUI.ui \
+    Forms/OutputWind.ui \
+    Forms/ParamConfigWind.ui \
+    Forms/VidOutputSubWind.ui
+
+SOURCES += \
            main.cpp \
            MainWindow.cpp \
-           OutputWindow.cpp \
            PluginLoader.cpp \
            PluginsConfigUI.cpp \
-    vidoutputsubwind.cpp
+    NoobaPlugin.cpp \
+    OutputWind.cpp \
+    ParamConfigWind.cpp \
+    VidOutputSubWind.cpp \
+    ParamDelegate.cpp
+
 RESOURCES += Resources/mainwind.qrc
 
 unix {
@@ -32,10 +50,12 @@ unix {
     PKGCONFIG += opencv
 }
 
+CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../NoobaVSS_build/NoobaPluginAPI/Debug/ -lNoobaPluginAPId
+CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../NoobaVSS_build/NoobaPluginAPI/Release/ -lNoobaPluginAPI
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../NoobaPluginAPI/ -lNoobaPluginAPI
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../NoobaPluginAPI/ -lNoobaPluginAPId
-else:unix: LIBS += -L$$OUT_PWD/../NoobaPluginAPI/ -lNoobaPluginAPI
+win32{
+    # need to put win32 opencv lib paths
+}
 
 INCLUDEPATH += $$PWD/../NoobaPluginAPI
 DEPENDPATH += $$PWD/../NoobaPluginAPI

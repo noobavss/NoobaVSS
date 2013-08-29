@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "FrameProcessor.h"
 #include "PluginsConfigUI.h"
+#include "ParamConfigWind.h"
 
 // Qt includes
 #include <QDebug>
@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QMdiSubWindow>
 #include <QCloseEvent>
+#include <QVBoxLayout>
 
 // opencv includes
 #include <opencv2/highgui/highgui.hpp>
@@ -18,14 +19,16 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    _paramConfigUI(new ParamConfigWind()),
     _delay(0),
-    _FrameProc(new FrameProcessor(parent)),
     _vidState(StoppedState),
     _inputWind("Input"),
     _outputWind("output")
 {
 	ui->setupUi(this);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateFrame()));
+    updateDockWidgets();
+
     _pluginLoader.loadPluginInfo();
     initMDIArea();
     setWindowTitle(nooba::ProgramName);
@@ -33,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+
     delete ui;
 }
 
@@ -199,6 +203,29 @@ void MainWindow::setVideoState( VideoState state )
     }
 }
 
+void MainWindow::updateDockWidgets()
+{
+    connect(&_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SLOT(onPluginLoad(NoobaPlugin*)));
+    connect(&_pluginLoader, SIGNAL(pluginUnloaded()), this, SLOT(onPluginUnload()));
+
+
+    QVBoxLayout *layout = new QVBoxLayout;
+    layout->addWidget(_paramConfigUI);
+    layout->setContentsMargins(0,0,0,0);
+    ui->paramConfigDock->widget()->setLayout(layout);
+
+    layout = new QVBoxLayout;
+    layout->addWidget(&_dbugOutWind);
+    layout->setContentsMargins(0,0,0,0);
+    ui->debugOutputDock->widget()->setLayout(layout);
+
+    if(_pluginLoader.getActivePlugin())
+    {
+       onPluginLoad(_pluginLoader.getActivePlugin());
+
+    }
+}
+
 void MainWindow::initMDIArea()
 {
     ui->mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -233,3 +260,15 @@ void MainWindow::on_TileviewButton_clicked()
 {
     ui->mdiArea->tileSubWindows();
 }
+
+void MainWindow::onPluginLoad(NoobaPlugin *plugin)
+{
+    _paramConfigUI->setPlugin(plugin);
+    connect(plugin, SIGNAL(debugMsg(QString)), &_dbugOutWind, SLOT(onDebugMsg(QString)));
+}
+
+void MainWindow::onPluginUnload()
+{
+    _paramConfigUI->clear();
+}
+

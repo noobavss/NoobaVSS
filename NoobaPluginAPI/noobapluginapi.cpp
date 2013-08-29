@@ -202,12 +202,12 @@ NoobaPluginAPI::NoobaPluginAPI()
 {
 }
 
-void NoobaPluginAPI::setErrMsg(const QString &errMsg)
-{
-    d->_errMsg = errMsg;
-}
+//void NoobaPluginAPI::setErrMsg(const QString &errMsg)
+//{
+//    d->_errMsg = errMsg;
+//}
 
-QString NoobaPluginAPI::errMsg() const
-{
-    return d->_errMsg;
-}
+//QString NoobaPluginAPI::errMsg() const
+//{
+//    return d->_errMsg;
+//}

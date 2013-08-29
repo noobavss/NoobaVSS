@@ -1,14 +1,13 @@
 #ifndef NOOBAPLUGINAPI_H
 #define NOOBAPLUGINAPI_H
 
-
 //#include "NoobaPluginAPI_global.h"
-
 #include "noobapluginbase.h"
-#include "property.h"
 
+#include <QObject>
 #include <QString>
 #include <QtPlugin>
+#include <QMetaType>
 
 /************************************************************************/
 /* IMPORTANT: ANY CHANGE TO THE API CORRESPOND TO A CHANGE IN THE       */
@@ -87,7 +86,20 @@ private:
     PluginInfoPrivate*  d;
 
 };
+namespace nooba {
 
+    enum ParamType {
+        IntParam        = 0,
+        DoubleParam     = 1,
+        StringParam     = 2,
+        RangeParam      = 3,
+        RegionParam     = 4,
+        MultiValueParam = 5
+    };
+
+}
+
+Q_DECLARE_METATYPE(nooba::ParamType)   // now ParamTypes can be used with QVariants
 
 class NoobaPluginAPI: public NoobaPluginAPIBase
 {
@@ -125,24 +137,64 @@ public:
      */
     virtual PluginInfo getPluginInfo() const = 0;
 
+signals:
+
+    // functions to create variables that need to be changed by the user.
+    // once created user can see the variables and change them.
+
     /**
-     * @brief errMsg On failure of the plugin this error message should be used to state the error
-     * @return QString error details
+     * integer parameter created
      */
-    QString errMsg() const;
+    void createIntParam(const QString& varName, int val, int max = 100, int min = 0);
+
+    /**
+     *double parameter created
+     */
+    void createDoubleParam(const QString& varName, double val, double max = 100.0, double min = 0.0);
+
+    /**
+     * parameter that can take string variables is created. File paths can also be
+     * taken using this
+     * TODO: File path functionality is yet to be implemented
+     */
+    void createStringParam(const QString& varName, QString val, bool isFilePath = false);
+
+    /**
+     * Parameter that can be used to create a defined set of strings. User will be able
+     * to select one from this strings.
+     */
+    void createMultiValParam(const QString& varName, const QStringList& valList);
+
+    /**
+     * debug output messages can be sent using this
+     */
+    void debugMsg(const QString& msg);
+
+public slots:
+
+    /**
+     * This functions will be called when the parameters are changed by the
+     * user.
+     */
+    virtual void onIntParamChanged(const QString& varName, int val) {
+        Q_UNUSED(varName) Q_UNUSED(val)
+    }
+
+    virtual void onDoubleParamChanged(const QString& varName, double val) {
+        Q_UNUSED(varName) Q_UNUSED(val)
+    }
+
+    virtual void onStringParamChanged(const QString& varName, const QString& val){
+        Q_UNUSED(varName) Q_UNUSED(val)
+    }
 
 protected:
 
-    /* private constructor so that this class could never be instantiated. Only be casted to this
-       interface type to get the API version details.
+    /**
+     * private constructor so that this class could never be instantiated. Only be casted to this
+     * interface type to get the API version details.
      */
     NoobaPluginAPI();
-
-    /**
-     * @brief setErrMsg on plugin error set the error message
-     * @param errMsg details of the error
-     */
-    void setErrMsg(const QString& errMsg);
 
 private:
 
