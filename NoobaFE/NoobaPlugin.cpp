@@ -27,7 +27,7 @@ bool NoobaPlugin::release()
     deleteMapItems<QMap<QString, IntData* > >(_intMap);
     deleteMapItems<QMap<QString, DoubleData* > >(_doubleMap);
     deleteMapItems<QMap<QString, StringData* > >(_stringMap);
-
+    deleteMapItems<QMap<QString, StringListData* > >(_stringListMap);
     return _api->release();
 }
 
@@ -54,6 +54,11 @@ void NoobaPlugin::onCreateStringParam(const QString &varName, const QString &val
     }
 }
 
+void NoobaPlugin::onCreateMultiValParam(const QString &varName, const QStringList &varList)
+{
+    _stringListMap.insert(varName, new StringListData(varName, varList));
+}
+
 void NoobaPlugin::onDebugMsg(const QString &msg)
 {
     qDebug() << "Debug MSG: " << msg;
@@ -66,6 +71,7 @@ void NoobaPlugin::initSignalSlots()
     connect(_api, SIGNAL(createIntParam(QString,int,int,int)), this, SLOT(onCreateIntParam(QString,int, int, int)));
     connect(_api, SIGNAL(createDoubleParam(QString,double, double, double)), this, SLOT(onCreateDoubleParam(QString,double, double, double)));
     connect(_api, SIGNAL(createStringParam(QString,QString, bool)), this, SLOT(onCreateStringParam(QString,QString, bool)));
+    connect(_api, SIGNAL(createMultiValParam(QString,QStringList)), this, SLOT(onCreateMultiValParam(QString,QStringList)));
 }
 
 void NoobaPlugin::onIntParamUpdate(const QString &varName, int val)
@@ -84,6 +90,12 @@ void NoobaPlugin::onStringParamUpdate(const QString &varName, const QString &val
 {
     _stringMap.value(varName)->_val = val;
     _api->onStringParamChanged(varName, val);
+}
+
+void NoobaPlugin::onMultiValParamUpdate(const QString &varName, const QString &val)
+{
+    _stringListMap.value(varName)->_val = val;
+    _api->onMultiValParamChanged(varName, val);
 }
 
 void NoobaPlugin::releaseSignalSlots()

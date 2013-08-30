@@ -19,11 +19,11 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    _paramConfigUI(new ParamConfigWind()),
+    _paramConfigUI(new ParamConfigWind(this)),
     _delay(0),
     _vidState(StoppedState),
-    _inputWind("Input"),
-    _outputWind("output")
+    _inputWind("Input", this),
+    _outputWind("output", this)
 {
 	ui->setupUi(this);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateFrame()));

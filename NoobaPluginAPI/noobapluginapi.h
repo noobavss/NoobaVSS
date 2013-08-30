@@ -6,6 +6,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QtPlugin>
 #include <QMetaType>
 
@@ -143,27 +144,39 @@ signals:
     // once created user can see the variables and change them.
 
     /**
-     * integer parameter created
+     * @brief createIntParam    integer parameter created
+     * @param varName
+     * @param val
+     * @param max
+     * @param min
      */
     void createIntParam(const QString& varName, int val, int max = 100, int min = 0);
 
     /**
-     *double parameter created
+     * @brief createDoubleParam     double parameter created
+     * @param varName
+     * @param val
+     * @param max
+     * @param min
      */
     void createDoubleParam(const QString& varName, double val, double max = 100.0, double min = 0.0);
 
     /**
-     * parameter that can take string variables is created. File paths can also be
-     * taken using this
-     * TODO: File path functionality is yet to be implemented
+     * @brief createStringParam     parameter that can take string variables is created.
+     * File paths can also be taken using this TODO: File path functionality is yet to be implemented
+     * @param varName
+     * @param val
+     * @param isFilePath
      */
     void createStringParam(const QString& varName, QString val, bool isFilePath = false);
 
     /**
-     * Parameter that can be used to create a defined set of strings. User will be able
-     * to select one from this strings.
+     * @brief createMultiValParam Parameter that can be used to create a defined set of strings.
+     *  User will be able to select one from this strings.
+     * @param varName
+     * @param varList
      */
-    void createMultiValParam(const QString& varName, const QStringList& valList);
+    void createMultiValParam(const QString& varName, const QStringList& varList);
 
     /**
      * debug output messages can be sent using this
@@ -185,6 +198,10 @@ public slots:
     }
 
     virtual void onStringParamChanged(const QString& varName, const QString& val){
+        Q_UNUSED(varName) Q_UNUSED(val)
+    }
+
+    virtual void onMultiValParamChanged(const QString& varName, const QString& val){
         Q_UNUSED(varName) Q_UNUSED(val)
     }
 

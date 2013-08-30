@@ -43,6 +43,7 @@ void ParamConfigWind::setPlugin(NoobaPlugin *plugin)
     addToTree<const QMap<QString, IntData* >, nooba::ParamType>(plugin->getIntParamMap(), nooba::IntParam);
     addToTree<const QMap<QString, DoubleData* >, nooba::ParamType>(plugin->getDoubleParamMap(), nooba::DoubleParam);
     addToTree<const QMap<QString, StringData* >, nooba::ParamType>(plugin->getStringMap(), nooba::StringParam);
+    addToTree<const QMap<QString, StringListData* >, nooba::ParamType>(plugin->getStringListMap(), nooba::MultiValueParam);
 }
 
 void ParamConfigWind::onItemChanged(QTreeWidgetItem* item, int  column)
@@ -65,6 +66,11 @@ void ParamConfigWind::onItemChanged(QTreeWidgetItem* item, int  column)
     case nooba::StringParam:
     {
         _plugin->onStringParamUpdate(varName, item->text(column));
+        break;
+    }
+    case nooba::MultiValueParam:
+    {
+        _plugin->onMultiValParamUpdate(varName, item->text(column));
         break;
     }
     default:

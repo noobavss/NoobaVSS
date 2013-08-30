@@ -6,6 +6,7 @@
 #include <QDoubleSpinBox>
 #include <QSpinBox>
 #include <QLineEdit>
+#include <QComboBox>
 #include <QVariant>
 
 ParamDelegate::ParamDelegate(QObject* parent ):
@@ -15,6 +16,8 @@ ParamDelegate::ParamDelegate(QObject* parent ):
 
 QWidget* ParamDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    Q_UNUSED(option)
+
     nooba::ParamType type = index.data(nooba::ParamTypeRole).value<nooba::ParamType>();
     switch(type)
     {
@@ -29,6 +32,16 @@ QWidget* ParamDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem
     case nooba::StringParam:
     {
         return new QLineEdit(parent);
+    }
+    case nooba::MultiValueParam:
+    {
+        StringListData* d = index.data(nooba::ParamDataRole).value<StringListData*>();
+        if(!d)
+            return NULL;
+
+        QComboBox* editor = new QComboBox(parent);
+        editor->addItems(d->_varList);
+        return editor;
     }
     default:
         return NULL;
