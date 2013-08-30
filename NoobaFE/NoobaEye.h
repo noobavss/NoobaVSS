@@ -5,7 +5,11 @@
 
 // Qt includes
 #include <QMetaType>
-#include <Qt/qnamespace.h>
+#if QT_VERSION >= 0x050000
+    #include <qnamespace.h>
+#else
+    #include <Qt/qnamespace.h>
+#endif
 
 namespace nooba
 {

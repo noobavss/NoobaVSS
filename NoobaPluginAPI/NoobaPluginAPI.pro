@@ -14,11 +14,11 @@ win32:TEMPLATE = vclib
 CONFIG(debug, debug|release):    message(Debug build!)
 CONFIG(release, debug|release):    message(Release build!)
 
-CONFIG(release, debug|release):    TARGET = NoobaPluginAPI
+CONFIG(release, debug|release): TARGET = NoobaPluginAPI
 CONFIG(debug, debug|release): TARGET = NoobaPluginAPId
 
-CONFIG(debug, debug|release):    DESTDIR = ../../NoobaVSS_build/NoobaPluginAPI/Debug/
-CONFIG(release, debug|release):    DESTDIR = ../../NoobaVSS_build/NoobaPluginAPI/Release/
+CONFIG(debug, debug|release):    DESTDIR = $$PWD/../../NoobaVSS_build/NoobaPluginAPI/Debug/
+CONFIG(release, debug|release):    DESTDIR = $$PWD/../../NoobaVSS_build/NoobaPluginAPI/Release/
 
 DEFINES += NOOBAPLUGINAPI_LIBRARY
 

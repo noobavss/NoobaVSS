@@ -35,4 +35,4 @@ TEMPLATE = subdirs
 
 SUBDIRS += NoobaPluginAPI NoobaFE
 
-CONFIG += ordered
+CONFIG += ordered   # builds in the order of subdirs mentioned

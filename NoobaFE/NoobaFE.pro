@@ -4,6 +4,9 @@
 
 TEMPLATE = app
 
+QT       += core gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
 CONFIG(debug, debug|release): message(Debug build!)
 CONFIG(release, debug|release): message(Release build!)
 

@@ -4,13 +4,18 @@
 #include "ParamConfigWind.h"
 
 // Qt includes
+#if QT_VERSION >= 0x050000
+    #include <QStandardPaths>
+#else
+    #include <QDesktopServices>
+#endif
 #include <QDebug>
 #include <QFileDialog>
-#include <QDesktopServices>
 #include <QMessageBox>
 #include <QMdiSubWindow>
 #include <QCloseEvent>
 #include <QVBoxLayout>
+#include <QDateTime>
 
 // opencv includes
 #include <opencv2/highgui/highgui.hpp>
@@ -52,9 +57,13 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::onOpenFile()
 {
+#if QT_VERSION >= 0x050000
+    QString path = QFileDialog::getOpenFileName(this, tr("Open file"),
+                      QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
+#else
     QString path = QFileDialog::getOpenFileName(this, tr("Open file"),
                       QDesktopServices::storageLocation(QDesktopServices::DesktopLocation));
-
+#endif
     if(path.isEmpty())
         return;
 
@@ -246,13 +255,16 @@ void MainWindow::onPluginAct_triggerred()
 
 void MainWindow::on_actionAbout_NoobaVSS_triggered()
 {
+
     QMessageBox::about(this, "Nooba VSS",
-                       QString("<h5>Nooba is an open source surveillance video analysis tool</h5><p>API Version:\t\t\t")
+                       QString("<b>Nooba is an open source surveillance video analysis tool</b><ul><li>API Version:\t\t\t")
                        .append(QString::number(API_MAJOR_VERSION)).append(".").append(QString::number(API_MINOR_VERSION))
-                       .append("</p><p>OpenCV version:\t\t\t").append(QString::number(CV_MAJOR_VERSION))
+                       .append("</li><li>OpenCV version:\t\t\t").append(QString::number(CV_MAJOR_VERSION))
                        .append(".").append(QString::number(CV_MINOR_VERSION))
-                       .append("</p><p>Version:\t\t\t").append(QString("").number(nooba::MajorVersion))
-                       .append(".").append(QString::number(nooba::MinorVersion)).append("</p>")
+                       .append("</li><li>App version:\t\t\t").append(QString("").number(nooba::MajorVersion))
+                       .append(".").append(QString::number(nooba::MinorVersion)).append("</li><li>")
+                       .append("Qt version:\t\t\t").append(QT_VERSION_STR).append("</li></ul>")
+                       .append("<p>Build on %1</p>").arg(QDateTime::currentDateTime().toString())
                        );
 }
 
