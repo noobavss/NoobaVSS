@@ -14,9 +14,13 @@
 PluginLoader::PluginLoader(QObject *parent)
 	: QObject(parent),
     _activePlugin(NULL),
-    _dir(QApplication::instance()->applicationDirPath())
+    _dir("plugins")
 {
-    _dir.cd("plugins");    // look in plugins directory
+//    _dir.cd("plugins");    // look in plugins directory
+//    _dir.setPath("/home/asitha/Documents/FYP/NoobaVSS_build/NoobaFE/Release/plugins");
+    qDebug() << _dir.isRelative();
+    qDebug() << _dir.currentPath();
+
     // init plugin loader
     loadPluginInfo();
     loadPlugin(prevLoadedPluginfileName());
@@ -30,9 +34,9 @@ PluginLoader::~PluginLoader()
     saveSettings(_activePluginFileName);
 }
 
-
 int PluginLoader::loadPluginInfo()
 {
+
     /*QDir pluginsDir(QApplication::instance()->applicationDirPath());*/
     _pluginInfoList.clear();
     int pluginCount = 0;
@@ -45,7 +49,7 @@ int PluginLoader::loadPluginInfo()
     foreach (QString fileName, _dir.entryList(QDir::Files))
     {        
         QPluginLoader pluginLoader(_dir.absoluteFilePath(fileName));       // use a scoped pluginLoader (separate from the m_QPluginLoader ) instance so that loading
-                                                                            // plugins to retrieve information and unloading doesn't affect the currently loaded plugin
+        qDebug() << _dir.entryList(QDir::Files);                                                                   // plugins to retrieve information and unloading doesn't affect the currently loaded plugin
         QObject *plugin = pluginLoader.instance();
         if (!plugin)
             break;

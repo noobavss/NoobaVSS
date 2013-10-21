@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     _paramConfigUI(new ParamConfigWind(this)),
     _delay(0),
-    _vidState(StoppedState),
+    _vidState(nooba::StoppedState),
     _inputWind("Input", this),
     _outputWind("output", this)
 {
@@ -47,11 +47,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    int ret  = QMessageBox::warning(this, tr("Close Request"),
-              tr("Are you sure you want to close the application?"), QMessageBox::Yes | QMessageBox::No);
+// TODO: Give user the option to choose whether to get the warning on close or not.
+//       this bothers some users
 
-    if(ret == QMessageBox::No)
-        event->ignore();
+//    int ret  = QMessageBox::warning(this, tr("Close Request"),
+//              tr("Are you sure you want to close the application?"), QMessageBox::Yes | QMessageBox::No);
+
+//    if(ret == QMessageBox::No)
+//        event->ignore();
 
 }
 
@@ -68,7 +71,7 @@ void MainWindow::onOpenFile()
         return;
 
     _vidCapture.release();  // release any currently loaded capture device if any
-    setVideoState(StoppedState);
+    setVideoState(nooba::StoppedState);
 
 	// load new video capture device
     if(!_vidCapture.open(path.toStdString()))
@@ -85,7 +88,7 @@ void MainWindow::onOpenFile()
 void MainWindow::onOpenWebCam()
 {
     _vidCapture.release();
-	setVideoState(StoppedState);
+    setVideoState(nooba::StoppedState);
 
     if(!_vidCapture.open(0))
 	{
@@ -125,9 +128,9 @@ void MainWindow::on_prevButton_clicked()
 
 void MainWindow::on_controlButton_clicked()
 {
-    if(_vidState == PlayingState)
+    if(_vidState == nooba::PlayingState)
     {
-        setVideoState(PausedState);
+        setVideoState(nooba::PausedState);
         return;
     }
 
@@ -140,19 +143,19 @@ void MainWindow::on_controlButton_clicked()
     }
     else    // on web cam open
     {
-        _delay = 100;   // assume 10 fps
-        _params.setFrameRate(10);
+        _delay = 50;   // assume 10 fps
+        _params.setFrameRate(20);
     }
 
     _timer.start(_delay);
-    setVideoState(PlayingState);
+    setVideoState(nooba::PlayingState);
 }
 
 void MainWindow::updateFrame()
 {
     if(!_pluginLoader.getActivePlugin()) //  if active plugin not set
     {
-        setVideoState(StoppedState);
+        setVideoState(nooba::StoppedState);
         QMessageBox msgBox;
         msgBox.setText(tr("No video processing plugin is set. Set a plugin before playing the video stream."));
         msgBox.setIcon(QMessageBox::Warning);
@@ -162,7 +165,8 @@ void MainWindow::updateFrame()
 
     if (!_vidCapture.read(_frame))
 	{
-		setVideoState(StoppedState);
+        setVideoState(nooba::StoppedState);
+        _vidCapture.set(CV_CAP_PROP_POS_FRAMES, 0);
 		return;
 	}
 
@@ -180,36 +184,37 @@ void MainWindow::updateFrame()
 	}
 }
 
-void MainWindow::setVideoState( VideoState state )
+void MainWindow::setVideoState( nooba::VideoState state )
 {
 	switch(state){
 
-	case StoppedState:
+    case nooba::StoppedState:
 		{
-            _vidState = StoppedState;
+            _vidState = nooba::StoppedState;
             _timer.stop();
             ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-play.png"));
             ui->controlButton->setToolTip(tr("Play"));
-			return;
+            break;
 		}
-	case PausedState:
+    case nooba::PausedState:
 		{
-            _vidState = PausedState;
+            _vidState = nooba::PausedState;
             ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-play.png"));
             ui->controlButton->setToolTip(tr("Play"));
             _timer.stop();
-			return;
+            break;
 		}
-	case PlayingState:
+    case nooba::PlayingState:
 		{
-            _vidState = PlayingState;
+            _vidState = nooba::PlayingState;
             ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-pause.png"));
             ui->controlButton->setToolTip(tr("Pause"));
-			return;
+            break;
 		}
 	default:
-		return;
+        break;
     }
+    _params.setVidState(_vidState);
 }
 
 void MainWindow::updateDockWidgets()

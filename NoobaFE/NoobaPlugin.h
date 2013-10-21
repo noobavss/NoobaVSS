@@ -5,6 +5,8 @@
 #include <QMap>
 #include <QMetaType>
 #include <QStringList>
+#include <QRectF>
+#include <QPointF>
 
 // forward declerations
 class NoobaPluginAPI;
@@ -85,12 +87,33 @@ struct StringListData
 
 Q_DECLARE_METATYPE(StringListData*)     // can be used with QVariant
 
+struct PointData {
+
+    PointData(const QString& varName, const QPointF& point):
+        _varName(varName), _val(point){}
+
+    const QString       _varName;
+    QPointF             _val;
+};
+
+Q_DECLARE_METATYPE(PointData*)
+
+struct RectData {
+
+    RectData(const QString& varName, const QRectF& region):
+        _varName(varName), _val(region) {}
+
+    const QString       _varName;
+    QRectF              _val;
+};
+
+Q_DECLARE_METATYPE(RectData*)
+
 class NoobaPlugin : public QObject
 {
     Q_OBJECT
 
 public:
-
 
     explicit NoobaPlugin(NoobaPluginAPI* api, QObject *parent = 0);
     ~NoobaPlugin();
@@ -115,6 +138,8 @@ public slots:
     void onDoubleParamUpdate(const QString& varName, double val);
     void onStringParamUpdate(const QString& varName, const QString& val);
     void onMultiValParamUpdate(const QString& varName, const QString& val);
+    void onPointParamUpdate(const QString& varName, const QPointF& val);
+    void onRectParamUpdate(const QString& varName, const QRectF &val);
 
 private slots:
 
@@ -123,6 +148,8 @@ private slots:
     void onCreateDoubleParam(const QString& varName, double val, double max, double min);
     void onCreateStringParam(const QString& varName, const QString& val, bool isFilePath);
     void onCreateMultiValParam(const QString& varName, const QStringList& varList);
+    void onCreatePointParam(const QString& varName, const QPointF& val);
+    void onCreateRectParam(const QString& varName, const QRectF& val);
     void onDebugMsg(const QString& msg);
 
 private:
@@ -137,6 +164,8 @@ private:
     QMap<QString, DoubleData* >     _doubleMap;
     QMap<QString, StringData* >     _stringMap;
     QMap<QString, StringListData* > _stringListMap;
+    QMap<QString, PointData* >      _pointMap;
+    QMap<QString, RectData* >       _rectMap;
 };
 
 #endif // NOOBAPLUGIN_H

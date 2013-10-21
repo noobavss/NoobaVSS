@@ -24,6 +24,30 @@ namespace cv {
     class Mat;
 }
 
+namespace nooba {
+
+    enum ParamType {
+        IntParam        = 0,
+        DoubleParam     = 1,
+        StringParam     = 2,
+        RangeParam      = 3,
+        RegionParam     = 4,
+        MultiValueParam = 5
+    };
+
+    /* Enum to define the current state of the video
+     */
+    enum VideoState {
+        PlayingState    = 0,
+        PausedState     = 1,
+        StoppedState    = 2
+    };
+
+}
+
+Q_DECLARE_METATYPE(nooba::ParamType)   // now ParamTypes can be used with QVariants
+
+
 struct ProcParamsPrivate;
 struct PluginInfoPrivate;
 struct NoobaPluginAPIPrivate;
@@ -52,6 +76,20 @@ public:
 
     void setErrorMsg(const QString& errMsg);
     QString errMsg() const;
+
+    /**
+     * @brief currentVideoState gives the current video state
+     * @return
+     */
+    nooba::VideoState currentVideoState() const;
+
+    /**
+     * @brief setVideoState Currently Nothing happens by calling this. Only changes the internal variable.
+     *                      No effect on the actual state.
+     * @param state
+     * @return
+     */
+    bool setVidState(nooba::VideoState state);
 
 private:
 
@@ -87,20 +125,6 @@ private:
     PluginInfoPrivate*  d;
 
 };
-namespace nooba {
-
-    enum ParamType {
-        IntParam        = 0,
-        DoubleParam     = 1,
-        StringParam     = 2,
-        RangeParam      = 3,
-        RegionParam     = 4,
-        MultiValueParam = 5
-    };
-
-}
-
-Q_DECLARE_METATYPE(nooba::ParamType)   // now ParamTypes can be used with QVariants
 
 class NoobaPluginAPI: public NoobaPluginAPIBase
 {
@@ -178,6 +202,10 @@ signals:
      */
     void createMultiValParam(const QString& varName, const QStringList& varList);
 
+    void createPointParam(const QString& varName, QPointF& val);
+
+    void createRectParam(const QString& varName, QRectF& val);
+
     /**
      * debug output messages can be sent using this
      */
@@ -202,6 +230,14 @@ public slots:
     }
 
     virtual void onMultiValParamChanged(const QString& varName, const QString& val){
+        Q_UNUSED(varName) Q_UNUSED(val)
+    }
+
+    virtual void onPointParamChanged(const QString& varName, const QPointF& val){
+        Q_UNUSED(varName) Q_UNUSED(val)
+    }
+
+    virtual void onRectParamChanged(const QString& varName, const QRectF& val){
         Q_UNUSED(varName) Q_UNUSED(val)
     }
 

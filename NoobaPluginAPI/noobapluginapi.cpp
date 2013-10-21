@@ -4,6 +4,7 @@ struct ProcParamsPrivate
 {
     ProcParamsPrivate():
         _isError(false),
+        _currentState(nooba::StoppedState),
         _frameId(-1),
         _frameRate(-1) {}
 
@@ -13,11 +14,11 @@ struct ProcParamsPrivate
     //       New variables. Copy and assignment constructors use it.
     // ---------------------------------------------------------------
     bool        _isError;   // frame process status, successful or not
+    nooba::VideoState  _currentState;
     int         _frameId;   // unique frameId for the video
     double      _frameRate; //
     QString     _errMsg;    // error details
 };
-
 
 ProcParams::ProcParams():
     d(new ProcParamsPrivate())
@@ -84,6 +85,17 @@ QString ProcParams::errMsg() const
     return d->_errMsg;
 }
 
+nooba::VideoState ProcParams::currentVideoState() const
+{
+    return d->_currentState;
+}
+
+bool ProcParams::setVidState(nooba::VideoState state)
+{
+    d->_currentState = state;
+    return false;   // currently this will not set the actual state. only the proc param variable
+}
+
 ProcParamsPrivate *ProcParams::createPrivateStruct(const ProcParams &rhs)
 {
     ProcParamsPrivate *t = new ProcParamsPrivate;
@@ -91,7 +103,7 @@ ProcParamsPrivate *ProcParams::createPrivateStruct(const ProcParams &rhs)
     t->_frameId = rhs.frameId();
     t->_frameRate = rhs.frameRate();
     t->_isError = rhs.isError();
-
+    t->_currentState = rhs.currentVideoState();
     return t;
 }
 
@@ -124,7 +136,6 @@ struct PluginInfoPrivate
     int         _majorVersion; // major version of plugin, different from API version
     int         _minorVersion; // minor version of plugin, different from API version
 };
-
 
 PluginInfo::PluginInfo(const QString &name, const int majorVersion,
                        const int minorVersion, const QString &description, const QString &author)
@@ -183,7 +194,6 @@ PluginInfoPrivate* PluginInfo::createPrivateStruct(const PluginInfo &rhs)
                 rhs.description(), rhs.author());
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 // NoobaPluginAPI class
 
@@ -191,9 +201,7 @@ PluginInfoPrivate* PluginInfo::createPrivateStruct(const PluginInfo &rhs)
 struct NoobaPluginAPIPrivate
 {
     NoobaPluginAPIPrivate(){}
-
     QString     _errMsg;
-
 };
 
 NoobaPluginAPI::NoobaPluginAPI()
@@ -201,13 +209,3 @@ NoobaPluginAPI::NoobaPluginAPI()
       d(new NoobaPluginAPIPrivate)
 {
 }
-
-//void NoobaPluginAPI::setErrMsg(const QString &errMsg)
-//{
-//    d->_errMsg = errMsg;
-//}
-
-//QString NoobaPluginAPI::errMsg() const
-//{
-//    return d->_errMsg;
-//}

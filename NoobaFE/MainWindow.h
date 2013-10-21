@@ -23,6 +23,11 @@ namespace Ui {
     class MainWindow;
 }
 
+namespace nooba {
+
+
+}
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -64,19 +69,11 @@ private:
 	 */
 	inline QImage grayQImage(cv::Mat& cvImg);
 
-	/* Enum to define the current state of the video
-	 */
-	enum VideoState {
-        PlayingState    = 0,
-        PausedState     = 1,
-        StoppedState    = 2
-	};
-
 	/*
 	 *	Updates the current video state
 	 *  \param state 
 	 */
-	void setVideoState(VideoState state);
+    void setVideoState(nooba::VideoState state);
 
     void updateDockWidgets();
 
@@ -90,7 +87,7 @@ private:
     cv::VideoCapture                _vidCapture;
     cv::Mat                         _frame;
     QTimer				            _timer;
-    VideoState			            _vidState;
+    nooba::VideoState               _vidState;
     ProcParams                      _params;
     PluginLoader                    _pluginLoader;
     VidOutputSubWind                _inputWind;

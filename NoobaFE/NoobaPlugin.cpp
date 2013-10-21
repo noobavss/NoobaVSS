@@ -1,7 +1,7 @@
 
 #include <QDebug>
-#include <noobapluginapi.h>
 
+#include <noobapluginapi.h>
 #include "NoobaPlugin.h"
 
 NoobaPlugin::NoobaPlugin(NoobaPluginAPI *api, QObject *parent):
@@ -28,6 +28,8 @@ bool NoobaPlugin::release()
     deleteMapItems<QMap<QString, DoubleData* > >(_doubleMap);
     deleteMapItems<QMap<QString, StringData* > >(_stringMap);
     deleteMapItems<QMap<QString, StringListData* > >(_stringListMap);
+    deleteMapItems<QMap<QString, PointData* > >(_pointMap);
+    deleteMapItems<QMap<QString, RectData* > >(_rectMap);
     return _api->release();
 }
 
@@ -59,6 +61,16 @@ void NoobaPlugin::onCreateMultiValParam(const QString &varName, const QStringLis
     _stringListMap.insert(varName, new StringListData(varName, varList));
 }
 
+void NoobaPlugin::onCreatePointParam(const QString &varName, const QPointF &val)
+{
+
+}
+
+void NoobaPlugin::onCreateRectParam(const QString &varName, const QRectF &val)
+{
+
+}
+
 void NoobaPlugin::onDebugMsg(const QString &msg)
 {
     qDebug() << "Debug MSG: " << msg;
@@ -72,6 +84,8 @@ void NoobaPlugin::initSignalSlots()
     connect(_api, SIGNAL(createDoubleParam(QString,double, double, double)), this, SLOT(onCreateDoubleParam(QString,double, double, double)));
     connect(_api, SIGNAL(createStringParam(QString,QString, bool)), this, SLOT(onCreateStringParam(QString,QString, bool)));
     connect(_api, SIGNAL(createMultiValParam(QString,QStringList)), this, SLOT(onCreateMultiValParam(QString,QStringList)));
+    connect(_api, SIGNAL(createPointParam(QString&,QPointF&)), this, SLOT(onCreatePointParam(QString&,QPointF&)));
+    connect(_api, SIGNAL(createRectParam(QString&,QRectF&)), this, SLOT(onCreateRectParam(QString&,QRectF&)));
 }
 
 void NoobaPlugin::onIntParamUpdate(const QString &varName, int val)
@@ -96,6 +110,23 @@ void NoobaPlugin::onMultiValParamUpdate(const QString &varName, const QString &v
 {
     _stringListMap.value(varName)->_val = val;
     _api->onMultiValParamChanged(varName, val);
+}
+
+void NoobaPlugin::onPointParamUpdate(const QString &varName, const QPointF &val)
+{
+    PointData* p = _pointMap.value(varName);
+    if(!p)
+        return;
+
+    p->_val.setX(val.x());
+    p->_val.setY(val.y());
+    _api->onPointParamChanged(varName, val);
+}
+
+void NoobaPlugin::onRectParamUpdate(const QString &varName, const QRectF &val)
+{
+    _rectMap.value(varName)->_val.setRect(val.x(), val.y(),val.width(), val.height());
+    _api->onRectParamChanged(varName, val);
 }
 
 void NoobaPlugin::releaseSignalSlots()

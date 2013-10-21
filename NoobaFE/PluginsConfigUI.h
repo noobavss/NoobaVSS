@@ -28,7 +28,6 @@ private:
     PluginLoader        &m_pluginLoader;
     const QString       ACTIVE;
     const QString       DISABLED;    
-
 };
 
 #endif // PLUGINSCONFIGUI_H

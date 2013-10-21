@@ -10,8 +10,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG(debug, debug|release): message(Debug build!)
 CONFIG(release, debug|release): message(Release build!)
 
-CONFIG(debug, debug|release): TARGET =  NoobaVSS_Debug
-CONFIG(release, debug|release): TARGET =  NoobaVSS_Release
+CONFIG(debug, debug|release): TARGET = NoobaVSS_Debug
+CONFIG(release, debug|release): TARGET = NoobaVSS_Release
 
 CONFIG(debug, debug|release): DESTDIR = ../../NoobaVSS_build/NoobaFE/Debug/
 CONFIG(release, debug|release): DESTDIR = ../../NoobaVSS_build/NoobaFE/Release/
