@@ -1,5 +1,3 @@
-#include <QMap>
-
 #include "noobapluginbaseprivate.h"
 #include "noobapluginbase.h"
 

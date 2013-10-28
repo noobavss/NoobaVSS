@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "PluginsConfigUI.h"
+#include "NoobaPlugin.h"
 #include "ParamConfigWind.h"
 
 // Qt includes
@@ -153,7 +154,7 @@ void MainWindow::on_controlButton_clicked()
 
 void MainWindow::updateFrame()
 {
-    if(!_pluginLoader.getActivePlugin()) //  if active plugin not set
+    if(!_pluginLoader.getBasePlugin()) //  if active plugin not set
     {
         setVideoState(nooba::StoppedState);
         QMessageBox msgBox;
@@ -178,7 +179,7 @@ void MainWindow::updateFrame()
 	cv::Mat editedFrame;
 
     ;
-    if(_pluginLoader.getActivePlugin()->procFrame(_frame, editedFrame, _params))
+    if(_pluginLoader.getBasePlugin()->procFrame(_frame, editedFrame, _params))
 	{
         _outputWind.updateFrame(grayQImage(editedFrame));
 	}
@@ -220,7 +221,7 @@ void MainWindow::setVideoState( nooba::VideoState state )
 void MainWindow::updateDockWidgets()
 {
     connect(&_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SLOT(onPluginLoad(NoobaPlugin*)));
-    connect(&_pluginLoader, SIGNAL(pluginUnloaded()), this, SLOT(onPluginUnload()));
+    connect(&_pluginLoader, SIGNAL(pluginUnloaded(const QString&)), this, SLOT(onPluginUnload(const QString&)));
 
 
     QVBoxLayout *layout = new QVBoxLayout;
@@ -233,9 +234,9 @@ void MainWindow::updateDockWidgets()
     layout->setContentsMargins(0,0,0,0);
     ui->debugOutputDock->widget()->setLayout(layout);
 
-    if(_pluginLoader.getActivePlugin())
+    if(_pluginLoader.getBasePlugin())
     {
-       onPluginLoad(_pluginLoader.getActivePlugin());
+       onPluginLoad(_pluginLoader.getBasePlugin());
 
     }
 }
@@ -280,12 +281,11 @@ void MainWindow::on_TileviewButton_clicked()
 
 void MainWindow::onPluginLoad(NoobaPlugin *plugin)
 {
-    _paramConfigUI->setPlugin(plugin);
+    _paramConfigUI->addPlugin(plugin);
     connect(plugin, SIGNAL(debugMsg(QString)), &_dbugOutWind, SLOT(onDebugMsg(QString)));
 }
 
-void MainWindow::onPluginUnload()
+void MainWindow::onPluginUnload(const QString &alias)
 {
-    _paramConfigUI->clear();
+    _paramConfigUI->removePlugin(alias);
 }
-

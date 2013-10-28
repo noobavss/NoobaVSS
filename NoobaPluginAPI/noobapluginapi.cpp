@@ -194,10 +194,19 @@ PluginInfoPrivate* PluginInfo::createPrivateStruct(const PluginInfo &rhs)
                 rhs.description(), rhs.author());
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// NoobaPluginAPI class
+///////////////////////////////////////////////////
+/// \brief The PluginPassDataPrivate struct
+///
+struct PluginPassDataPrivate{
 
-// private data structure for NoobaPluginAPI class
+    QStringList _strList;
+
+};
+
+///////////////////////////////////////////////////
+/// \brief The NoobaPluginAPIPrivate struct
+/// private data structure for NoobaPluginAPI class
+///
 struct NoobaPluginAPIPrivate
 {
     NoobaPluginAPIPrivate(){}
@@ -209,3 +218,54 @@ NoobaPluginAPI::NoobaPluginAPI()
       d(new NoobaPluginAPIPrivate)
 {
 }
+
+//////////////////////////////////////////////////
+/// \brief PluginPassData::PluginPassData
+///
+PluginPassData::PluginPassData()
+    :d(new PluginPassDataPrivate)
+{
+}
+
+PluginPassData::~PluginPassData()
+{
+    delete d;
+}
+
+PluginPassData::PluginPassData(const PluginPassData &rhs)
+{
+    d = createPrivateStruct(rhs);
+}
+
+PluginPassData &PluginPassData::operator =(const PluginPassData &rhs)
+{
+    if(this == &rhs)
+        return *this;
+
+    d = createPrivateStruct(rhs);
+    return *this;
+}
+
+QStringList PluginPassData::strList() const
+{
+    return d->_strList;
+}
+
+void PluginPassData::setStrList(const QStringList &list)
+{
+    d->_strList = list;
+}
+
+void PluginPassData::appendStrList(const QString &str)
+{
+    d->_strList.append(str);
+}
+
+PluginPassDataPrivate *PluginPassData::createPrivateStruct(const PluginPassData &rhs)
+{
+    PluginPassDataPrivate* p = new PluginPassDataPrivate;
+    p->_strList = QStringList(rhs.strList());
+    return p;
+}
+
+

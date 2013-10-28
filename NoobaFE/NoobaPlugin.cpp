@@ -1,24 +1,34 @@
 
 #include <QDebug>
 
+#include <QPluginLoader>
 #include <noobapluginapi.h>
 #include "NoobaPlugin.h"
 
-NoobaPlugin::NoobaPlugin(NoobaPluginAPI *api, QObject *parent):
+
+NoobaPlugin::NoobaPlugin(const QString &fileName, const QString& alias, NoobaPluginAPI *api, QPluginLoader *loader, QObject *parent):
     QObject(parent),
-    _api(api)
+    _fileName(fileName),
+    _alias(alias),
+    _api(api),
+    _pluginLoader(loader)
 {
 }
 
 NoobaPlugin::~NoobaPlugin()
 {
     release();
+    _pluginLoader->unload();
+    delete _pluginLoader;
 }
 
 bool NoobaPlugin::init()
 {
     initSignalSlots();
-    return _api->init();
+    bool ok =  _api->init();
+    if(!ok)
+        qDebug() << tr("plugin: '%1' initialisation failed!").arg(_alias) << Q_FUNC_INFO;
+    return ok;
 }
 
 bool NoobaPlugin::release()
@@ -30,12 +40,21 @@ bool NoobaPlugin::release()
     deleteMapItems<QMap<QString, StringListData* > >(_stringListMap);
     deleteMapItems<QMap<QString, PointData* > >(_pointMap);
     deleteMapItems<QMap<QString, RectData* > >(_rectMap);
-    return _api->release();
+    bool ok = _api->release();
+    if(!ok)
+        qDebug() << tr("plugin '%1' releasing failed.") << Q_FUNC_INFO;
+
+    return ok;
 }
 
 bool NoobaPlugin::procFrame(const cv::Mat &in, cv::Mat &out, ProcParams &params)
 {
     return _api->procFrame(in, out, params);
+}
+
+PluginInfo NoobaPlugin::getPluginInfo() const
+{
+    return _api->getPluginInfo();
 }
 
 void NoobaPlugin::onCreateIntParam(const QString &varName, int val, int max, int min)
@@ -63,12 +82,10 @@ void NoobaPlugin::onCreateMultiValParam(const QString &varName, const QStringLis
 
 void NoobaPlugin::onCreatePointParam(const QString &varName, const QPointF &val)
 {
-
 }
 
 void NoobaPlugin::onCreateRectParam(const QString &varName, const QRectF &val)
 {
-
 }
 
 void NoobaPlugin::onDebugMsg(const QString &msg)
@@ -78,14 +95,15 @@ void NoobaPlugin::onDebugMsg(const QString &msg)
 
 void NoobaPlugin::initSignalSlots()
 {
-    connect(_api, SIGNAL(debugMsg(QString)), this, SIGNAL(debugMsg(QString)));
-    connect(_api, SIGNAL(debugMsg(QString)), this, SLOT(onDebugMsg(QString)));
-    connect(_api, SIGNAL(createIntParam(QString,int,int,int)), this, SLOT(onCreateIntParam(QString,int, int, int)));
-    connect(_api, SIGNAL(createDoubleParam(QString,double, double, double)), this, SLOT(onCreateDoubleParam(QString,double, double, double)));
-    connect(_api, SIGNAL(createStringParam(QString,QString, bool)), this, SLOT(onCreateStringParam(QString,QString, bool)));
-    connect(_api, SIGNAL(createMultiValParam(QString,QStringList)), this, SLOT(onCreateMultiValParam(QString,QStringList)));
-    connect(_api, SIGNAL(createPointParam(QString&,QPointF&)), this, SLOT(onCreatePointParam(QString&,QPointF&)));
-    connect(_api, SIGNAL(createRectParam(QString&,QRectF&)), this, SLOT(onCreateRectParam(QString&,QRectF&)));
+    connect(_api, SIGNAL(debugMsgRequest(QString)), this, SIGNAL(debugMsg(QString)));
+    connect(_api, SIGNAL(debugMsgRequest(QString)), this, SLOT(onDebugMsg(QString)));
+    connect(_api, SIGNAL(createIntParamRequest(QString,int,int,int)), this, SLOT(onCreateIntParam(QString,int, int, int)));
+    connect(_api, SIGNAL(createDoubleParamRequest(QString,double, double, double)), this, SLOT(onCreateDoubleParam(QString,double, double, double)));
+    connect(_api, SIGNAL(createStringParamRequest(QString,QString, bool)), this, SLOT(onCreateStringParam(QString,QString, bool)));
+    connect(_api, SIGNAL(createMultiValParamRequest(QString,QStringList)), this, SLOT(onCreateMultiValParam(QString,QStringList)));
+    connect(_api, SIGNAL(createPointParamRequest(QString&,QPointF&)), this, SLOT(onCreatePointParam(QString&,QPointF&)));
+    connect(_api, SIGNAL(createRectParamRequest(QString&,QRectF&)), this, SLOT(onCreateRectParam(QString&,QRectF&)));
+    connect(_api, SIGNAL(outputDataRequest(PluginPassData*)), this, SIGNAL(outputData(PluginPassData*)));
 }
 
 void NoobaPlugin::onIntParamUpdate(const QString &varName, int val)
@@ -127,6 +145,11 @@ void NoobaPlugin::onRectParamUpdate(const QString &varName, const QRectF &val)
 {
     _rectMap.value(varName)->_val.setRect(val.x(), val.y(),val.width(), val.height());
     _api->onRectParamChanged(varName, val);
+}
+
+void NoobaPlugin::inputData(PluginPassData *data)
+{
+    _api->inputData(data);
 }
 
 void NoobaPlugin::releaseSignalSlots()

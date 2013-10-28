@@ -42,7 +42,6 @@ namespace nooba {
         PausedState     = 1,
         StoppedState    = 2
     };
-
 }
 
 Q_DECLARE_METATYPE(nooba::ParamType)   // now ParamTypes can be used with QVariants
@@ -51,6 +50,7 @@ Q_DECLARE_METATYPE(nooba::ParamType)   // now ParamTypes can be used with QVaria
 struct ProcParamsPrivate;
 struct PluginInfoPrivate;
 struct NoobaPluginAPIPrivate;
+struct PluginPassDataPrivate;
 
 /*
  * Structure to output extra information other than the output image.
@@ -97,6 +97,29 @@ private:
     ProcParamsPrivate*   d;  // d pointer
 
 };
+
+Q_DECLARE_METATYPE(ProcParams*)
+
+class PluginPassData
+{
+public:
+
+    explicit PluginPassData();
+    ~PluginPassData();
+
+    PluginPassData(const PluginPassData& rhs);                // copy constructor
+    PluginPassData& operator=(const PluginPassData& rhs);     // assignment operator
+    QStringList strList() const;
+    void setStrList(const QStringList& list);
+    void appendStrList(const QString& str);
+
+private:
+
+    PluginPassDataPrivate* createPrivateStruct(const PluginPassData& rhs);
+    PluginPassDataPrivate*  d; // d pointer
+};
+
+Q_DECLARE_METATYPE(PluginPassData*)
 
 /**
  * @brief Plugin information are stored in this structure
@@ -162,8 +185,6 @@ public:
      */
     virtual PluginInfo getPluginInfo() const = 0;
 
-signals:
-
     // functions to create variables that need to be changed by the user.
     // once created user can see the variables and change them.
 
@@ -174,7 +195,8 @@ signals:
      * @param max
      * @param min
      */
-    void createIntParam(const QString& varName, int val, int max = 100, int min = 0);
+    void createIntParam(const QString& varName, int val, int max = 100, int min = 0)
+    {   emit createIntParamRequest(varName, val, max, min);}
 
     /**
      * @brief createDoubleParam     double parameter created
@@ -183,7 +205,8 @@ signals:
      * @param max
      * @param min
      */
-    void createDoubleParam(const QString& varName, double val, double max = 100.0, double min = 0.0);
+    void createDoubleParam(const QString& varName, double val, double max = 100.0, double min = 0.0)
+    {   emit createDoubleParamRequest(varName, val, max, min); }
 
     /**
      * @brief createStringParam     parameter that can take string variables is created.
@@ -192,7 +215,8 @@ signals:
      * @param val
      * @param isFilePath
      */
-    void createStringParam(const QString& varName, QString val, bool isFilePath = false);
+    void createStringParam(const QString& varName, QString val, bool isFilePath = false)
+    {   emit createStringParamRequest(varName, val, isFilePath);}
 
     /**
      * @brief createMultiValParam Parameter that can be used to create a defined set of strings.
@@ -200,16 +224,38 @@ signals:
      * @param varName
      * @param varList
      */
-    void createMultiValParam(const QString& varName, const QStringList& varList);
+    void createMultiValParam(const QString& varName, const QStringList& varList)
+    {   emit createMultiValParamRequest(varName, varList);   }
 
-    void createPointParam(const QString& varName, QPointF& val);
+    void createPointParam(const QString& varName, QPointF& val)
+    {   emit createPointParamRequest(varName, val); }
 
-    void createRectParam(const QString& varName, QRectF& val);
+    void createRectParam(const QString& varName, QRectF& val)
+    {   emit createRectParam(varName, val); }
 
     /**
      * debug output messages can be sent using this
      */
-    void debugMsg(const QString& msg);
+    void debugMsg(const QString& msg)
+    {   emit debugMsgRequest(msg); }
+
+    /**
+     * @brief outputData data to be shared with other plugins
+     * @param data
+     */
+    void outputData(PluginPassData *data)
+    {   emit outputDataRequest(data); }
+
+signals:
+
+    void createIntParamRequest(const QString& varName, int val, int max = 100, int min = 0);
+    void createDoubleParamRequest(const QString& varName, double val, double max = 100.0, double min = 0.0);
+    void createStringParamRequest(const QString& varName, QString val, bool isFilePath = false);
+    void createMultiValParamRequest(const QString& varName, const QStringList& varList);
+    void createPointParamRequest(const QString& varName, QPointF& val);
+    void createRectParamRequest(const QString& varName, QRectF& val);
+    void debugMsgRequest(const QString& msg);
+    void outputDataRequest(PluginPassData *data);
 
 public slots:
 
@@ -241,13 +287,22 @@ public slots:
         Q_UNUSED(varName) Q_UNUSED(val)
     }
 
+    /**
+     * @brief inputData data received from other plugin thru thid function. This is used to interconnect plugins.
+     *                  Another plugins outputData(PluginPassData* data) can be connected to this slot.
+     * @param data
+     */
+    virtual void inputData(PluginPassData* data){
+        Q_UNUSED(data)
+    }
+
 protected:
 
     /**
      * private constructor so that this class could never be instantiated. Only be casted to this
      * interface type to get the API version details.
      */
-    NoobaPluginAPI();
+    explicit NoobaPluginAPI();
 
 private:
 

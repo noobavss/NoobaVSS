@@ -28,7 +28,8 @@ HEADERS += \
     OutputWind.h \
     ParamConfigWind.h \
     VidOutputSubWind.h \
-    ParamDelegate.h
+    ParamDelegate.h \
+    pluginconndelegate.h
 
 FORMS += Forms/MainWindow.ui Forms/PluginsConfigUI.ui \
     Forms/OutputWind.ui \
@@ -44,7 +45,8 @@ SOURCES += \
     OutputWind.cpp \
     ParamConfigWind.cpp \
     VidOutputSubWind.cpp \
-    ParamDelegate.cpp
+    ParamDelegate.cpp \
+    pluginconndelegate.cpp
 
 RESOURCES += Resources/mainwind.qrc
 

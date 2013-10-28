@@ -27,9 +27,9 @@ public:
      *        plugin
      * @param plugin pointer to NoobaPlugin object
      */
-    void setPlugin(NoobaPlugin* plugin);
-
-    void clear() { setPlugin(NULL); }
+    void addPlugin(NoobaPlugin* plugin);
+    void removePlugin(const QString& alias);
+    void clear();
     
 private slots:
 
@@ -42,10 +42,10 @@ private:
      * NOTE:    Type is given as template type to avoid the
      *          inclusion of the NoobaPluginAPI header to this file :)
      */
-    template<typename Map, typename Type> void addToTree( Map& map, Type type);
+    template<typename Map, typename Type> void addToTree( Map& map, Type type, QTreeWidgetItem* topLevel);
 
     Ui::ParamConfigWind             *ui;
-    NoobaPlugin                     *_plugin;       // doesn't take ownership
+    int                             PluginPtrRole;
     QScopedPointer<ParamDelegate>   _delegateSP;
     QScopedPointer<NoEditDelegate>  _noEditDelegateSP;
 

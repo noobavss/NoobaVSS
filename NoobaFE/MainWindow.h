@@ -24,8 +24,6 @@ namespace Ui {
 }
 
 namespace nooba {
-
-
 }
 
 class MainWindow : public QMainWindow
@@ -53,7 +51,7 @@ private slots:
     void on_TileviewButton_clicked();
 
     void onPluginLoad(NoobaPlugin *plugin);
-    void onPluginUnload();
+    void onPluginUnload(const QString& alias);
 
 private:
 

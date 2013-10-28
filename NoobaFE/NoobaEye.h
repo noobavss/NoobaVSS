@@ -18,7 +18,6 @@ namespace nooba
     const int  MajorVersion     = 0;
     const int MinorVersion      = 2;
 
-
     // QSettings related consts
     const QString Settings_PluginInfo_block = "Plugin_info";
     const QString Settings_ActivePlugin_FileName = "ap_filename";

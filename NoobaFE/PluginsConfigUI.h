@@ -3,8 +3,10 @@
 
 #include <QDialog>
 #include "ui_PluginsConfigUI.h"
+#include "pluginconndelegate.h"
+#include "PluginLoader.h"
 
-class PluginLoader;
+class NoobaPlugin;
 
 class PluginsConfigUI : public QDialog
 {
@@ -18,14 +20,25 @@ public:
 private slots:
 
     void onReloadButtonClicked();
-    void onSetDefaultButtonClicked();
-    
+    void onSetDefaultButtonClicked();    
+    void on_addButton_clicked();
+    void on_removeButton_clicked();
+    void on_applyButton_clicked();
+    void on_loadPluginButton_clicked();
+    void on_unloadPluginButton_clicked();
+    void on_cancelButton_clicked();
+    void onPluginsDisconnected(PluginLoader::PluginConnData* pcd);
+
 private:
 
     void updateUI();
+    void addLoadedPluginToTree(NoobaPlugin* p);
 
     Ui::PluginsConfigUI ui;
-    PluginLoader        &m_pluginLoader;
+    Qt::ItemDataRole    FILENAME_ROLE;
+    int                 ALIAS_ROLE;
+    PluginLoader        &_pluginLoader;
+    PluginConnDelegate* _pluginConnDelegate;
     const QString       ACTIVE;
     const QString       DISABLED;    
 };

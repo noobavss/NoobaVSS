@@ -8,9 +8,14 @@
 #include <QRectF>
 #include <QPointF>
 
+
 // forward declerations
 class NoobaPluginAPI;
 class ProcParams;
+class PluginPassData;
+class QPluginLoader;
+class PluginInfo;
+
 namespace cv { class Mat; }
 
 struct IntData
@@ -115,12 +120,35 @@ class NoobaPlugin : public QObject
 
 public:
 
-    explicit NoobaPlugin(NoobaPluginAPI* api, QObject *parent = 0);
+    explicit NoobaPlugin(const QString& fileName, const QString& alias, NoobaPluginAPI* api, QPluginLoader* loader, QObject *parent = 0);
     ~NoobaPlugin();
 
     bool init();
     bool release();
     bool procFrame(const cv::Mat& in, cv::Mat& out, ProcParams& params);
+    QPluginLoader* getPluginLoader() const { return _pluginLoader; }
+    bool isBasePlugin() const {return _isBasePlugin; }
+    void setIsBasePlugin(bool isBase) { _isBasePlugin = isBase; }
+
+    /**
+     * @brief getFileName local filename of the plugin file is returned
+     * @return
+     */
+    QString fileName() const { return _fileName; }
+
+    /**
+     * @brief alias     Name given for the plugin at loading is returned. This is not the plugin name
+     *                  but the name given at program runtime. This makes it easy to identify plugins with
+     *                  same name loaded twice.
+     * @return
+     */
+    QString alias() const { return _alias; }
+
+    /**
+     * @brief getPluginInfo plugin related metadata is returned
+     * @return
+     */
+    PluginInfo getPluginInfo() const;
 
     const QMap<QString, IntData* >& getIntParamMap() const { return _intMap; }
     const QMap<QString, DoubleData* >& getDoubleParamMap() const { return _doubleMap; }
@@ -130,6 +158,7 @@ public:
 signals:
     
     void debugMsg(const QString& msg);
+    void outputData(PluginPassData* data);
 
 public slots:
 
@@ -140,6 +169,7 @@ public slots:
     void onMultiValParamUpdate(const QString& varName, const QString& val);
     void onPointParamUpdate(const QString& varName, const QPointF& val);
     void onRectParamUpdate(const QString& varName, const QRectF &val);
+    void inputData(PluginPassData* data);
 
 private slots:
 
@@ -159,7 +189,11 @@ private:
     void initSignalSlots();
     void releaseSignalSlots();
 
+    bool                            _isBasePlugin;
     NoobaPluginAPI*                 _api;
+    QPluginLoader*                  _pluginLoader;
+    QString                         _fileName;
+    QString                         _alias;
     QMap<QString, IntData* >        _intMap;
     QMap<QString, DoubleData* >     _doubleMap;
     QMap<QString, StringData* >     _stringMap;
@@ -167,5 +201,7 @@ private:
     QMap<QString, PointData* >      _pointMap;
     QMap<QString, RectData* >       _rectMap;
 };
+
+Q_DECLARE_METATYPE(NoobaPlugin*)
 
 #endif // NOOBAPLUGIN_H
