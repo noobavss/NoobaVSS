@@ -19,15 +19,24 @@ QWidget* ParamDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem
     Q_UNUSED(option)
 
     nooba::ParamType type = index.data(nooba::ParamTypeRole).value<nooba::ParamType>();
+
     switch(type)
     {
     case nooba::IntParam:
     {
-        return new QSpinBox(parent);
+        QSpinBox* e = new QSpinBox(parent);
+        IntData* d = index.data(nooba::ParamDataRole).value<IntData*>();
+        e->setMaximum(d->_max);
+        e->setMinimum(d->_min);
+        return e;
     }
     case nooba::DoubleParam:
     {
-        return new QDoubleSpinBox(parent);
+        QDoubleSpinBox *e = new QDoubleSpinBox(parent);
+        DoubleData* d = index.data(nooba::ParamDataRole).value<DoubleData*>();
+        e->setMaximum(d->_max);
+        e->setMinimum(d->_min);
+        return e;
     }
     case nooba::StringParam:
     {
@@ -52,6 +61,7 @@ QWidget* ParamDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem
 void ParamDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
     QStyledItemDelegate::setEditorData(editor, index);
+
 }
 
 void ParamDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
