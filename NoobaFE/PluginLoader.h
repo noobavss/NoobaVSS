@@ -86,7 +86,13 @@ public:
      * @return
      */
     bool connectAllPlugins(QList<PluginConnData*> configList);
-    void connectPlugins(PluginConnData* pcd);
+    void connectPlugins(PluginConnData *pcd);
+
+    /**
+     * @brief getPCDList returns the PluginConnData list
+     * @return
+     */
+    QList<PluginConnData*> getPCDList() { return _pcdList; }
 
     /**
      * @brief disconnectPlugin  disconnect a single connection according to the plugin connection
@@ -104,6 +110,9 @@ public:
     bool disconnectPlugin(NoobaPlugin* plugin);
     bool disconnectAllPlugins();
 
+    void saveCurrentConfig();
+    void loadPrevConfig();
+
 signals:
 
     void pluginLoaded(NoobaPlugin *plugin);
@@ -120,9 +129,7 @@ private:
 
     void updateBasePlugin(NoobaPlugin *pluginToBeRemoved);
     inline QString getPluginAlias(const QString &pluginName);
-    void saveSettings(const QString& pluginFileName );
-    QString prevLoadedPluginfileName() const;
-    	
+
     QList<nooba::PluginData>    _pluginInfoList;
     NoobaPlugin                 *_basePlugin;
     QDir                        _dir;

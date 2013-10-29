@@ -227,10 +227,10 @@ public:
     void createMultiValParam(const QString& varName, const QStringList& varList)
     {   emit createMultiValParamRequest(varName, varList);   }
 
-    void createPointParam(const QString& varName, QPointF& val)
+    void createPointParam(const QString& varName, const QPointF& val)
     {   emit createPointParamRequest(varName, val); }
 
-    void createRectParam(const QString& varName, QRectF& val)
+    void createRectParam(const QString& varName, const QRectF& val)
     {   emit createRectParam(varName, val); }
 
     /**
@@ -252,8 +252,8 @@ signals:
     void createDoubleParamRequest(const QString& varName, double val, double max = 100.0, double min = 0.0);
     void createStringParamRequest(const QString& varName, QString val, bool isFilePath = false);
     void createMultiValParamRequest(const QString& varName, const QStringList& varList);
-    void createPointParamRequest(const QString& varName, QPointF& val);
-    void createRectParamRequest(const QString& varName, QRectF& val);
+    void createPointParamRequest(const QString& varName, const QPointF& val);
+    void createRectParamRequest(const QString& varName, const QRectF& val);
     void debugMsgRequest(const QString& msg);
     void outputDataRequest(PluginPassData *data);
 

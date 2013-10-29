@@ -114,6 +114,9 @@ struct RectData {
 
 Q_DECLARE_METATYPE(RectData*)
 
+/**
+ * @brief The NoobaPlugin class this is a wrapper class for the Loaded plugins
+ */
 class NoobaPlugin : public QObject
 {
     Q_OBJECT
@@ -184,7 +187,7 @@ private slots:
 
 private:
 
-    template <typename Map> void deleteMapItems(Map map);
+    template <typename value> void deleteMapItems(QMap<QString, value>& map);
 
     void initSignalSlots();
     void releaseSignalSlots();

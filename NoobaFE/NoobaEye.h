@@ -16,12 +16,15 @@ namespace nooba
     const QString ProgramName   = "Nooba_VSS";
     const QString Organisation  = "Nooba";
     const int  MajorVersion     = 0;
-    const int MinorVersion      = 2;
+    const int MinorVersion      = 3;
 
     // QSettings related consts
-    const QString Settings_PluginInfo_block = "Plugin_info";
-    const QString Settings_ActivePlugin_FileName = "ap_filename";
-
+    const QString Settings_PluginConfig_block   = "Plugin_info";
+    const QString Settings_BasePlugin_Filename  = "BasePlugin_filename";
+    const QString Settings_ActivePluginList     = "Active_plugin_list";
+    const QString Settings_Connection_data      = "Connected_plugin_filenames";
+    const QString Settings_InPlug_Alias         = "In";
+    const QString Settings_OutPlug_Alias        = "Out";
     // plugin information. Used by pluginLoader
     struct PluginData
     {

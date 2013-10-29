@@ -8,10 +8,11 @@
 
 NoobaPlugin::NoobaPlugin(const QString &fileName, const QString& alias, NoobaPluginAPI *api, QPluginLoader *loader, QObject *parent):
     QObject(parent),
-    _fileName(fileName),
-    _alias(alias),
+    _isBasePlugin(false),
     _api(api),
-    _pluginLoader(loader)
+    _pluginLoader(loader),
+    _fileName(fileName),
+    _alias(alias)
 {
 }
 
@@ -19,11 +20,13 @@ NoobaPlugin::~NoobaPlugin()
 {
     release();
     _pluginLoader->unload();
-    delete _pluginLoader;
+    delete _pluginLoader;    
 }
 
 bool NoobaPlugin::init()
 {
+    // TODO: Need to load previous configurations from QSettings
+
     initSignalSlots();
     bool ok =  _api->init();
     if(!ok)
@@ -33,13 +36,15 @@ bool NoobaPlugin::init()
 
 bool NoobaPlugin::release()
 {
+    // TODO need to save configurations to a QSettings
     releaseSignalSlots();
-    deleteMapItems<QMap<QString, IntData* > >(_intMap);
-    deleteMapItems<QMap<QString, DoubleData* > >(_doubleMap);
-    deleteMapItems<QMap<QString, StringData* > >(_stringMap);
-    deleteMapItems<QMap<QString, StringListData* > >(_stringListMap);
-    deleteMapItems<QMap<QString, PointData* > >(_pointMap);
-    deleteMapItems<QMap<QString, RectData* > >(_rectMap);
+    deleteMapItems<IntData* >(_intMap);
+    deleteMapItems<DoubleData* >(_doubleMap);
+    deleteMapItems<StringData* >(_stringMap);
+    deleteMapItems<StringListData* >(_stringListMap);
+    deleteMapItems<PointData* >(_pointMap);
+    deleteMapItems<RectData* >(_rectMap);
+
     bool ok = _api->release();
     if(!ok)
         qDebug() << tr("plugin '%1' releasing failed.") << Q_FUNC_INFO;
@@ -82,10 +87,14 @@ void NoobaPlugin::onCreateMultiValParam(const QString &varName, const QStringLis
 
 void NoobaPlugin::onCreatePointParam(const QString &varName, const QPointF &val)
 {
+    Q_UNUSED(varName)
+    Q_UNUSED(val)
 }
 
 void NoobaPlugin::onCreateRectParam(const QString &varName, const QRectF &val)
 {
+    Q_UNUSED(varName)
+    Q_UNUSED(val)
 }
 
 void NoobaPlugin::onDebugMsg(const QString &msg)
@@ -101,8 +110,8 @@ void NoobaPlugin::initSignalSlots()
     connect(_api, SIGNAL(createDoubleParamRequest(QString,double, double, double)), this, SLOT(onCreateDoubleParam(QString,double, double, double)));
     connect(_api, SIGNAL(createStringParamRequest(QString,QString, bool)), this, SLOT(onCreateStringParam(QString,QString, bool)));
     connect(_api, SIGNAL(createMultiValParamRequest(QString,QStringList)), this, SLOT(onCreateMultiValParam(QString,QStringList)));
-    connect(_api, SIGNAL(createPointParamRequest(QString&,QPointF&)), this, SLOT(onCreatePointParam(QString&,QPointF&)));
-    connect(_api, SIGNAL(createRectParamRequest(QString&,QRectF&)), this, SLOT(onCreateRectParam(QString&,QRectF&)));
+    connect(_api, SIGNAL(createPointParamRequest(QString,QPointF)), this, SLOT(onCreatePointParam(QString,QPointF)));
+    connect(_api, SIGNAL(createRectParamRequest(QString,QRectF)), this, SLOT(onCreateRectParam(QString,QRectF)));
     connect(_api, SIGNAL(outputDataRequest(PluginPassData*)), this, SIGNAL(outputData(PluginPassData*)));
 }
 
@@ -157,10 +166,10 @@ void NoobaPlugin::releaseSignalSlots()
     _api->disconnect();
 }
 
-template <typename Map>
-void NoobaPlugin::deleteMapItems(Map map)
+template <typename value>
+void NoobaPlugin::deleteMapItems(QMap<QString, value>& map)
 {
-    typename Map::iterator iter = map.begin();
+    typename QMap<QString, value>::iterator iter = map.begin();
     for(; iter != map.end(); iter++)
     {
         delete iter.value();

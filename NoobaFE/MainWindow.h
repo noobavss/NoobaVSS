@@ -81,7 +81,7 @@ private:
     Ui::MainWindow                  *ui;
     ParamConfigWind                 *_paramConfigUI;
     int                             _delay;
-
+    bool                            _isWebCam;
     cv::VideoCapture                _vidCapture;
     cv::Mat                         _frame;
     QTimer				            _timer;

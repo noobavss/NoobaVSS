@@ -10,6 +10,7 @@ PluginsConfigUI::PluginsConfigUI(PluginLoader& pluginLoader, QWidget *parent)
       ACTIVE(tr("Active")),
       DISABLED(tr("Disabled"))
 {
+    _applyConfig = false;
     FILENAME_ROLE = Qt::UserRole;
     ALIAS_ROLE = Qt::UserRole +2;
     ui.setupUi(this);
@@ -25,7 +26,6 @@ PluginsConfigUI::~PluginsConfigUI()
 void PluginsConfigUI::onReloadButtonClicked()
 {
     _pluginLoader.loadPluginInfo();
-    _pluginLoader.unloadPlugins();
     updateUI();
 }
 
@@ -59,7 +59,7 @@ void PluginsConfigUI::updateUI()
     ui.pluginListTree->clear();
     ui.pluginListTree->setColumnCount(2);
     ui.pluginListTree->setHeaderLabels(QStringList() << tr("Property") << tr("Value"));
-    ui.pluginConfigTree->setItemDelegate(_pluginConnDelegate);
+
 
     foreach(const nooba::PluginData& pluginData, _pluginLoader.getPluginInfo())
     {
@@ -76,16 +76,16 @@ void PluginsConfigUI::updateUI()
         ui.availablePluginsTree->addTopLevelItem(l1);
 
         // TODO: Need to check the loaded plugins and update the UI
-        // sort the available and loaded list.. then iterate thru the available list while checkinavailability
+        // sort the available and loaded list.. then iterate thru the available list while checkin availability
         // of the loaded plugins
-
-//        if(m_pluginLoader.getActivePluginFilename().compare(pluginData._fileName) == 0) // if plugin available
+//        foreach(NoobaPlugin* p, _pluginLoader.getActivePlugins())
 //        {
-//            level0->setText(1, ACTIVE);
-//        }
-//        else
-//        {
+//            if(p->fileName().compare(pluginData._fileName) == 0) // if plugin available
+//            {
+//                level0->setText(1, ACTIVE);
+//            }
 //            level0->setText(1, DISABLED);
+
 //        }
 
         ui.pluginListTree->addTopLevelItem(level0);
@@ -126,6 +126,24 @@ void PluginsConfigUI::updateUI()
     foreach (NoobaPlugin* p, _pluginLoader.getActivePlugins()) {
         addLoadedPluginToTree(p);
     }
+
+    // update connection table
+    QList<PluginLoader::PluginConnData* > lst = _pluginLoader.getPCDList();
+    foreach(PluginLoader::PluginConnData* pcd, lst)
+    {
+        QTreeWidgetItem* itm = new QTreeWidgetItem(ui.pluginConfigTree);
+        itm->setFlags(itm->flags()| Qt::ItemIsEditable);
+        itm->setBackgroundColor(0, QColor(240, 240,240));
+        itm->setBackground(1, QColor(240, 240,240));
+        itm->setText(0, pcd->_outPlugAlias);
+        QVariant v;
+        v.setValue(pcd->_outPlug);
+        itm->setData(0, Qt::UserRole, v);
+        itm->setText(1, pcd->_inPlugAlias);
+        v.setValue(pcd->_inPlug);
+        itm->setData(1, Qt::UserRole, v);
+    }
+    ui.pluginConfigTree->setItemDelegate(_pluginConnDelegate);
 }
 
 
@@ -133,6 +151,8 @@ void PluginsConfigUI::on_addButton_clicked()
 {
     QTreeWidgetItem* itm = new QTreeWidgetItem(1);
     itm->setFlags(itm->flags()| Qt::ItemIsEditable);
+    itm->setBackgroundColor(0, QColor(240, 240,240));
+    itm->setBackground(1, QColor(240, 240,240));
     ui.pluginConfigTree->addTopLevelItem(itm);
 }
 
@@ -163,13 +183,16 @@ void PluginsConfigUI::on_applyButton_clicked()
         QVariant v = itm->data(0, Qt::UserRole);
         NoobaPlugin* p = v.value<NoobaPlugin* >();
         connData->_outPlug = p;
+        connData->_outPlugAlias = p->alias();
         v = itm->data(1, Qt::UserRole);
         p = v.value<NoobaPlugin* >();
         connData->_inPlug = p;
-
+        connData->_inPlugAlias = p->alias();
         lst.append(connData);
     }
     _pluginLoader.connectAllPlugins(lst);
+    _pluginLoader.saveCurrentConfig();
+    _applyConfig = true;
 }
 
 void PluginsConfigUI::on_loadPluginButton_clicked()
@@ -229,7 +252,8 @@ void PluginsConfigUI::on_unloadPluginButton_clicked()
 
 void PluginsConfigUI::on_cancelButton_clicked()
 {
-
+    _applyConfig = false;
+    close();
 }
 
 void PluginsConfigUI::onPluginsDisconnected(PluginLoader::PluginConnData *pcd)
@@ -242,4 +266,14 @@ void PluginsConfigUI::onPluginsDisconnected(PluginLoader::PluginConnData *pcd)
             delete itm;
         }
     }
+}
+
+void PluginsConfigUI::closeEvent(QCloseEvent *)
+{
+    if(_applyConfig)
+        return;
+
+    _pluginLoader.loadPrevConfig(); // this is not reverting back :/ this may lead to loosing the states of plugins
+                                    // this reloads the plugins to its previous state.
+    return;
 }

@@ -18,15 +18,15 @@ PluginLoader::PluginLoader(QObject *parent)
 {
     // init plugin loader
     loadPluginInfo();
-    loadPlugin(prevLoadedPluginfileName());
 }
 
 PluginLoader::~PluginLoader()
 {
+    saveCurrentConfig();    // this should be at the TOP
     if(_basePlugin)
         _basePlugin->release();
 
-//    saveSettings(_activePluginFileName);
+    unloadPlugins();
 }
 
 int PluginLoader::loadPluginInfo()
@@ -90,9 +90,6 @@ int PluginLoader::loadPluginInfo()
 
 NoobaPlugin *PluginLoader::loadPlugin(const QString& fileName, bool isBase)
 {
-    // call with empty filename will occur when app is run for the first time in a 
-    // system. Since this func is called by constructor of this class using previously loaded
-    // plugins filename which is invalid when running for the first time
     if(fileName.isEmpty())
     {
         qDebug() << "Trying to load a plugin with an empty file name." << Q_FUNC_INFO;
@@ -129,7 +126,7 @@ NoobaPlugin *PluginLoader::loadPlugin(const QString& fileName, bool isBase)
     msgBox.setText(tr("Plugin: %1 loading failed").arg(fileName));
     qDebug() << tr("Plugin: %1 loading failed").arg(fileName) << Q_FUNC_INFO;
     msgBox.exec();      // show error message
-    return NULL;   // no plugin loaded, Unsuccessful
+    return NULL;        // no plugin loaded, Unsuccessful
 }
 
 bool PluginLoader::unloadPlugins()
@@ -141,16 +138,8 @@ bool PluginLoader::unloadPlugins()
     {
         if(plugin) // plugin reference is not null
         {
-            if(plugin->getPluginLoader())   // if plugin loader reference is not null
-            {
-                plugin->getPluginLoader()->unload();
-                delete plugin->getPluginLoader();
-            }
-            else
-            {
-                ok = false;
-            }
             emit pluginUnloaded(plugin->alias());
+            plugin->release();
             delete plugin;
         }
         else
@@ -173,15 +162,14 @@ bool PluginLoader::unloadPlugin(const QString &alias)
     for(int i=0; i < _loadedPlugins.size(); i++) {
         if(_loadedPlugins.at(i)->alias().compare(alias) == 0)
         {
-            bool ok = _loadedPlugins.at(i)->getPluginLoader()->unload();
-            updateBasePlugin(_loadedPlugins.at(i));
-            disconnectPlugin(_loadedPlugins.at(i));
-            _loadedPlugins.removeAt(i);
-            if(ok)
-                qDebug() << tr("Plugin '%1' unloaded").arg(alias) << Q_FUNC_INFO;
-
+            NoobaPlugin* p = _loadedPlugins.at(i);
+            updateBasePlugin(p);
+            disconnectPlugin(p);
+            p->release();
             emit pluginUnloaded(alias);
-            return ok;
+            delete p;
+            _loadedPlugins.removeAt(i);
+            return true;
         }
     }
     qDebug() << tr("plugin '%1' unload failed").arg(alias) << Q_FUNC_INFO;
@@ -213,7 +201,7 @@ bool PluginLoader::connectAllPlugins(QList<PluginLoader::PluginConnData *> confi
     // NOTE:    NO checking for compatibility of plugins done here. It is assumed that is done in
     //          plugin configuration.
 
-    disconnectAllPlugins(); // disconnect all plugins and connect new plugins
+    disconnectAllPlugins();         // disconnect all plugins and connect new plugins
     qDebug() << tr("plugin connected") << Q_FUNC_INFO;
     foreach(PluginLoader::PluginConnData* connData, configList)
     {
@@ -223,7 +211,7 @@ bool PluginLoader::connectAllPlugins(QList<PluginLoader::PluginConnData *> confi
     return true;
 }
 
-void PluginLoader::connectPlugins(PluginLoader::PluginConnData *pcd)
+void PluginLoader::connectPlugins(PluginLoader::PluginConnData* pcd)
 {
     connect(pcd->_outPlug, SIGNAL(outputData(PluginPassData*)), pcd->_inPlug, SLOT(inputData(PluginPassData*)));
     _pcdList.append(pcd);
@@ -257,6 +245,102 @@ bool PluginLoader::disconnectAllPlugins()
     return true;
 }
 
+void PluginLoader::saveCurrentConfig()
+{
+    if(!_basePlugin)
+        return;
+
+    QSettings s(nooba::Organisation, nooba::ProgramName);
+    s.beginGroup(nooba::Settings_PluginConfig_block);
+    s.setValue(nooba::Settings_BasePlugin_Filename, _basePlugin->fileName());
+
+    QStringList activePlugins;
+    foreach(NoobaPlugin* p, _loadedPlugins)
+    {
+        activePlugins.append(p->fileName());
+    }
+
+    s.setValue(nooba::Settings_ActivePluginList, QVariant(activePlugins));
+
+    // plugin connection data
+    s.beginWriteArray(nooba::Settings_Connection_data);
+    for(int i = 0; i < _pcdList.count(); i++)
+    {
+        s.setArrayIndex(i);
+        s.setValue(nooba::Settings_InPlug_Alias, _pcdList.at(i)->_inPlugAlias);
+        s.setValue(nooba::Settings_OutPlug_Alias, _pcdList.at(i)->_outPlugAlias);
+    }
+    s.endArray();
+
+    s.endGroup();
+    s.sync();
+}
+
+void PluginLoader::loadPrevConfig()
+{
+    QSettings s(nooba::Organisation, nooba::ProgramName);
+    s.beginGroup(nooba::Settings_PluginConfig_block);
+    QString baseFilename = s.value(nooba::Settings_BasePlugin_Filename, "").toString();
+    QStringList activePlugins = s.value(nooba::Settings_ActivePluginList, "").toStringList();
+
+    unloadPlugins();        // unload previously loaded plugins
+
+    // load plugins
+    bool isBase;
+    foreach(const QString& fName, activePlugins)
+    {
+        if(fName.isEmpty()) // don't try to load, ignore
+            continue;
+        (fName.compare(baseFilename) == 0) ? isBase = true: isBase = false;
+        NoobaPlugin* p = loadPlugin(fName, isBase);
+        if(!p)
+        {
+            unloadPlugins();
+            QMessageBox msgBox;
+            msgBox.setText(tr("Plugin loading from previous configuration failed. %1 not found").arg(fName));
+            msgBox.exec();
+            break;
+        }
+    }
+
+    // make connections
+    int size = s.beginReadArray(nooba::Settings_Connection_data);
+    for(int i = 0; i < size; i++)
+    {
+        // load each connection detail from QSettings
+        s.setArrayIndex(i);
+        PluginConnData* pcd = new PluginConnData;
+        pcd->_inPlugAlias = s.value(nooba::Settings_InPlug_Alias, tr("!Error")).toString();
+        pcd->_outPlugAlias = s.value(nooba::Settings_OutPlug_Alias, tr("!Error")).toString();
+        bool inFound = false, outFound = false;
+        foreach(NoobaPlugin* p, _loadedPlugins) // search for the loaded plugins for the relevant
+                                                // plugins to be connected.
+        {
+            if(p->alias().compare(pcd->_inPlugAlias) == 0)
+            {
+                pcd->_inPlug = p;
+                inFound = true;
+            }
+            if(p->alias().compare(pcd->_outPlugAlias) == 0)
+            {
+                pcd->_outPlug = p;
+                outFound = true;
+            }
+            if(outFound && inFound)
+                break;
+        }
+        if(!inFound || !outFound) // if one of the plugins not found remove connection
+        {
+            delete pcd;
+        }
+        connectPlugins(pcd);    // connect the plugins
+    }
+    s.endArray();
+
+    s.endGroup();
+    return;
+}
+
 bool PluginLoader::disconnectPlugin(NoobaPlugin *plugin)
 {
     for(int i= _pcdList.count()-1; i >=0; i--)
@@ -286,26 +370,6 @@ void PluginLoader::updateBasePlugin(NoobaPlugin* pluginToBeRemoved)
     emit basePluginChanged(_basePlugin);
     return;
 }
-
-void PluginLoader::saveSettings( const QString& pluginFileName )
-{
-    QSettings s(nooba::Organisation, nooba::ProgramName);
-    s.beginGroup(nooba::Settings_PluginInfo_block);
-    s.setValue(nooba::Settings_ActivePlugin_FileName, pluginFileName);
-    s.endGroup();
-    s.sync();
-}
-
-// TODO:  need to load the plugin configuration
-QString PluginLoader::prevLoadedPluginfileName() const
-{
-    QSettings s(nooba::Organisation, nooba::ProgramName);
-    s.beginGroup(nooba::Settings_PluginInfo_block);
-    QString filename = s.value(nooba::Settings_ActivePlugin_FileName, "").toString();
-    s.endGroup();
-    return filename;
-}
-
 
 QString PluginLoader::getPluginAlias(const QString& pluginName)
 {

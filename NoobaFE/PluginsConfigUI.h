@@ -28,6 +28,7 @@ private slots:
     void on_unloadPluginButton_clicked();
     void on_cancelButton_clicked();
     void onPluginsDisconnected(PluginLoader::PluginConnData* pcd);
+    void closeEvent(QCloseEvent *);
 
 private:
 
@@ -37,6 +38,7 @@ private:
     Ui::PluginsConfigUI ui;
     Qt::ItemDataRole    FILENAME_ROLE;
     int                 ALIAS_ROLE;
+    bool                _applyConfig;
     PluginLoader        &_pluginLoader;
     PluginConnDelegate* _pluginConnDelegate;
     const QString       ACTIVE;

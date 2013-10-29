@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     _paramConfigUI(new ParamConfigWind(this)),
     _delay(0),
+    _isWebCam(false),
     _vidState(nooba::StoppedState),
     _inputWind("Input", this),
     _outputWind("output", this)
@@ -34,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->setupUi(this);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateFrame()));
     updateDockWidgets();
-
+    _pluginLoader.loadPrevConfig();
     _pluginLoader.loadPluginInfo();
     initMDIArea();
     setWindowTitle(nooba::ProgramName);
@@ -48,6 +49,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    Q_UNUSED(event)
 // TODO: Give user the option to choose whether to get the warning on close or not.
 //       this bothers some users
 
@@ -82,6 +84,7 @@ void MainWindow::onOpenFile()
         errMsg.exec();
         return;
     }
+    _isWebCam = false;
     _params.setFrameId(0);
     ui->statusBar->showMessage(tr("file opened: %1").arg(path), 6000);
 }
@@ -99,7 +102,8 @@ void MainWindow::onOpenWebCam()
 		errMsg.exec();
 		return;
 	}
-    _params.setFrameId(0);
+    _isWebCam = true;
+    _params.setFrameId(-1);
     ui->statusBar->showMessage(tr("Web cam is set as default input source."));
 }
 
@@ -172,10 +176,10 @@ void MainWindow::updateFrame()
 	}
 
     cv::cvtColor(_frame, _frame,CV_BGR2RGB); // convert layout from BGR to RGB
-    _params.setFrameId(_vidCapture.get(CV_CAP_PROP_POS_FRAMES) - 1);
+    if(!_isWebCam)
+        _params.setFrameId(_vidCapture.get(CV_CAP_PROP_POS_FRAMES) - 1);
 
     _inputWind.updateFrame(convertToQImage(_frame));
-
 	cv::Mat editedFrame;
 
     ;
