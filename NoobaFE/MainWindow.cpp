@@ -85,6 +85,7 @@ void MainWindow::onOpenFile()
         return;
     }
     _isWebCam = false;
+    ui->prevButton->setEnabled(true);   // enable the previous button on this mode.
     _params.setFrameId(0);
     _pluginLoader.reloadPlugins();
     ui->statusBar->showMessage(tr("file opened: %1").arg(path), 6000);
@@ -104,6 +105,7 @@ void MainWindow::onOpenWebCam()
 		return;
 	}
     _isWebCam = true;
+    ui->prevButton->setDisabled(true);  // disable on web cam mode, irrelavant
     _params.setFrameId(-1);
     _pluginLoader.reloadPlugins();
     ui->statusBar->showMessage(tr("Web cam is set as default input source."));
