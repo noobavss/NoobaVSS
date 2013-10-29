@@ -119,6 +119,7 @@ signals:
     void pluginLoaded(NoobaPlugin *plugin);
     void pluginUnloaded(const QString& alias);
     void pluginsDisconnected(PluginLoader::PluginConnData* pcd);
+    void pluginsConnected(PluginLoader::PluginConnData* pcd);
 
     /**
      * @brief basePluginChanged
@@ -128,8 +129,11 @@ signals:
 
 private:
 
-    void updateBasePlugin(NoobaPlugin *pluginToBeRemoved);
+    inline bool versionCheckOk(NoobaPluginAPIBase* apiBase, const QString &filename, QString &errStr);
     inline QString getPluginAlias(const QString &pluginName);
+    inline void updateConnection(PluginConnData* pcd, bool isConnect);
+    void updateBasePlugin(NoobaPlugin *pluginToBeRemoved);
+
 
     QList<nooba::PluginData>    _pluginInfoList;
     NoobaPlugin                 *_basePlugin;

@@ -34,9 +34,6 @@ int PluginLoader::loadPluginInfo()
     /*QDir pluginsDir(QApplication::instance()->applicationDirPath());*/
     _pluginInfoList.clear();
     int pluginCount = 0;
-
-    int pluginAPIMajorVer;
-    int pluginAPIMinorVer;
     QString errStr;
 
     // go through the directory and try to load the plugin files
@@ -52,25 +49,12 @@ int PluginLoader::loadPluginInfo()
         if (!apiBase)
             break;
 
-        pluginAPIMajorVer = apiBase->APIMajorVersion();
-        pluginAPIMinorVer = apiBase->APIMinorVersion();
-        bool ok = true;
-        if(pluginAPIMajorVer > API_MAJOR_VERSION)
-            ok = false;
-
-        if(pluginAPIMajorVer == API_MAJOR_VERSION && pluginAPIMinorVer > API_MINOR_VERSION)
-            ok = false;
-
-        if(!ok)
-        {
-            errStr.append( tr("\n%1 version(%2.%3) is newer than the program version (%4.%5). Plugin not loaded ").
-                  arg(fileName).arg(pluginAPIMajorVer).arg(pluginAPIMinorVer).arg(API_MAJOR_VERSION).arg(API_MINOR_VERSION));
+        if(!versionCheckOk(apiBase, fileName,  errStr))
             break;
-        }
 
         // add the plugin details to the list
         NoobaPluginAPI* api = qobject_cast<NoobaPluginAPI* >(plugin);
-        nooba::PluginData pluginData(fileName, api->getPluginInfo(),pluginAPIMajorVer, pluginAPIMinorVer);
+        nooba::PluginData pluginData(fileName, api->getPluginInfo(),api->APIMajorVersion(), api->APIMinorVersion());
         _pluginInfoList.append(pluginData);
         pluginLoader.unload();  // unload after getting the details of the plugin
         pluginCount++;
@@ -203,9 +187,9 @@ bool PluginLoader::connectAllPlugins(QList<PluginLoader::PluginConnData *> confi
 
     disconnectAllPlugins();         // disconnect all plugins and connect new plugins
     qDebug() << tr("plugin connected") << Q_FUNC_INFO;
-    foreach(PluginLoader::PluginConnData* connData, configList)
+    foreach(PluginLoader::PluginConnData* pcd, configList)
     {
-        connect(connData->_outPlug, SIGNAL(outputData(PluginPassData*)), connData->_inPlug, SLOT(inputData(PluginPassData*)));
+        updateConnection(pcd, true);
     }
     _pcdList = configList;
     return true;
@@ -213,7 +197,7 @@ bool PluginLoader::connectAllPlugins(QList<PluginLoader::PluginConnData *> confi
 
 void PluginLoader::connectPlugins(PluginLoader::PluginConnData* pcd)
 {
-    connect(pcd->_outPlug, SIGNAL(outputData(PluginPassData*)), pcd->_inPlug, SLOT(inputData(PluginPassData*)));
+    updateConnection(pcd, true);
     _pcdList.append(pcd);
     return;
 }
@@ -221,7 +205,7 @@ void PluginLoader::connectPlugins(PluginLoader::PluginConnData* pcd)
 bool PluginLoader::disconnectPlugin(PluginLoader::PluginConnData *pcd)
 {
     bool ok = false;
-    disconnect(pcd->_outPlug, SIGNAL(outputData(PluginPassData*)), pcd->_inPlug, SLOT(inputData(PluginPassData*)));
+    updateConnection(pcd, false);
     for(int i = 0; i < _pcdList.count(); i++)
     {
         if(_pcdList.at(i) == pcd)
@@ -238,7 +222,7 @@ bool PluginLoader::disconnectPlugin(PluginLoader::PluginConnData *pcd)
 bool PluginLoader::disconnectAllPlugins()
 {
     foreach (PluginLoader::PluginConnData* pcd, _pcdList) {
-        disconnect(pcd->_outPlug, SIGNAL(outputData(PluginPassData*)), pcd->_inPlug, SLOT(inputData(PluginPassData*)));
+        updateConnection(pcd, false);
         delete pcd;
     }
     _pcdList.clear();
@@ -349,6 +333,34 @@ void PluginLoader::reloadPlugins()
     }
 }
 
+bool PluginLoader::versionCheckOk(NoobaPluginAPIBase *apiBase, const QString& filename, QString& errStr)
+{
+    int pluginAPIMajorVer = apiBase->APIMajorVersion();
+    int pluginAPIMinorVer = apiBase->APIMinorVersion();
+    bool ok = true;
+    if(pluginAPIMajorVer > API_MAJOR_VERSION)
+        ok = false;
+
+    if(pluginAPIMajorVer == API_MAJOR_VERSION && pluginAPIMinorVer > API_MINOR_VERSION)
+        ok = false;
+
+    if(pluginAPIMajorVer == 0 && pluginAPIMinorVer < 5) // api compatibility brocked in 0.4 to 0.5
+    {
+        errStr.append(tr("\n%1 version(%2.%3) is incompatible with the current version (%4.%5). Recompile the plugin" \
+                         " with the latest version of the api.").arg(filename).arg(pluginAPIMajorVer).
+                         arg(pluginAPIMinorVer).arg(API_MAJOR_VERSION).arg(API_MINOR_VERSION));
+        return false;
+    }
+
+    if(!ok)
+    {
+        errStr.append( tr("\n[version mismatch] %1 version(%2.%3) is newer than the program version (%4.%5).").
+              arg(filename).arg(pluginAPIMajorVer).arg(pluginAPIMinorVer).arg(API_MAJOR_VERSION).arg(API_MINOR_VERSION));
+        return false;
+    }
+    return true;
+}
+
 bool PluginLoader::disconnectPlugin(NoobaPlugin *plugin)
 {
     for(int i= _pcdList.count()-1; i >=0; i--)
@@ -356,7 +368,7 @@ bool PluginLoader::disconnectPlugin(NoobaPlugin *plugin)
         PluginConnData* pcd = _pcdList.at(i);
         if(pcd->_inPlug == plugin || pcd->_outPlug == plugin)
         {
-            disconnect(pcd->_outPlug, SIGNAL(outputData(PluginPassData*)), pcd->_inPlug, SLOT(inputData(PluginPassData*)));
+            updateConnection(pcd, false);
             emit pluginsDisconnected(pcd);
             delete _pcdList.at(i);
             _pcdList.removeAt(i);
@@ -388,4 +400,19 @@ QString PluginLoader::getPluginAlias(const QString& pluginName)
             count++;
     }
     return QString("%1[%2]").arg(pluginName).arg(count);
+}
+
+void PluginLoader::updateConnection(PluginLoader::PluginConnData *pcd, bool isConnect)
+{
+    if(isConnect)
+    {
+        connect(pcd->_outPlug, SIGNAL(outputData(PluginPassData)), pcd->_inPlug, SLOT(inputData(PluginPassData)));
+        emit pluginsConnected(pcd);
+    }
+    else
+    {
+        disconnect(pcd->_outPlug, SIGNAL(outputData(PluginPassData)), pcd->_inPlug, SLOT(inputData(PluginPassData)));
+        emit pluginsDisconnected(pcd);
+    }
+    return;
 }

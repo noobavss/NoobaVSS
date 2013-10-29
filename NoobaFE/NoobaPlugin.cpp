@@ -112,7 +112,7 @@ void NoobaPlugin::initSignalSlots()
     connect(_api, SIGNAL(createMultiValParamRequest(QString,QStringList)), this, SLOT(onCreateMultiValParam(QString,QStringList)));
     connect(_api, SIGNAL(createPointParamRequest(QString,QPointF)), this, SLOT(onCreatePointParam(QString,QPointF)));
     connect(_api, SIGNAL(createRectParamRequest(QString,QRectF)), this, SLOT(onCreateRectParam(QString,QRectF)));
-    connect(_api, SIGNAL(outputDataRequest(PluginPassData*)), this, SIGNAL(outputData(PluginPassData*)));
+    connect(_api, SIGNAL(outputDataRequest(PluginPassData)), this, SIGNAL(outputData(PluginPassData)));
 }
 
 void NoobaPlugin::onIntParamUpdate(const QString &varName, int val)
@@ -156,7 +156,7 @@ void NoobaPlugin::onRectParamUpdate(const QString &varName, const QRectF &val)
     _api->onRectParamChanged(varName, val);
 }
 
-void NoobaPlugin::inputData(PluginPassData *data)
+void NoobaPlugin::inputData(const PluginPassData& data)
 {
     _api->inputData(data);
 }

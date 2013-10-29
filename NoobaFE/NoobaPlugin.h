@@ -161,7 +161,7 @@ public:
 signals:
     
     void debugMsg(const QString& msg);
-    void outputData(PluginPassData* data);
+    void outputData(const PluginPassData& data);
 
 public slots:
 
@@ -171,8 +171,8 @@ public slots:
     void onStringParamUpdate(const QString& varName, const QString& val);
     void onMultiValParamUpdate(const QString& varName, const QString& val);
     void onPointParamUpdate(const QString& varName, const QPointF& val);
-    void onRectParamUpdate(const QString& varName, const QRectF &val);
-    void inputData(PluginPassData* data);
+    void onRectParamUpdate(const QString& varName, const QRectF& val);
+    void inputData(const PluginPassData& data);
 
 private slots:
 

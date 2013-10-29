@@ -120,6 +120,7 @@ private:
 };
 
 Q_DECLARE_METATYPE(PluginPassData*)
+Q_DECLARE_METATYPE(PluginPassData)
 
 /**
  * @brief Plugin information are stored in this structure
@@ -243,7 +244,7 @@ public:
      * @brief outputData data to be shared with other plugins
      * @param data
      */
-    void outputData(PluginPassData *data)
+    void outputData(const PluginPassData& data)
     {   emit outputDataRequest(data); }
 
 signals:
@@ -255,7 +256,7 @@ signals:
     void createPointParamRequest(const QString& varName, const QPointF& val);
     void createRectParamRequest(const QString& varName, const QRectF& val);
     void debugMsgRequest(const QString& msg);
-    void outputDataRequest(PluginPassData *data);
+    void outputDataRequest(const PluginPassData& data);
 
 public slots:
 
@@ -292,7 +293,7 @@ public slots:
      *                  Another plugins outputData(PluginPassData* data) can be connected to this slot.
      * @param data
      */
-    virtual void inputData(PluginPassData* data){
+    virtual void inputData(const PluginPassData& data){
         Q_UNUSED(data)
     }
 
