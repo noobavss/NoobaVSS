@@ -112,6 +112,7 @@ public:
 
     void saveCurrentConfig();
     void loadPrevConfig();
+    void reloadPlugins();
 
 signals:
 

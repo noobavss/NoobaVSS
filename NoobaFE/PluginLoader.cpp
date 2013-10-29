@@ -341,6 +341,14 @@ void PluginLoader::loadPrevConfig()
     return;
 }
 
+void PluginLoader::reloadPlugins()
+{
+    foreach (NoobaPlugin* p, _loadedPlugins) {
+        p->release();
+        p->init();
+    }
+}
+
 bool PluginLoader::disconnectPlugin(NoobaPlugin *plugin)
 {
     for(int i= _pcdList.count()-1; i >=0; i--)

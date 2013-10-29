@@ -86,6 +86,7 @@ void MainWindow::onOpenFile()
     }
     _isWebCam = false;
     _params.setFrameId(0);
+    _pluginLoader.reloadPlugins();
     ui->statusBar->showMessage(tr("file opened: %1").arg(path), 6000);
 }
 
@@ -104,6 +105,7 @@ void MainWindow::onOpenWebCam()
 	}
     _isWebCam = true;
     _params.setFrameId(-1);
+    _pluginLoader.reloadPlugins();
     ui->statusBar->showMessage(tr("Web cam is set as default input source."));
 }
 
