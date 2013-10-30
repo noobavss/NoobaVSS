@@ -30,6 +30,8 @@ private slots:
     void onPluginsDisconnected(PluginLoader::PluginConnData* pcd);
     void closeEvent(QCloseEvent *);
 
+    void on_doneButton_clicked();
+
 private:
 
     void updateUI();

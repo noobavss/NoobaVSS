@@ -362,22 +362,6 @@
  <resources/>
  <connections>
   <connection>
-   <sender>doneButton</sender>
-   <signal>clicked()</signal>
-   <receiver>PluginsConfigUI</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>606</x>
-     <y>442</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>323</x>
-     <y>228</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>reloadButton</sender>
    <signal>clicked()</signal>
    <receiver>PluginsConfigUI</receiver>

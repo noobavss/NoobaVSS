@@ -277,3 +277,10 @@ void PluginsConfigUI::closeEvent(QCloseEvent *)
                                     // this reloads the plugins to its previous state.
     return;
 }
+
+void PluginsConfigUI::on_doneButton_clicked()
+{
+    on_applyButton_clicked();
+    _applyConfig = true;
+    close();
+}

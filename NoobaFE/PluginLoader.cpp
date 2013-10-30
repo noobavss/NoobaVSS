@@ -231,31 +231,32 @@ bool PluginLoader::disconnectAllPlugins()
 
 void PluginLoader::saveCurrentConfig()
 {
-    if(!_basePlugin)
-        return;
-
     QSettings s(nooba::Organisation, nooba::ProgramName);
+
     s.beginGroup(nooba::Settings_PluginConfig_block);
-    s.setValue(nooba::Settings_BasePlugin_Filename, _basePlugin->fileName());
-
-    QStringList activePlugins;
-    foreach(NoobaPlugin* p, _loadedPlugins)
+    s.remove("");
+    if(_basePlugin)
     {
-        activePlugins.append(p->fileName());
+        s.setValue(nooba::Settings_BasePlugin_Filename, _basePlugin->fileName());
+
+        QStringList activePlugins;
+        foreach(NoobaPlugin* p, _loadedPlugins)
+        {
+            activePlugins.append(p->fileName());
+        }
+
+        s.setValue(nooba::Settings_ActivePluginList, QVariant(activePlugins));
+
+        // plugin connection data
+        s.beginWriteArray(nooba::Settings_Connection_data);
+        for(int i = 0; i < _pcdList.count(); i++)
+        {
+            s.setArrayIndex(i);
+            s.setValue(nooba::Settings_InPlug_Alias, _pcdList.at(i)->_inPlugAlias);
+            s.setValue(nooba::Settings_OutPlug_Alias, _pcdList.at(i)->_outPlugAlias);
+        }
+        s.endArray();
     }
-
-    s.setValue(nooba::Settings_ActivePluginList, QVariant(activePlugins));
-
-    // plugin connection data
-    s.beginWriteArray(nooba::Settings_Connection_data);
-    for(int i = 0; i < _pcdList.count(); i++)
-    {
-        s.setArrayIndex(i);
-        s.setValue(nooba::Settings_InPlug_Alias, _pcdList.at(i)->_inPlugAlias);
-        s.setValue(nooba::Settings_OutPlug_Alias, _pcdList.at(i)->_outPlugAlias);
-    }
-    s.endArray();
-
     s.endGroup();
     s.sync();
 }
@@ -283,7 +284,7 @@ void PluginLoader::loadPrevConfig()
             QMessageBox msgBox;
             msgBox.setText(tr("Plugin loading from previous configuration failed. %1 not found").arg(fName));
             msgBox.exec();
-            break;
+            return;
         }
     }
 
@@ -385,8 +386,17 @@ void PluginLoader::updateBasePlugin(NoobaPlugin* pluginToBeRemoved)
 
     _basePlugin = NULL;
     if(!_loadedPlugins.isEmpty())
-        _basePlugin = _loadedPlugins.first();
+    {
+        foreach(NoobaPlugin* p, _loadedPlugins)
+        {
+            if(p != pluginToBeRemoved)
+            {
+                _basePlugin = p;
+                break;
+            }
+        }
 
+    }
     emit basePluginChanged(_basePlugin);
     return;
 }
