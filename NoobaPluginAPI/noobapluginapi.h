@@ -10,6 +10,8 @@
 #include <QtPlugin>
 #include <QMetaType>
 
+class QImage;
+
 /************************************************************************/
 /* IMPORTANT: ANY CHANGE TO THE API CORRESPOND TO A CHANGE IN THE       */
 /*            VERSION NUMBER. SO IF A CHANGE IS DONE TO THE API         */
@@ -112,6 +114,8 @@ public:
     QStringList strList() const;
     void setStrList(const QStringList& list);
     void appendStrList(const QString& str);
+    void setImage(const QImage& image);
+    QImage& getImage() const;
 
 private:
 

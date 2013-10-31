@@ -1,4 +1,5 @@
 #include "noobapluginapi.h"
+#include <QImage>
 
 struct ProcParamsPrivate
 {
@@ -200,6 +201,7 @@ PluginInfoPrivate* PluginInfo::createPrivateStruct(const PluginInfo &rhs)
 struct PluginPassDataPrivate{
 
     QStringList _strList;
+    QImage      _img;
 
 };
 
@@ -259,6 +261,16 @@ void PluginPassData::setStrList(const QStringList &list)
 void PluginPassData::appendStrList(const QString &str)
 {
     d->_strList.append(str);
+}
+
+void PluginPassData::setImage(const QImage &image)
+{
+    d->_img = image;
+}
+
+QImage &PluginPassData::getImage() const
+{
+    return d->_img;
 }
 
 PluginPassDataPrivate *PluginPassData::createPrivateStruct(const PluginPassData &rhs)
