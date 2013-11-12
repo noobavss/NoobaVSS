@@ -111,10 +111,22 @@ void MainWindow::onOpenWebCam()
     ui->statusBar->showMessage(tr("Web cam is set as default input source."));
 }
 
-QImage MainWindow::convertToQImage(cv::Mat& cvImg)
+QImage MainWindow::cvt2QImage(cv::Mat& cvImg)
 {
-    return QImage((const unsigned char*)(cvImg.data),
-                cvImg.cols,cvImg.rows,cvImg.step,  QImage::Format_RGB888);
+    QImage img;
+
+    if(cvImg.channels() == 1)
+    {
+        img = QImage((const unsigned char*)(cvImg.data),
+                     cvImg.cols,cvImg.rows,cvImg.step,  QImage::Format_Indexed8);
+    }
+    else
+    {
+        img = QImage((const unsigned char*)(cvImg.data),
+                     cvImg.cols,cvImg.rows,cvImg.step,  QImage::Format_RGB888);
+
+    }
+    return img;
 }
 
 QImage MainWindow::grayQImage( cv::Mat& cvImg )
@@ -183,12 +195,12 @@ void MainWindow::updateFrame()
         _params.setFrameId(_vidCapture.get(CV_CAP_PROP_POS_FRAMES) - 1);
 
     cv::cvtColor(_frame, _frame, CV_BGR2RGB); // convert layout from BGR to RGB.
-    _inputWind.updateFrame(convertToQImage(_frame));
+    _inputWind.updateFrame(cvt2QImage(_frame));
 	cv::Mat editedFrame;
 
     if(_pluginLoader.getBasePlugin()->procFrame(_frame, editedFrame, _params))
 	{
-        _outputWind.updateFrame(grayQImage(editedFrame));
+        _outputWind.updateFrame(cvt2QImage(editedFrame));
 	}
 }
 
@@ -245,7 +257,6 @@ void MainWindow::updateDockWidgets()
     if(_pluginLoader.getBasePlugin())
     {
        onPluginLoad(_pluginLoader.getBasePlugin());
-
     }
 }
 

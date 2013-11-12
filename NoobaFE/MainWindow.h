@@ -60,7 +60,7 @@ private:
 	 \brief get a color QImage from cv::Mat
 	 \return QImage with three color channels 
 	 */
-    inline QImage convertToQImage(cv::Mat &cvImg);
+    inline QImage cvt2QImage(cv::Mat &cvImg);
 
 	/* 
 	 \brief get a grayscale QImage from cv::Mat

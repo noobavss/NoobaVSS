@@ -27,6 +27,7 @@ NoobaPlugin::~NoobaPlugin()
 bool NoobaPlugin::init()
 {
     // TODO: Need to load previous configurations from QSettings
+    qDebug() << _alias << " init " << Q_FUNC_INFO;
     initSignalSlots();
     bool ok =  _api->init();
     if(!ok)
@@ -37,6 +38,7 @@ bool NoobaPlugin::init()
 
 bool NoobaPlugin::release()
 {
+    qDebug() << _alias << " release " << Q_FUNC_INFO;
     emit onAboutToRelease(this);
     // TODO need to save configurations to a QSettings
     releaseSignalSlots();
