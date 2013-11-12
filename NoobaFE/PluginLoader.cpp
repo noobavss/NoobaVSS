@@ -93,6 +93,9 @@ NoobaPlugin *PluginLoader::loadPlugin(const QString& fileName, bool isBase)
                                     getPluginAlias(api->getPluginInfo().name()),
                                     api, pl, this);
 
+            connect(nPlug, SIGNAL(onInit(NoobaPlugin*)), this, SIGNAL(pluginInitialised(NoobaPlugin*)));
+            connect(nPlug, SIGNAL(onAboutToRelease(NoobaPlugin*)), this, SIGNAL(pluginAboutToRelease(NoobaPlugin*)));
+
             nPlug->setIsBasePlugin(isBase);
             nPlug->init();
             _loadedPlugins.append(nPlug);
@@ -330,7 +333,7 @@ void PluginLoader::reloadPlugins()
 {
     foreach (NoobaPlugin* p, _loadedPlugins) {
         p->release();
-        p->init();
+        p->init();        
     }
 }
 

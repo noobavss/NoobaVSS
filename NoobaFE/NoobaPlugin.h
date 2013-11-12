@@ -162,6 +162,8 @@ signals:
     
     void debugMsg(const QString& msg);
     void outputData(const PluginPassData& data);
+    void onInit(NoobaPlugin* plugin);
+    void onAboutToRelease(NoobaPlugin* plugin);
 
 public slots:
 
@@ -173,6 +175,8 @@ public slots:
     void onPointParamUpdate(const QString& varName, const QPointF& val);
     void onRectParamUpdate(const QString& varName, const QRectF& val);
     void inputData(const PluginPassData& data);
+    void saveConfig(const QString& filename);
+    void loadPrevConfig();
 
 private slots:
 

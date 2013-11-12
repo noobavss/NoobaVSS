@@ -22,15 +22,12 @@ public:
     explicit ParamConfigWind(QWidget *parent = 0);
     ~ParamConfigWind();
 
-    /**
-     * @brief setPlugin updates the tree widget to show the parameters of the
-     *        plugin
-     * @param plugin pointer to NoobaPlugin object
-     */
+public slots:
+
     void addPlugin(NoobaPlugin* plugin);
-    void removePlugin(const QString& alias);
+    void removePlugin(NoobaPlugin* plugin);
     void clear();
-    
+
 private slots:
 
     void onItemChanged(QTreeWidgetItem* item, int  column);

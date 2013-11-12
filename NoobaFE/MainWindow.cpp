@@ -179,14 +179,13 @@ void MainWindow::updateFrame()
 		return;
 	}
 
-    cv::cvtColor(_frame, _frame,CV_BGR2RGB); // convert layout from BGR to RGB
     if(!_isWebCam)
         _params.setFrameId(_vidCapture.get(CV_CAP_PROP_POS_FRAMES) - 1);
 
+    cv::cvtColor(_frame, _frame, CV_BGR2RGB); // convert layout from BGR to RGB.
     _inputWind.updateFrame(convertToQImage(_frame));
 	cv::Mat editedFrame;
 
-    ;
     if(_pluginLoader.getBasePlugin()->procFrame(_frame, editedFrame, _params))
 	{
         _outputWind.updateFrame(grayQImage(editedFrame));
@@ -230,7 +229,8 @@ void MainWindow::updateDockWidgets()
 {
     connect(&_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SLOT(onPluginLoad(NoobaPlugin*)));
     connect(&_pluginLoader, SIGNAL(pluginUnloaded(const QString&)), this, SLOT(onPluginUnload(const QString&)));
-
+    connect(&_pluginLoader, SIGNAL(pluginInitialised(NoobaPlugin*)), _paramConfigUI, SLOT(addPlugin(NoobaPlugin*)));
+    connect(&_pluginLoader, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), _paramConfigUI, SLOT(removePlugin(NoobaPlugin*)));
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(_paramConfigUI);
@@ -288,12 +288,16 @@ void MainWindow::on_TileviewButton_clicked()
 }
 
 void MainWindow::onPluginLoad(NoobaPlugin *plugin)
-{
-    _paramConfigUI->addPlugin(plugin);
+{    
     connect(plugin, SIGNAL(debugMsg(QString)), &_dbugOutWind, SLOT(onDebugMsg(QString)));
 }
 
 void MainWindow::onPluginUnload(const QString &alias)
 {
-    _paramConfigUI->removePlugin(alias);
+    Q_UNUSED(alias)
+}
+
+void MainWindow::addVidOutput(const QString &title, NoobaPlugin *plugin)
+{
+
 }

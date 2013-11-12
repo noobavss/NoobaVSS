@@ -1,10 +1,11 @@
 
 #include <QDebug>
-
 #include <QPluginLoader>
+#include <QSettings>
+
+#include <NoobaEye.h>
 #include <noobapluginapi.h>
 #include "NoobaPlugin.h"
-
 
 NoobaPlugin::NoobaPlugin(const QString &fileName, const QString& alias, NoobaPluginAPI *api, QPluginLoader *loader, QObject *parent):
     QObject(parent),
@@ -26,16 +27,17 @@ NoobaPlugin::~NoobaPlugin()
 bool NoobaPlugin::init()
 {
     // TODO: Need to load previous configurations from QSettings
-
     initSignalSlots();
     bool ok =  _api->init();
     if(!ok)
         qDebug() << tr("plugin: '%1' initialisation failed!").arg(_alias) << Q_FUNC_INFO;
+    emit onInit(this);
     return ok;
 }
 
 bool NoobaPlugin::release()
 {
+    emit onAboutToRelease(this);
     // TODO need to save configurations to a QSettings
     releaseSignalSlots();
     deleteMapItems<IntData* >(_intMap);
@@ -159,6 +161,23 @@ void NoobaPlugin::onRectParamUpdate(const QString &varName, const QRectF &val)
 void NoobaPlugin::inputData(const PluginPassData& data)
 {
     _api->inputData(data);
+}
+
+void NoobaPlugin::saveConfig(const QString &filename)
+{
+    QSettings s;
+//    if(filename.isEmpty())
+//    {
+//        s = QSettings(nooba::Organisation, nooba::ProgramName);
+//    }
+//    else
+//    {
+//        s = QSettings(filename, QSettings::IniFormat);
+//    }
+}
+
+void NoobaPlugin::loadPrevConfig()
+{
 }
 
 void NoobaPlugin::releaseSignalSlots()

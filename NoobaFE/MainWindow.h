@@ -52,6 +52,7 @@ private slots:
 
     void onPluginLoad(NoobaPlugin *plugin);
     void onPluginUnload(const QString& alias);
+    void addVidOutput(const QString& title, NoobaPlugin* plugin);
 
 private:
 

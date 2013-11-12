@@ -36,6 +36,7 @@ void ParamConfigWind::addPlugin(NoobaPlugin *plugin)
     {
         return;
     }
+
     QTreeWidgetItem* l1 = new QTreeWidgetItem(1);
     l1->setText(0, plugin->alias());
     QVariant v;
@@ -58,11 +59,11 @@ void ParamConfigWind::addPlugin(NoobaPlugin *plugin)
     return;
 }
 
-void ParamConfigWind::removePlugin(const QString &alias)
+void ParamConfigWind::removePlugin(NoobaPlugin* plugin)
 {
     for(int i = 0; i < ui->paramTree->topLevelItemCount(); i++)
     {
-        if(ui->paramTree->topLevelItem(i)->text(0).compare(alias) == 0)
+        if(ui->paramTree->topLevelItem(i)->text(0).compare(plugin->alias()) == 0)
         {
             delete ui->paramTree->topLevelItem(i);
         }
