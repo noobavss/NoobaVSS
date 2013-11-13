@@ -1,5 +1,5 @@
 #include "FrameViewer.h"
-#include "ui_VidOutputSubWind.h"
+#include "ui_FrameViewer.h"
 
 #include <QCloseEvent>
 
