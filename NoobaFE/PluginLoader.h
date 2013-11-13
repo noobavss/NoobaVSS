@@ -112,12 +112,12 @@ public:
 
     void saveCurrentConfig();
     void loadPrevConfig();
-    void reloadPlugins();
+    void refreshPlugins();
 
 signals:
 
-    void pluginLoaded(NoobaPlugin *plugin);
-    void pluginUnloaded(const QString& alias);
+    void pluginLoaded(NoobaPlugin* plugin);
+    void pluginAboutToUnloaded(NoobaPlugin* plugin);
     void pluginsDisconnected(PluginLoader::PluginConnData* pcd);
     void pluginsConnected(PluginLoader::PluginConnData* pcd);
     void pluginInitialised(NoobaPlugin* plugin);
@@ -135,6 +135,7 @@ private:
     inline QString getPluginAlias(const QString &pluginName);
     inline void updateConnection(PluginConnData* pcd, bool isConnect);
     void updateBasePlugin(NoobaPlugin *pluginToBeRemoved);
+    inline void releaseAndUnload(NoobaPlugin* plugin);
 
     QList<nooba::PluginData>    _pluginInfoList;
     NoobaPlugin                 *_basePlugin;

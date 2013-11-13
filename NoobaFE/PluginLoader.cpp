@@ -92,6 +92,7 @@ NoobaPlugin *PluginLoader::loadPlugin(const QString& fileName, bool isBase)
                                     fileName,
                                     getPluginAlias(api->getPluginInfo().name()),
                                     api, pl, this);
+            emit pluginLoaded(nPlug); // this should be called imediately after creation of NoobaPlugin
 
             connect(nPlug, SIGNAL(onInit(NoobaPlugin*)), this, SIGNAL(pluginInitialised(NoobaPlugin*)));
             connect(nPlug, SIGNAL(onAboutToRelease(NoobaPlugin*)), this, SIGNAL(pluginAboutToRelease(NoobaPlugin*)));
@@ -99,7 +100,6 @@ NoobaPlugin *PluginLoader::loadPlugin(const QString& fileName, bool isBase)
             nPlug->setIsBasePlugin(isBase);
             nPlug->init();
             _loadedPlugins.append(nPlug);
-            emit pluginLoaded(nPlug);
             if(isBase)
                 _basePlugin = nPlug;
             return nPlug; // return plugin, successful
@@ -125,9 +125,7 @@ bool PluginLoader::unloadPlugins()
     {
         if(plugin) // plugin reference is not null
         {
-            emit pluginUnloaded(plugin->alias());
-            plugin->release();
-            delete plugin;
+            releaseAndUnload(plugin);
         }
         else
         {
@@ -152,9 +150,7 @@ bool PluginLoader::unloadPlugin(const QString &alias)
             NoobaPlugin* p = _loadedPlugins.at(i);
             updateBasePlugin(p);
             disconnectPlugin(p);
-            p->release();
-            emit pluginUnloaded(alias);
-            delete p;
+            releaseAndUnload(p);
             _loadedPlugins.removeAt(i);
             return true;
         }
@@ -329,7 +325,7 @@ void PluginLoader::loadPrevConfig()
     return;
 }
 
-void PluginLoader::reloadPlugins()
+void PluginLoader::refreshPlugins()
 {
     foreach (NoobaPlugin* p, _loadedPlugins) {
         p->release();
@@ -402,6 +398,14 @@ void PluginLoader::updateBasePlugin(NoobaPlugin* pluginToBeRemoved)
     }
     emit basePluginChanged(_basePlugin);
     return;
+}
+
+void PluginLoader::releaseAndUnload(NoobaPlugin *plugin)
+{
+    // release then unload
+    plugin->release();
+    emit pluginAboutToUnloaded(plugin);  // this should be called after release();
+    delete plugin;
 }
 
 QString PluginLoader::getPluginAlias(const QString& pluginName)

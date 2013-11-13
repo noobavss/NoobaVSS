@@ -164,7 +164,7 @@ signals:
     void onInit(NoobaPlugin* plugin);
     void onAboutToRelease(NoobaPlugin* plugin);
     void createFrameViewer(const QString& title);
-    void updateFrameViewer(const QString&title, const QImage& frame);
+    void updateFrameViewer(const QString& title, const QImage& frame);
 
 public slots:
 

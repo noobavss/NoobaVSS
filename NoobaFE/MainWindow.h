@@ -53,10 +53,11 @@ private slots:
     void on_TileviewButton_clicked();
 
     void onPluginLoad(NoobaPlugin *plugin);
-    void onPluginUnload(const QString& alias);
+    void onPluginAboutUnload(NoobaPlugin *plugin);
     void onPluginInitialised(NoobaPlugin* plugin);
     void onPluginAboutToRelease(NoobaPlugin* plugin);
-    void addVidOutput(const QString& title, NoobaPlugin* plugin);
+    void onCreateFrameViewerRequest(const QString& title);
+    void onFrameViewerUpdate(const QString& title, const QImage& frame);
 
 private:
 
@@ -92,13 +93,14 @@ private:
     void connectSignalSlots();
 
     void initMDIArea();
-    void addMDISubWindow(FrameViewer* frameViewer);
+    QMdiSubWindow *addMDISubWindow(FrameViewer* frameViewer);
 	
 
     Ui::MainWindow                  *ui;
     ParamConfigWind                 *_paramConfigUI;
     int                             _delay;
     bool                            _isWebCam;
+    bool                            _firstRun;
     cv::VideoCapture                _vidCapture;
     cv::Mat                         _frame;
     QTimer				            _timer;
@@ -108,7 +110,7 @@ private:
     FrameViewer                     _inputWind;
     FrameViewer                     _outputWind;
     OutputWind                      _dbugOutWind;
-    QMap<QString, MdiSubWindData*>  _frameViewerMap;
+    QMap<NoobaPlugin*, QMap<QString, MdiSubWindData*> >  _frameViewerMap;
 };
 
 #endif // MAINWINDOW_H

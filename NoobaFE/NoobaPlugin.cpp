@@ -114,6 +114,8 @@ void NoobaPlugin::initSignalSlots()
     connect(_api, SIGNAL(createPointParamRequest(QString,QPointF)), this, SLOT(onCreatePointParam(QString,QPointF)));
     connect(_api, SIGNAL(createRectParamRequest(QString,QRectF)), this, SLOT(onCreateRectParam(QString,QRectF)));
     connect(_api, SIGNAL(outputDataRequest(PluginPassData)), this, SIGNAL(outputData(PluginPassData)));
+    connect(_api, SIGNAL(createFrameViewerRequest(QString)), this, SIGNAL(createFrameViewer(QString)));
+    connect(_api, SIGNAL(updateFrameViewerRequest(QString,QImage)), this, SIGNAL(updateFrameViewer(QString,QImage)));
 }
 
 void NoobaPlugin::onIntParamUpdate(const QString &varName, int val)

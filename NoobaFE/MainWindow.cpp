@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _paramConfigUI(new ParamConfigWind(this)),
     _delay(0),
     _isWebCam(false),
+    _firstRun(true),
     _vidState(nooba::StoppedState),
     _inputWind("Input", this),
     _outputWind("output", this)
@@ -88,7 +89,11 @@ void MainWindow::onOpenFile()
     _isWebCam = false;
     ui->prevButton->setEnabled(true);   // enable the previous button on this mode.
     _params.setFrameId(0);
-    _pluginLoader.reloadPlugins();
+
+    if(!_firstRun)
+        _pluginLoader.refreshPlugins();
+
+    _firstRun = false;
     ui->statusBar->showMessage(tr("file opened: %1").arg(path), 6000);
 }
 
@@ -108,7 +113,11 @@ void MainWindow::onOpenWebCam()
     _isWebCam = true;
     ui->prevButton->setDisabled(true);  // disable on web cam mode, irrelavant
     _params.setFrameId(-1);
-    _pluginLoader.reloadPlugins();
+
+    if(!_firstRun)
+        _pluginLoader.refreshPlugins();
+
+    _firstRun = false;
     ui->statusBar->showMessage(tr("Web cam is set as default input source."));
 }
 
@@ -253,7 +262,7 @@ void MainWindow::updateDockWidgets()
 void MainWindow::connectSignalSlots()
 {
     connect(&_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SLOT(onPluginLoad(NoobaPlugin*)));
-    connect(&_pluginLoader, SIGNAL(pluginUnloaded(const QString&)), this, SLOT(onPluginUnload(const QString&)));
+    connect(&_pluginLoader, SIGNAL(pluginAboutToUnloaded(NoobaPlugin*)), this, SLOT(onPluginAboutToRelease(NoobaPlugin*)));
     connect(&_pluginLoader, SIGNAL(pluginInitialised(NoobaPlugin*)), this, SLOT(onPluginInitialised(NoobaPlugin*)));
     connect(&_pluginLoader, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), this, SLOT(onPluginAboutToRelease(NoobaPlugin*)));
 }
@@ -268,10 +277,11 @@ void MainWindow::initMDIArea()
     ui->mdiArea->tileSubWindows();
 }
 
-void MainWindow::addMDISubWindow(FrameViewer *frameViewer)
+QMdiSubWindow* MainWindow::addMDISubWindow(FrameViewer *frameViewer)
 {
     QMdiSubWindow *mdiWind = ui->mdiArea->addSubWindow(frameViewer);
     mdiWind->setContentsMargins(0,0,0,0);
+    return mdiWind;
 }
 
 void MainWindow::onPluginAct_triggerred()
@@ -302,12 +312,22 @@ void MainWindow::on_TileviewButton_clicked()
 
 void MainWindow::onPluginLoad(NoobaPlugin *plugin)
 {    
-    connect(plugin, SIGNAL(debugMsg(QString)), &_dbugOutWind, SLOT(onDebugMsg(QString)));    
+    connect(plugin, SIGNAL(debugMsg(QString)), &_dbugOutWind, SLOT(onDebugMsg(QString)));
+    connect(plugin, SIGNAL(createFrameViewer(QString)), this, SLOT(onCreateFrameViewerRequest(QString)));
+    _frameViewerMap.insert(plugin, QMap<QString, MdiSubWindData* >());
 }
 
-void MainWindow::onPluginUnload(const QString &alias)
+void MainWindow::onPluginAboutUnload(NoobaPlugin* plugin)
 {
-    Q_UNUSED(alias)
+    QMap<NoobaPlugin*, QMap<QString, MdiSubWindData*> >::const_iterator i = _frameViewerMap.find(plugin);
+    if(i == _frameViewerMap.end())
+        return;
+
+    foreach (MdiSubWindData* d, i.value())
+    {
+        delete d;
+    }
+    _frameViewerMap.remove(plugin);
 }
 
 void MainWindow::onPluginInitialised(NoobaPlugin *plugin)
@@ -320,7 +340,26 @@ void MainWindow::onPluginAboutToRelease(NoobaPlugin *plugin)
     _paramConfigUI->removePlugin(plugin);
 }
 
-void MainWindow::addVidOutput(const QString &title, NoobaPlugin *plugin)
+void MainWindow::onCreateFrameViewerRequest(const QString &title)
 {
+    NoobaPlugin* p = qobject_cast<NoobaPlugin*>(sender());  // get the sender of the signal
+    if(!p)
+        return;
 
+    FrameViewer *fv = new FrameViewer(title, this);
+    QMdiSubWindow* sw = addMDISubWindow(fv);
+    MdiSubWindData* data = new MdiSubWindData(p, sw, fv);
+    _frameViewerMap[p].insert(title, data);
+    connect(p, SIGNAL(updateFrameViewer(QString,QImage)), this, SLOT(onFrameViewerUpdate(QString,QImage)));
 }
+
+void MainWindow::onFrameViewerUpdate(const QString &title, const QImage &frame)
+{
+    NoobaPlugin* p = qobject_cast<NoobaPlugin*>(sender());  // get the sender of the signal
+    if(!p)
+        return;
+
+    MdiSubWindData* d = _frameViewerMap.value(p).value(title);
+    d->_frameViewer->updateFrame(frame);
+}
+
