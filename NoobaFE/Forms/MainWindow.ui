@@ -18,7 +18,16 @@
     <property name="spacing">
      <number>0</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
     <item>
@@ -66,6 +75,9 @@
            <height>32</height>
           </size>
          </property>
+         <property name="shortcut">
+          <string>Left</string>
+         </property>
          <property name="autoRaise">
           <bool>true</bool>
          </property>
@@ -92,6 +104,9 @@
            <height>32</height>
           </size>
          </property>
+         <property name="shortcut">
+          <string>Right</string>
+         </property>
          <property name="autoRaise">
           <bool>true</bool>
          </property>
@@ -117,6 +132,9 @@
            <width>32</width>
            <height>32</height>
           </size>
+         </property>
+         <property name="shortcut">
+          <string>Return, Space</string>
          </property>
          <property name="autoRaise">
           <bool>true</bool>
@@ -170,12 +188,12 @@
      <x>0</x>
      <y>0</y>
      <width>847</width>
-     <height>25</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionWeb_Cam"/>
@@ -184,17 +202,26 @@
    </widget>
    <widget class="QMenu" name="menuImage">
     <property name="title">
-     <string>Settings</string>
+     <string>&amp;Settings</string>
     </property>
     <addaction name="actionPlugins"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>About</string>
+     <string>&amp;About</string>
     </property>
     <addaction name="actionAbout_NoobaVSS"/>
    </widget>
+   <widget class="QMenu" name="menuPlayback">
+    <property name="title">
+     <string>&amp;Playback</string>
+    </property>
+    <addaction name="actionPlay_Pause"/>
+    <addaction name="actionNext_Frame"/>
+    <addaction name="actionPrevious_Frame"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuPlayback"/>
    <addaction name="menuImage"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -226,7 +253,7 @@
      <normaloff>:/Resources/super-mono-iconset/folder.png</normaloff>:/Resources/super-mono-iconset/folder.png</iconset>
    </property>
    <property name="text">
-    <string>Open File</string>
+    <string>&amp;Open File</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -238,10 +265,10 @@
      <normaloff>:/Resources/super-mono-iconset/web-cam.png</normaloff>:/Resources/super-mono-iconset/web-cam.png</iconset>
    </property>
    <property name="text">
-    <string>Web Cam</string>
+    <string>&amp;Web Cam</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+I</string>
+    <string>Ctrl+E</string>
    </property>
   </action>
   <action name="actionPlugins">
@@ -250,7 +277,7 @@
      <normaloff>:/Resources/super-mono-iconset/gears.png</normaloff>:/Resources/super-mono-iconset/gears.png</iconset>
    </property>
    <property name="text">
-    <string>Plugins Configuration</string>
+    <string>Plugins &amp;Configuration</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -271,10 +298,46 @@
      <normaloff>:/Resources/super-mono-iconset/button-cross.png</normaloff>:/Resources/super-mono-iconset/button-cross.png</iconset>
    </property>
    <property name="text">
-    <string>Exit</string>
+    <string>E&amp;xit</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionPlay_Pause">
+   <property name="icon">
+    <iconset resource="../Resources/mainwind.qrc">
+     <normaloff>:/Resources/super-mono-iconset/button-play.png</normaloff>:/Resources/super-mono-iconset/button-play.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Play/Pause</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Return</string>
+   </property>
+  </action>
+  <action name="actionNext_Frame">
+   <property name="icon">
+    <iconset resource="../Resources/mainwind.qrc">
+     <normaloff>:/Resources/super-mono-iconset/navigation-right.png</normaloff>:/Resources/super-mono-iconset/navigation-right.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Next Frame</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Right</string>
+   </property>
+  </action>
+  <action name="actionPrevious_Frame">
+   <property name="icon">
+    <iconset resource="../Resources/mainwind.qrc">
+     <normaloff>:/Resources/super-mono-iconset/navigation-left.png</normaloff>:/Resources/super-mono-iconset/navigation-left.png</iconset>
+   </property>
+   <property name="text">
+    <string>P&amp;revious Frame</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Left</string>
    </property>
   </action>
  </widget>
@@ -333,9 +396,9 @@
   </connection>
   <connection>
    <sender>actionExit</sender>
-   <signal>triggered(bool)</signal>
+   <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>close()</slot>
+   <slot>on_nextButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -347,12 +410,62 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionPlay_Pause</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_controlButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>103</x>
+     <y>473</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>423</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNext_Frame</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_nextButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>423</x>
+     <y>257</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>423</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPrevious_Frame</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>on_prevButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>423</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onOpenFile()</slot>
   <slot>onFlip()</slot>
-  <slot>on_playButton_clicked()</slot>
+  <slot>on_controlButton_clicked()</slot>
   <slot>onOpenWebCam()</slot>
   <slot>onPluginAct_triggerred()</slot>
+  <slot>on_nextButton_clicked()</slot>
+  <slot>on_prevButton_clicked()</slot>
  </slots>
 </ui>

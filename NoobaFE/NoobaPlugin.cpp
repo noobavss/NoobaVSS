@@ -78,10 +78,7 @@ void NoobaPlugin::onCreateDoubleParam(const QString &varName, double val, double
 
 void NoobaPlugin::onCreateStringParam(const QString &varName, const QString &val, bool isFilePath)
 {
-    if(!isFilePath)
-    {
-        _stringMap.insert(varName,new StringData(varName, val, isFilePath));
-    }
+    _stringMap.insert(varName,new StringData(varName, val, isFilePath));
 }
 
 void NoobaPlugin::onCreateMultiValParam(const QString &varName, const QStringList &varList)

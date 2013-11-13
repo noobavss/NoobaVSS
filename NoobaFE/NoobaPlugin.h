@@ -8,7 +8,6 @@
 #include <QRectF>
 #include <QPointF>
 
-
 // forward declerations
 class NoobaPluginAPI;
 class ProcParams;
@@ -164,6 +163,8 @@ signals:
     void outputData(const PluginPassData& data);
     void onInit(NoobaPlugin* plugin);
     void onAboutToRelease(NoobaPlugin* plugin);
+    void createFrameViewer(const QString& title);
+    void updateFrameViewer(const QString&title, const QImage& frame);
 
 public slots:
 
@@ -207,6 +208,7 @@ private:
     QMap<QString, StringListData* > _stringListMap;
     QMap<QString, PointData* >      _pointMap;
     QMap<QString, RectData* >       _rectMap;
+
 };
 
 Q_DECLARE_METATYPE(NoobaPlugin*)
