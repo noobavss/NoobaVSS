@@ -53,7 +53,7 @@ private slots:
     void on_TileviewButton_clicked();
 
     void onPluginLoad(NoobaPlugin *plugin);
-    void onPluginAboutUnload(NoobaPlugin *plugin);
+    void onPluginAboutToUnload(NoobaPlugin *plugin);
     void onPluginInitialised(NoobaPlugin* plugin);
     void onPluginAboutToRelease(NoobaPlugin* plugin);
     void onCreateFrameViewerRequest(const QString& title);
@@ -65,13 +65,6 @@ private:
     {
         MdiSubWindData(NoobaPlugin* plugin, QMdiSubWindow* subWind, FrameViewer* frameViewer)
             :_plugin(plugin), _mdiSubWind(subWind), _frameViewer(frameViewer){}
-
-        ~MdiSubWindData()
-        {
-            // plugin is deleted seperately
-            delete _mdiSubWind;
-            delete _frameViewer;
-        }
 
         NoobaPlugin*    _plugin;
         QMdiSubWindow*  _mdiSubWind;

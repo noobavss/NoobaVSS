@@ -398,7 +398,7 @@
    <sender>actionExit</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>on_nextButton_clicked()</slot>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -417,8 +417,8 @@
    <slot>on_controlButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>103</x>
-     <y>473</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>423</x>
@@ -433,8 +433,8 @@
    <slot>on_nextButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>423</x>
-     <y>257</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>423</x>

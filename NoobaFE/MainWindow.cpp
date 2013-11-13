@@ -17,6 +17,7 @@
 #include <QCloseEvent>
 #include <QVBoxLayout>
 #include <QDateTime>
+#include <QMapIterator>
 
 // opencv includes
 #include <opencv2/highgui/highgui.hpp>
@@ -45,7 +46,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    QMap<NoobaPlugin*, QMap<QString, MdiSubWindData* > >::iterator i = _frameViewerMap.begin();
 
+    for(;i != _frameViewerMap.end(); i++)
+    {
+        foreach(MdiSubWindData* d, i.value())
+        {
+            delete d->_mdiSubWind;
+            delete d;
+        }
+    }
+    _frameViewerMap.clear();
     delete ui;
 }
 
@@ -262,7 +273,7 @@ void MainWindow::updateDockWidgets()
 void MainWindow::connectSignalSlots()
 {
     connect(&_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SLOT(onPluginLoad(NoobaPlugin*)));
-    connect(&_pluginLoader, SIGNAL(pluginAboutToUnloaded(NoobaPlugin*)), this, SLOT(onPluginAboutToRelease(NoobaPlugin*)));
+    connect(&_pluginLoader, SIGNAL(pluginAboutToUnloaded(NoobaPlugin*)), this, SLOT(onPluginAboutToUnload(NoobaPlugin*)));
     connect(&_pluginLoader, SIGNAL(pluginInitialised(NoobaPlugin*)), this, SLOT(onPluginInitialised(NoobaPlugin*)));
     connect(&_pluginLoader, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), this, SLOT(onPluginAboutToRelease(NoobaPlugin*)));
 }
@@ -292,7 +303,6 @@ void MainWindow::onPluginAct_triggerred()
 
 void MainWindow::on_actionAbout_NoobaVSS_triggered()
 {
-
     QMessageBox::about(this, "Nooba VSS",
                        QString("<b>Nooba is an open source surveillance video analysis tool</b><ul><li>API Version:\t\t\t")
                        .append(QString::number(API_MAJOR_VERSION)).append(".").append(QString::number(API_MINOR_VERSION))
@@ -317,14 +327,14 @@ void MainWindow::onPluginLoad(NoobaPlugin *plugin)
     _frameViewerMap.insert(plugin, QMap<QString, MdiSubWindData* >());
 }
 
-void MainWindow::onPluginAboutUnload(NoobaPlugin* plugin)
+void MainWindow::onPluginAboutToUnload(NoobaPlugin* plugin)
 {
-    QMap<NoobaPlugin*, QMap<QString, MdiSubWindData*> >::const_iterator i = _frameViewerMap.find(plugin);
-    if(i == _frameViewerMap.end())
-        return;
+    QMap<QString, MdiSubWindData*> subWindMap = _frameViewerMap.value(plugin);
 
-    foreach (MdiSubWindData* d, i.value())
+    foreach (MdiSubWindData* d, subWindMap)
     {
+        delete d->_mdiSubWind;
+        //delete d->_frameViewer;
         delete d;
     }
     _frameViewerMap.remove(plugin);
@@ -348,6 +358,7 @@ void MainWindow::onCreateFrameViewerRequest(const QString &title)
 
     FrameViewer *fv = new FrameViewer(title, this);
     QMdiSubWindow* sw = addMDISubWindow(fv);
+    sw->setVisible(true);
     MdiSubWindData* data = new MdiSubWindData(p, sw, fv);
     _frameViewerMap[p].insert(title, data);
     connect(p, SIGNAL(updateFrameViewer(QString,QImage)), this, SLOT(onFrameViewerUpdate(QString,QImage)));

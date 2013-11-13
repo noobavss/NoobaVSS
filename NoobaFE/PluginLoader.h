@@ -133,7 +133,7 @@ private:
 
     inline bool versionCheckOk(NoobaPluginAPIBase* apiBase, const QString &filename, QString &errStr);
     inline QString getPluginAlias(const QString &pluginName);
-    inline void updateConnection(PluginConnData* pcd, bool isConnect);
+    inline void updatePluginConnection(PluginConnData* pcd, bool isConnect);
     void updateBasePlugin(NoobaPlugin *pluginToBeRemoved);
     inline void releaseAndUnload(NoobaPlugin* plugin);
 

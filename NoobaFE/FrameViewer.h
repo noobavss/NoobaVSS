@@ -20,8 +20,9 @@ public slots:
 
     void closeEvent(QCloseEvent *event);
     bool updateFrame(const QImage& in);
-
+    void resizeEvent(QResizeEvent *event);
 private:
+
 
     Ui::FrameViewer *ui;
 };

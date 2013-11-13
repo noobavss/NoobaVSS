@@ -13,6 +13,7 @@ FrameViewer::FrameViewer(const QString &title, QWidget *parent) :
     // show video in center
     ui->canvas->setAlignment(Qt::AlignCenter);
     ui->canvas->setAlignment(Qt::AlignCenter);
+    ui->canvas->setMinimumSize(1,1);
 }
 
 FrameViewer::~FrameViewer()
@@ -26,7 +27,16 @@ void FrameViewer::closeEvent(QCloseEvent * event)
 }
 
 bool FrameViewer::updateFrame(const QImage &in)
-{
-    ui->canvas->setPixmap(QPixmap::fromImage(in));
+{    
+    ui->canvas->setPixmap(QPixmap::fromImage(in).scaled(ui->canvas->size(), Qt::KeepAspectRatio));
     return true;
 }
+
+void FrameViewer::resizeEvent(QResizeEvent *event)
+{
+    if(!ui->canvas->pixmap())
+        return;
+
+    ui->canvas->setPixmap(ui->canvas->pixmap()->scaled(event->size(), Qt::KeepAspectRatio));
+}
+

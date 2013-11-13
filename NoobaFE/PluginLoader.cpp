@@ -120,6 +120,7 @@ bool PluginLoader::unloadPlugins()
 {
     bool ok = true;
     disconnectAllPlugins();
+    _basePlugin = NULL;
 
     foreach(NoobaPlugin* plugin, _loadedPlugins)
     {
@@ -133,7 +134,6 @@ bool PluginLoader::unloadPlugins()
         }
     }
     _loadedPlugins.clear();
-    _basePlugin = NULL;
 
     if(!ok) // on error print a debug message
     {
@@ -188,7 +188,7 @@ bool PluginLoader::connectAllPlugins(QList<PluginLoader::PluginConnData *> confi
     qDebug() << tr("plugin connected") << Q_FUNC_INFO;
     foreach(PluginLoader::PluginConnData* pcd, configList)
     {
-        updateConnection(pcd, true);
+        updatePluginConnection(pcd, true);
     }
     _pcdList = configList;
     return true;
@@ -196,7 +196,7 @@ bool PluginLoader::connectAllPlugins(QList<PluginLoader::PluginConnData *> confi
 
 void PluginLoader::connectPlugins(PluginLoader::PluginConnData* pcd)
 {
-    updateConnection(pcd, true);
+    updatePluginConnection(pcd, true);
     _pcdList.append(pcd);
     return;
 }
@@ -204,7 +204,7 @@ void PluginLoader::connectPlugins(PluginLoader::PluginConnData* pcd)
 bool PluginLoader::disconnectPlugin(PluginLoader::PluginConnData *pcd)
 {
     bool ok = false;
-    updateConnection(pcd, false);
+    updatePluginConnection(pcd, false);
     for(int i = 0; i < _pcdList.count(); i++)
     {
         if(_pcdList.at(i) == pcd)
@@ -221,7 +221,7 @@ bool PluginLoader::disconnectPlugin(PluginLoader::PluginConnData *pcd)
 bool PluginLoader::disconnectAllPlugins()
 {
     foreach (PluginLoader::PluginConnData* pcd, _pcdList) {
-        updateConnection(pcd, false);
+        updatePluginConnection(pcd, false);
         delete pcd;
     }
     _pcdList.clear();
@@ -368,7 +368,7 @@ bool PluginLoader::disconnectPlugin(NoobaPlugin *plugin)
         PluginConnData* pcd = _pcdList.at(i);
         if(pcd->_inPlug == plugin || pcd->_outPlug == plugin)
         {
-            updateConnection(pcd, false);
+            updatePluginConnection(pcd, false);
             emit pluginsDisconnected(pcd);
             delete _pcdList.at(i);
             _pcdList.removeAt(i);
@@ -394,7 +394,6 @@ void PluginLoader::updateBasePlugin(NoobaPlugin* pluginToBeRemoved)
                 break;
             }
         }
-
     }
     emit basePluginChanged(_basePlugin);
     return;
@@ -419,7 +418,7 @@ QString PluginLoader::getPluginAlias(const QString& pluginName)
     return QString("%1[%2]").arg(pluginName).arg(count);
 }
 
-void PluginLoader::updateConnection(PluginLoader::PluginConnData *pcd, bool isConnect)
+void PluginLoader::updatePluginConnection(PluginLoader::PluginConnData *pcd, bool isConnect)
 {
     if(isConnect)
     {
