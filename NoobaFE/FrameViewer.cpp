@@ -1,11 +1,11 @@
-#include "VidOutputSubWind.h"
+#include "FrameViewer.h"
 #include "ui_VidOutputSubWind.h"
 
 #include <QCloseEvent>
 
-VidOutputSubWind::VidOutputSubWind(const QString &title, QWidget *parent) :
+FrameViewer::FrameViewer(const QString &title, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::VidOutputSubWind)
+    ui(new Ui::FrameViewer)
 {
     ui->setupUi(this);
     ui->canvas->setProperty("canvas", true);    // for use with style sheet styling
@@ -15,17 +15,17 @@ VidOutputSubWind::VidOutputSubWind(const QString &title, QWidget *parent) :
     ui->canvas->setAlignment(Qt::AlignCenter);
 }
 
-VidOutputSubWind::~VidOutputSubWind()
+FrameViewer::~FrameViewer()
 {
     delete ui;
 }
 
-void VidOutputSubWind::closeEvent(QCloseEvent * event)
+void FrameViewer::closeEvent(QCloseEvent * event)
 {
     event->ignore();
 }
 
-bool VidOutputSubWind::updateFrame(const QImage &in)
+bool FrameViewer::updateFrame(const QImage &in)
 {
     ui->canvas->setPixmap(QPixmap::fromImage(in));
     return true;

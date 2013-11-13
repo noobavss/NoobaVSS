@@ -3,18 +3,18 @@
 
 #include <QWidget>
 
-// forward declaration
-namespace Ui { class VidOutputSubWind; }
+// forward declaration VidOutputSubWind
+namespace Ui { class FrameViewer; }
 class QImage;
 
-class VidOutputSubWind : public QWidget
+class FrameViewer : public QWidget
 {
     Q_OBJECT
     
 public:
 
-    explicit VidOutputSubWind(const QString& title, QWidget *parent = 0);
-    ~VidOutputSubWind();
+    explicit FrameViewer(const QString& title, QWidget *parent = 0);
+    ~FrameViewer();
 
 public slots:
 
@@ -23,7 +23,7 @@ public slots:
 
 private:
 
-    Ui::VidOutputSubWind *ui;
+    Ui::FrameViewer *ui;
 };
 
 #endif // VIDOUTPUTSUBWIND_H

@@ -4,12 +4,14 @@
 // project files
 #include "NoobaEye.h"
 #include "PluginLoader.h"
-#include "VidOutputSubWind.h"
+#include "FrameViewer.h"
 #include "OutputWind.h"
 
 // Qt includes
 #include <QMainWindow>
 #include <QScopedPointer>
+#include <QMdiSubWindow>
+#include <QMap>
 #include <QTimer>
 
 // Opencv includes
@@ -52,9 +54,28 @@ private slots:
 
     void onPluginLoad(NoobaPlugin *plugin);
     void onPluginUnload(const QString& alias);
+    void onPluginInitialised(NoobaPlugin* plugin);
+    void onPluginAboutToRelease(NoobaPlugin* plugin);
     void addVidOutput(const QString& title, NoobaPlugin* plugin);
 
 private:
+
+    struct MdiSubWindData
+    {
+        MdiSubWindData(NoobaPlugin* plugin, QMdiSubWindow* subWind, FrameViewer* frameViewer)
+            :_plugin(plugin), _mdiSubWind(subWind), _frameViewer(frameViewer){}
+
+        ~MdiSubWindData()
+        {
+            // plugin is deleted seperately
+            delete _mdiSubWind;
+            delete _frameViewer;
+        }
+
+        NoobaPlugin*    _plugin;
+        QMdiSubWindow*  _mdiSubWind;
+        FrameViewer*    _frameViewer;
+    };
 
 	/*
 	 \brief get a color QImage from cv::Mat
@@ -62,21 +83,16 @@ private:
 	 */
     inline QImage cvt2QImage(cv::Mat &cvImg);
 
-	/* 
-	 \brief get a grayscale QImage from cv::Mat
-	 \return QImage returns single color channel QImage
-	 */
-	inline QImage grayQImage(cv::Mat& cvImg);
-
-	/*
+    /*
 	 *	Updates the current video state
 	 *  \param state 
 	 */
     void setVideoState(nooba::VideoState state);
-
     void updateDockWidgets();
+    void connectSignalSlots();
 
     void initMDIArea();
+    void addMDISubWindow(FrameViewer* frameViewer);
 	
 
     Ui::MainWindow                  *ui;
@@ -89,9 +105,10 @@ private:
     nooba::VideoState               _vidState;
     ProcParams                      _params;
     PluginLoader                    _pluginLoader;
-    VidOutputSubWind                _inputWind;
-    VidOutputSubWind                _outputWind;
+    FrameViewer                     _inputWind;
+    FrameViewer                     _outputWind;
     OutputWind                      _dbugOutWind;
+    QMap<QString, MdiSubWindData*>  _frameViewerMap;
 };
 
 #endif // MAINWINDOW_H

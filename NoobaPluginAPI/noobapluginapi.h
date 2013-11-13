@@ -255,10 +255,11 @@ public:
      * @brief createOutputWind creates MDI SubWindow to show the frame outputs
      * @param title title of the subWindow
      */
-    void createOutputWind(const QString& title)
-    {   emit createOutputWindRequest(title); }
+    void createFrameViewer(const QString& title)
+    {   emit createFrameViewerRequest(title); }
 
-    void updateOutputWind(const QString& title, const QImage& img);
+    void updateFrameViewer(const QString& title, const QImage& frame)
+    {   emit updateFrameViewerRequest(title, frame); }
 
 signals:
 
@@ -270,7 +271,8 @@ signals:
     void createRectParamRequest(const QString& varName, const QRectF& val);
     void debugMsgRequest(const QString& msg);
     void outputDataRequest(const PluginPassData& data);
-    void createOutputWindRequest(const QString& title);
+    void createFrameViewerRequest(const QString& title);
+    void updateFrameViewerRequest(const QString& title, const QImage& frame);
 
 public slots:
 

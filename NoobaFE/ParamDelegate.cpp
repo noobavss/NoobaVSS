@@ -61,7 +61,6 @@ QWidget* ParamDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem
 void ParamDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
     QStyledItemDelegate::setEditorData(editor, index);
-
 }
 
 void ParamDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const

@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->setupUi(this);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateFrame()));
     updateDockWidgets();
+    connectSignalSlots();
     _pluginLoader.loadPrevConfig();
     _pluginLoader.loadPluginInfo();
     initMDIArea();
@@ -127,12 +128,6 @@ QImage MainWindow::cvt2QImage(cv::Mat& cvImg)
 
     }
     return img;
-}
-
-QImage MainWindow::grayQImage( cv::Mat& cvImg )
-{
-	return QImage((const unsigned char*)(cvImg.data),
-		cvImg.cols,cvImg.rows,cvImg.step,  QImage::Format_Indexed8);
 }
 
 void MainWindow::on_nextButton_clicked()
@@ -239,11 +234,6 @@ void MainWindow::setVideoState( nooba::VideoState state )
 
 void MainWindow::updateDockWidgets()
 {
-    connect(&_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SLOT(onPluginLoad(NoobaPlugin*)));
-    connect(&_pluginLoader, SIGNAL(pluginUnloaded(const QString&)), this, SLOT(onPluginUnload(const QString&)));
-    connect(&_pluginLoader, SIGNAL(pluginInitialised(NoobaPlugin*)), _paramConfigUI, SLOT(addPlugin(NoobaPlugin*)));
-    connect(&_pluginLoader, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), _paramConfigUI, SLOT(removePlugin(NoobaPlugin*)));
-
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(_paramConfigUI);
     layout->setContentsMargins(0,0,0,0);
@@ -260,16 +250,28 @@ void MainWindow::updateDockWidgets()
     }
 }
 
+void MainWindow::connectSignalSlots()
+{
+    connect(&_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SLOT(onPluginLoad(NoobaPlugin*)));
+    connect(&_pluginLoader, SIGNAL(pluginUnloaded(const QString&)), this, SLOT(onPluginUnload(const QString&)));
+    connect(&_pluginLoader, SIGNAL(pluginInitialised(NoobaPlugin*)), this, SLOT(onPluginInitialised(NoobaPlugin*)));
+    connect(&_pluginLoader, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), this, SLOT(onPluginAboutToRelease(NoobaPlugin*)));
+}
+
 void MainWindow::initMDIArea()
 {
     ui->mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-    QMdiSubWindow *sw = ui->mdiArea->addSubWindow(&_outputWind);
-    sw->setContentsMargins(0,0,0,0);
-    sw = ui->mdiArea->addSubWindow(&_inputWind);
-    sw->setContentsMargins(0,0,0,0);
+    addMDISubWindow(&_inputWind);
+    addMDISubWindow(&_outputWind);
     ui->mdiArea->tileSubWindows();
+}
+
+void MainWindow::addMDISubWindow(FrameViewer *frameViewer)
+{
+    QMdiSubWindow *mdiWind = ui->mdiArea->addSubWindow(frameViewer);
+    mdiWind->setContentsMargins(0,0,0,0);
 }
 
 void MainWindow::onPluginAct_triggerred()
@@ -300,12 +302,22 @@ void MainWindow::on_TileviewButton_clicked()
 
 void MainWindow::onPluginLoad(NoobaPlugin *plugin)
 {    
-    connect(plugin, SIGNAL(debugMsg(QString)), &_dbugOutWind, SLOT(onDebugMsg(QString)));
+    connect(plugin, SIGNAL(debugMsg(QString)), &_dbugOutWind, SLOT(onDebugMsg(QString)));    
 }
 
 void MainWindow::onPluginUnload(const QString &alias)
 {
     Q_UNUSED(alias)
+}
+
+void MainWindow::onPluginInitialised(NoobaPlugin *plugin)
+{
+    _paramConfigUI->addPlugin(plugin);
+}
+
+void MainWindow::onPluginAboutToRelease(NoobaPlugin *plugin)
+{
+    _paramConfigUI->removePlugin(plugin);
 }
 
 void MainWindow::addVidOutput(const QString &title, NoobaPlugin *plugin)

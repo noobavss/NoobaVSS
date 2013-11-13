@@ -27,14 +27,14 @@ HEADERS += \
     NoobaPlugin.h \
     OutputWind.h \
     ParamConfigWind.h \
-    VidOutputSubWind.h \
     ParamDelegate.h \
-    pluginconndelegate.h
+    pluginconndelegate.h \
+    FrameViewer.h
 
 FORMS += Forms/MainWindow.ui Forms/PluginsConfigUI.ui \
     Forms/OutputWind.ui \
     Forms/ParamConfigWind.ui \
-    Forms/VidOutputSubWind.ui
+    Forms/FrameViewer.ui
 
 SOURCES += \
            main.cpp \
@@ -44,9 +44,9 @@ SOURCES += \
     NoobaPlugin.cpp \
     OutputWind.cpp \
     ParamConfigWind.cpp \
-    VidOutputSubWind.cpp \
     ParamDelegate.cpp \
-    pluginconndelegate.cpp
+    pluginconndelegate.cpp \
+    FrameViewer.cpp
 
 RESOURCES += Resources/mainwind.qrc
 
