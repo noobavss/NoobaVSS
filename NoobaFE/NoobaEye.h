@@ -16,7 +16,7 @@ namespace nooba
     const QString ProgramName   = "Nooba_VSS";
     const QString Organisation  = "Nooba";
     const int  MajorVersion     = 0;
-    const int MinorVersion      = 3;
+    const int MinorVersion      = 5;
 
     // QSettings related consts
     const QString Settings_PluginConfig_block   = "Plugin_info";
