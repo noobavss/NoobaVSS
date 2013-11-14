@@ -27,8 +27,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    _sharedImageBuffer(new SharedImageBuffer()),
-    _paramConfigUI(new ParamConfigWind(this))
+    _sharedImageBuffer(new SharedImageBuffer())
 {
 	ui->setupUi(this);
 //    connect(&_timer, SIGNAL(timeout()), this, SLOT(updateFrame()));
@@ -36,25 +35,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
 //    updateDockWidgets();
 //    connectSignalSlots();
-//    _pluginLoader.loadPrevConfig();
-//    _pluginLoader.loadPluginInfo();
+
 //    initMDIArea();
     setWindowTitle(nooba::ProgramName);
 }
 
 MainWindow::~MainWindow()
 {
-    QMap<NoobaPlugin*, QMap<QString, MdiSubWindData* > >::iterator i = _frameViewerMap.begin();
 
-    for(;i != _frameViewerMap.end(); i++)
-    {
-        foreach(MdiSubWindData* d, i.value())
-        {
-            delete d->_mdiSubWind;
-            delete d;
-        }
-    }
-    _frameViewerMap.clear();
     delete ui;
 }
 
@@ -104,23 +92,6 @@ void MainWindow::onOpenWebCam()
 //    ui->statusBar->showMessage(tr("Web cam is set as default input source."));
 }
 
-QImage MainWindow::cvt2QImage(cv::Mat& cvImg)
-{
-    QImage img;
-    if(cvImg.channels() == 1)
-    {
-        img = QImage((const unsigned char*)(cvImg.data),
-                     cvImg.cols,cvImg.rows,cvImg.step,  QImage::Format_Indexed8);
-    }
-    else
-    {
-        img = QImage((const unsigned char*)(cvImg.data),
-                     cvImg.cols,cvImg.rows,cvImg.step,  QImage::Format_RGB888);
-
-    }
-    return img;
-}
-
 void MainWindow::on_nextButton_clicked()
 {
 //    updateFrame();
@@ -139,15 +110,15 @@ void MainWindow::on_controlButton_clicked()
 
 void MainWindow::updateFrame()
 {
-    if(!_pluginLoader.getBasePlugin()) //  if active plugin not set
-    {
-        setVideoState(nooba::StoppedState);
-        QMessageBox msgBox;
-        msgBox.setText(tr("No video processing plugin is set. Set a plugin before playing the video stream."));
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.exec();
-        onPluginAct_triggerred(); // pop plugin config window
-    }
+//    if(!_pluginLoader.getBasePlugin()) //  if active plugin not set
+//    {
+//        setVideoState(nooba::StoppedState);
+//        QMessageBox msgBox;
+//        msgBox.setText(tr("No video processing plugin is set. Set a plugin before playing the video stream."));
+//        msgBox.setIcon(QMessageBox::Warning);
+//        msgBox.exec();
+//        onPluginAct_triggerred(); // pop plugin config window
+//    }
 
 //    if (!_vidCapture.read(_frame))
 //	{
@@ -169,39 +140,22 @@ void MainWindow::updateFrame()
 //	}
 }
 
-void MainWindow::setVideoState( nooba::VideoState state )
+void MainWindow::updateDockWidgets(CameraView* camView)
 {
-}
+    //    QVBoxLayout *layout = new QVBoxLayout;
+    //    layout->addWidget(_paramConfigUI);
+    //    layout->setContentsMargins(0,0,0,0);
+    //    ui->paramConfigDock->widget()->setLayout(layout);
 
-void MainWindow::updateDockWidgets()
-{
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(_paramConfigUI);
-    layout->setContentsMargins(0,0,0,0);
-    ui->paramConfigDock->widget()->setLayout(layout);
+    //    layout = new QVBoxLayout;
+    //    layout->addWidget(&_dbugOutWind);
+    //    layout->setContentsMargins(0,0,0,0);
+    //    ui->debugOutputDock->widget()->setLayout(layout);
 
-    layout = new QVBoxLayout;
-    layout->addWidget(&_dbugOutWind);
-    layout->setContentsMargins(0,0,0,0);
-    ui->debugOutputDock->widget()->setLayout(layout);
-
-    if(_pluginLoader.getBasePlugin())
-    {
-       onPluginLoad(_pluginLoader.getBasePlugin());
-    }
-}
-
-void MainWindow::connectSignalSlots()
-{
-    connect(&_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SLOT(onPluginLoad(NoobaPlugin*)));
-    connect(&_pluginLoader, SIGNAL(pluginAboutToUnloaded(NoobaPlugin*)), this, SLOT(onPluginAboutToUnload(NoobaPlugin*)));
-    connect(&_pluginLoader, SIGNAL(pluginInitialised(NoobaPlugin*)), this, SLOT(onPluginInitialised(NoobaPlugin*)));
-    connect(&_pluginLoader, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), this, SLOT(onPluginAboutToRelease(NoobaPlugin*)));
-}
-
-void MainWindow::stopCaptureThread()
-{
-
+    //    if(_pluginLoader.getBasePlugin())
+    //    {
+    //       onPluginLoad(_pluginLoader.getBasePlugin());
+    //    }
 }
 
 CameraView* MainWindow::addNewSourceTab()
@@ -214,25 +168,21 @@ CameraView* MainWindow::addNewSourceTab()
 
 void MainWindow::initMDIArea()
 {
-//    ui->mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-//    ui->mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-
-//    addMDISubWindow(&_inputWind);
-//    addMDISubWindow(&_outputWind);
-//    ui->mdiArea->tileSubWindows();
 }
 
-QMdiSubWindow* MainWindow::addMDISubWindow(FrameViewer *frameViewer)
-{
-//    QMdiSubWindow *mdiWind = ui->mdiArea->addSubWindow(frameViewer);
-//    mdiWind->setContentsMargins(0,0,0,0);
-//    return mdiWind;
-}
 
 void MainWindow::onPluginAct_triggerred()
 {
-   PluginsConfigUI dlg(_pluginLoader, this);
-   dlg.exec();
+    QMdiSubWindow *subWindow = ui->mdiArea->activeSubWindow();
+    if(!subWindow)
+        return;
+
+    CameraView  *camView = qobject_cast<CameraView*>(subWindow->widget());
+    if(!camView)
+        return;
+
+    PluginsConfigUI dlg(*camView->getPluginLoader(), this);
+    dlg.exec();
 }
 
 void MainWindow::on_actionAbout_NoobaVSS_triggered()
@@ -247,63 +197,4 @@ void MainWindow::on_actionAbout_NoobaVSS_triggered()
                        .append("Qt version:\t\t\t").append(QT_VERSION_STR).append("</li></ul>")
                        .append("<p>Build on %1</p>").arg(QDateTime::currentDateTime().toString())
                        );
-}
-
-void MainWindow::on_TileviewButton_clicked()
-{
-//    ui->mdiArea->tileSubWindows();
-}
-
-void MainWindow::onPluginLoad(NoobaPlugin *plugin)
-{    
-    connect(plugin, SIGNAL(debugMsg(QString)), &_dbugOutWind, SLOT(onDebugMsg(QString)));
-    connect(plugin, SIGNAL(createFrameViewer(QString)), this, SLOT(onCreateFrameViewerRequest(QString)));
-    _frameViewerMap.insert(plugin, QMap<QString, MdiSubWindData* >());
-}
-
-void MainWindow::onPluginAboutToUnload(NoobaPlugin* plugin)
-{
-    QMap<QString, MdiSubWindData*> subWindMap = _frameViewerMap.value(plugin);
-
-    foreach (MdiSubWindData* d, subWindMap)
-    {
-        delete d->_mdiSubWind;
-        //delete d->_frameViewer;
-        delete d;
-    }
-    _frameViewerMap.remove(plugin);
-}
-
-void MainWindow::onPluginInitialised(NoobaPlugin *plugin)
-{
-    _paramConfigUI->addPlugin(plugin);
-}
-
-void MainWindow::onPluginAboutToRelease(NoobaPlugin *plugin)
-{
-    _paramConfigUI->removePlugin(plugin);
-}
-
-void MainWindow::onCreateFrameViewerRequest(const QString &title)
-{
-    NoobaPlugin* p = qobject_cast<NoobaPlugin*>(sender());  // get the sender of the signal
-    if(!p)
-        return;
-
-    FrameViewer *fv = new FrameViewer(title, this);
-    QMdiSubWindow* sw = addMDISubWindow(fv);
-    sw->setVisible(true);
-    MdiSubWindData* data = new MdiSubWindData(p, sw, fv);
-    _frameViewerMap[p].insert(title, data);
-    connect(p, SIGNAL(updateFrameViewer(QString,QImage)), this, SLOT(onFrameViewerUpdate(QString,QImage)));
-}
-
-void MainWindow::onFrameViewerUpdate(const QString &title, const QImage &frame)
-{
-    NoobaPlugin* p = qobject_cast<NoobaPlugin*>(sender());  // get the sender of the signal
-    if(!p)
-        return;
-
-    MdiSubWindData* d = _frameViewerMap.value(p).value(title);
-    d->_frameViewer->updateFrame(frame);
 }

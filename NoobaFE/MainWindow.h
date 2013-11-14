@@ -3,11 +3,7 @@
 
 // project files
 #include "NoobaEye.h"
-#include "PluginLoader.h"
-#include "FrameViewer.h"
-#include "OutputWind.h"
 #include "SharedImageBuffer.h"
-#include "CaptureThread.h"
 #include "CameraView.h"
 
 // Qt includes
@@ -20,9 +16,6 @@
 // Opencv includes
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-
-// forward declarations
-class ParamConfigWind;
 
 namespace Ui {
     class MainWindow;
@@ -53,56 +46,18 @@ private slots:
     void on_actionAbout_NoobaVSS_triggered();
     void on_controlButton_clicked();
 
-    void on_TileviewButton_clicked();
-
-    void onPluginLoad(NoobaPlugin *plugin);
-    void onPluginAboutToUnload(NoobaPlugin *plugin);
-    void onPluginInitialised(NoobaPlugin* plugin);
-    void onPluginAboutToRelease(NoobaPlugin* plugin);
-    void onCreateFrameViewerRequest(const QString& title);
-    void onFrameViewerUpdate(const QString& title, const QImage& frame);
-
 private:
 
-    struct MdiSubWindData
-    {
-        MdiSubWindData(NoobaPlugin* plugin, QMdiSubWindow* subWind, FrameViewer* frameViewer)
-            :_plugin(plugin), _mdiSubWind(subWind), _frameViewer(frameViewer){}
 
-        NoobaPlugin*    _plugin;
-        QMdiSubWindow*  _mdiSubWind;
-        FrameViewer*    _frameViewer;
-    };
 
-	/*
-	 \brief get a color QImage from cv::Mat
-	 \return QImage with three color channels 
-	 */
-    inline QImage cvt2QImage(cv::Mat &cvImg);
-
-    /*
-	 *	Updates the current video state
-	 *  \param state 
-	 */
-    void setVideoState(nooba::VideoState state);
-    void updateDockWidgets();
-    void connectSignalSlots();
-    void stopCaptureThread();
+    void updateDockWidgets(CameraView *camView);
     CameraView *addNewSourceTab();
 
     void initMDIArea();
-    QMdiSubWindow *addMDISubWindow(FrameViewer* frameViewer);
-	
 
     Ui::MainWindow                  *ui;
     SharedImageBuffer               *_sharedImageBuffer;
-    ParamConfigWind                 *_paramConfigUI;
-    cv::Mat                         _frame;
-    QTimer				            _timer;
-    ProcParams                      _params;
-    PluginLoader                    _pluginLoader;
-    OutputWind                      _dbugOutWind;
-    QMap<NoobaPlugin*, QMap<QString, MdiSubWindData*> >  _frameViewerMap;
+
 
 };
 

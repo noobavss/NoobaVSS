@@ -1,4 +1,8 @@
+// Qt
 #include <QApplication>
+#include <QFile>
+
+// nooba
 #include "MainWindow.h"
 #include "NoobaEye.h"
 
