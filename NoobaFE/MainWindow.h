@@ -8,6 +8,7 @@
 #include "OutputWind.h"
 #include "SharedImageBuffer.h"
 #include "CaptureThread.h"
+#include "CameraView.h"
 
 // Qt includes
 #include <QMainWindow>
@@ -87,6 +88,7 @@ private:
     void updateDockWidgets();
     void connectSignalSlots();
     void stopCaptureThread();
+    CameraView *addNewSourceTab();
 
     void initMDIArea();
     QMdiSubWindow *addMDISubWindow(FrameViewer* frameViewer);
@@ -94,22 +96,14 @@ private:
 
     Ui::MainWindow                  *ui;
     SharedImageBuffer               *_sharedImageBuffer;
-    CaptureThread                   *_captureThread;
     ParamConfigWind                 *_paramConfigUI;
-    int                             _delay;
-    int                             _deviceNumber;
-    bool                            _isWebCam;
-    bool                            _firstRun;
-    cv::VideoCapture                _vidCapture;
     cv::Mat                         _frame;
     QTimer				            _timer;
-    nooba::VideoState               _vidState;
     ProcParams                      _params;
     PluginLoader                    _pluginLoader;
-    FrameViewer                     _inputWind;
-    FrameViewer                     _outputWind;
     OutputWind                      _dbugOutWind;
     QMap<NoobaPlugin*, QMap<QString, MdiSubWindData*> >  _frameViewerMap;
+
 };
 
 #endif // MAINWINDOW_H

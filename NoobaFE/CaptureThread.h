@@ -52,6 +52,7 @@ class CaptureThread : public QThread
     Q_OBJECT
 
     public:
+
         CaptureThread(SharedImageBuffer *sharedImageBuffer, int deviceNumber, bool dropFrameIfBufferFull, int width = -1, int height = -1);
         void stop();
         bool connectToCamera();
@@ -61,6 +62,7 @@ class CaptureThread : public QThread
         int getInputSourceHeight();
 
     private:
+
         void updateFPS(int);
         SharedImageBuffer *sharedImageBuffer;
         VideoCapture cap;
@@ -79,9 +81,11 @@ class CaptureThread : public QThread
         int height;
 
     protected:
+
         void run();
 
     signals:
+
         void updateStatisticsInGUI(struct ThreadStatisticsData);
 };
 

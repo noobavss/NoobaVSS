@@ -28,18 +28,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     _sharedImageBuffer(new SharedImageBuffer()),
-    _captureThread(NULL),
-    _paramConfigUI(new ParamConfigWind(this)),
-    _delay(0),
-    _deviceNumber(0),
-    _isWebCam(false),
-    _firstRun(true),
-    _vidState(nooba::StoppedState),
-    _inputWind("Input", this),
-    _outputWind("output", this)
+    _paramConfigUI(new ParamConfigWind(this))
 {
 	ui->setupUi(this);
-    setCentralWidget(new CameraView());
 //    connect(&_timer, SIGNAL(timeout()), this, SLOT(updateFrame()));
 
 
@@ -83,70 +74,39 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::onOpenFile()
 {
-#if QT_VERSION >= 0x050000
-    QString path = QFileDialog::getOpenFileName(this, tr("Open file"),
-                      QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
-#else
-    QString path = QFileDialog::getOpenFileName(this, tr("Open file"),
-                      QDesktopServices::storageLocation(QDesktopServices::DesktopLocation));
-#endif
-    if(path.isEmpty())
-        return;
 
-    _vidCapture.release();  // release any currently loaded capture device if any
-    setVideoState(nooba::StoppedState);
+//    _vidCapture.release();  // release any currently loaded capture device if any
+//    setVideoState(nooba::StoppedState);
 
-	// load new video capture device
-    if(!_vidCapture.open(path.toStdString()))
-    {
-        QMessageBox errMsg;
-        errMsg.setText(tr("File open failed from path \"%1\"").arg(path));
-        errMsg.exec();
-        return;
-    }
-    _isWebCam = false;
-//    ui->prevButton->setEnabled(true);   // enable the previous button on this mode.
-    _params.setFrameId(0);
+//	// load new video capture device
+//    if(!_vidCapture.open(path.toStdString()))
+//    {
+//        QMessageBox errMsg;
+//        errMsg.setText(tr("File open failed from path \"%1\"").arg(path));
+//        errMsg.exec();
+//        return;
+//    }
+//    _isWebCam = false;
+////    ui->prevButton->setEnabled(true);   // enable the previous button on this mode.
+//    _params.setFrameId(0);
 
-    if(!_firstRun)
-        _pluginLoader.refreshPlugins();
+//    if(!_firstRun)
+//        _pluginLoader.refreshPlugins();
 
-    _firstRun = false;
-    ui->statusBar->showMessage(tr("file opened: %1").arg(path), 6000);
+//    _firstRun = false;
+//    ui->statusBar->showMessage(tr("file opened: %1").arg(path), 6000);
 }
 
 void MainWindow::onOpenWebCam()
 {
-//    _vidCapture.release();
-    setVideoState(nooba::StoppedState);
-
-    _deviceNumber = 0;
-    _captureThread = new CaptureThread(_sharedImageBuffer, _deviceNumber,true);
-    if(!_captureThread->connectToCamera())
-//    if(!_vidCapture.open(0))
-    {
-        QMessageBox errMsg;
-        errMsg.setText(tr("Failed to open web-cam"));
-        errMsg.setIcon(QMessageBox::Critical);
-        errMsg.exec();
-        delete _captureThread;
-        return;
-    }
-    _isWebCam = true;
-//    ui->prevButton->setDisabled(true);  // disable on web cam mode, irrelavant
-    _params.setFrameId(-1);
-
-    if(!_firstRun)
-        _pluginLoader.refreshPlugins();
-
-    _firstRun = false;
-    ui->statusBar->showMessage(tr("Web cam is set as default input source."));
+    CameraView* camView = addNewSourceTab();
+    camView->connectToCamera();
+//    ui->statusBar->showMessage(tr("Web cam is set as default input source."));
 }
 
 QImage MainWindow::cvt2QImage(cv::Mat& cvImg)
 {
     QImage img;
-
     if(cvImg.channels() == 1)
     {
         img = QImage((const unsigned char*)(cvImg.data),
@@ -175,27 +135,6 @@ void MainWindow::on_prevButton_clicked()
 
 void MainWindow::on_controlButton_clicked()
 {
-    if(_vidState == nooba::PlayingState)
-    {
-        setVideoState(nooba::PausedState);
-        return;
-    }
-
-//    double rate= _vidCapture.get(CV_CAP_PROP_FPS);
-
-//    if(rate > 0)    // video file
-//    {
-//        _delay = 1000/rate;
-//        _params.setFrameRate(rate);
-//    }
-//    else    // on web cam open
-//    {
-//        _delay = 50;   // assume 10 fps
-//        _params.setFrameRate(20);
-//    }
-
-//    _timer.start(_delay);
-    setVideoState(nooba::PlayingState);
 }
 
 void MainWindow::updateFrame()
@@ -232,36 +171,6 @@ void MainWindow::updateFrame()
 
 void MainWindow::setVideoState( nooba::VideoState state )
 {
-//	switch(state){
-
-//    case nooba::StoppedState:
-//		{
-//            _vidState = nooba::StoppedState;
-//            ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-play.png"));
-//            ui->controlButton->setToolTip(tr("Play"));
-//            stopCaptureThread();
-//            break;
-//		}
-//    case nooba::PausedState:
-//		{
-//            _vidState = nooba::PausedState;
-//            ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-play.png"));
-//            ui->controlButton->setToolTip(tr("Play"));
-//            stopCaptureThread();
-//            break;
-//		}
-//    case nooba::PlayingState:
-//		{
-//            _vidState = nooba::PlayingState;
-//            ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-pause.png"));
-//            ui->controlButton->setToolTip(tr("Pause"));
-//            _captureThread->start(QThread::NormalPriority);
-//            break;
-//		}
-//	default:
-//        break;
-//    }
-//    _params.setVidState(_vidState);
 }
 
 void MainWindow::updateDockWidgets()
@@ -292,17 +201,15 @@ void MainWindow::connectSignalSlots()
 
 void MainWindow::stopCaptureThread()
 {
-    if(!_captureThread)
-        return;
 
-    qDebug() << "[" << _deviceNumber << "] About to stop capture thread...";
-    _captureThread->stop();
-    _sharedImageBuffer->wakeAll(); // This allows the thread to be stopped if it is in a wait-state
-    // Take one frame off a FULL queue to allow the capture thread to finish
-    if(_sharedImageBuffer->getByDeviceNumber(_deviceNumber)->isFull())
-        _sharedImageBuffer->getByDeviceNumber(_deviceNumber)->get();
-    _captureThread->wait();
-    qDebug() << "[" << _deviceNumber << "] Capture thread successfully stopped.";
+}
+
+CameraView* MainWindow::addNewSourceTab()
+{
+    CameraView* camView = new CameraView(_sharedImageBuffer);
+    QMdiSubWindow* subWind = ui->mdiArea->addSubWindow(camView);
+    subWind->showMaximized();
+    return camView;
 }
 
 void MainWindow::initMDIArea()
@@ -400,4 +307,3 @@ void MainWindow::onFrameViewerUpdate(const QString &title, const QImage &frame)
     MdiSubWindData* d = _frameViewerMap.value(p).value(title);
     d->_frameViewer->updateFrame(frame);
 }
-
