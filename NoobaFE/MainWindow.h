@@ -6,6 +6,8 @@
 #include "PluginLoader.h"
 #include "FrameViewer.h"
 #include "OutputWind.h"
+#include "SharedImageBuffer.h"
+#include "CaptureThread.h"
 
 // Qt includes
 #include <QMainWindow>
@@ -84,14 +86,18 @@ private:
     void setVideoState(nooba::VideoState state);
     void updateDockWidgets();
     void connectSignalSlots();
+    void stopCaptureThread();
 
     void initMDIArea();
     QMdiSubWindow *addMDISubWindow(FrameViewer* frameViewer);
 	
 
     Ui::MainWindow                  *ui;
+    SharedImageBuffer               *_sharedImageBuffer;
+    CaptureThread                   *_captureThread;
     ParamConfigWind                 *_paramConfigUI;
     int                             _delay;
+    int                             _deviceNumber;
     bool                            _isWebCam;
     bool                            _firstRun;
     cv::VideoCapture                _vidCapture;

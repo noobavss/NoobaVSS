@@ -18,6 +18,7 @@
 #include <QVBoxLayout>
 #include <QDateTime>
 #include <QMapIterator>
+#include <CameraView.h>
 
 // opencv includes
 #include <opencv2/highgui/highgui.hpp>
@@ -26,8 +27,11 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    _sharedImageBuffer(new SharedImageBuffer()),
+    _captureThread(NULL),
     _paramConfigUI(new ParamConfigWind(this)),
     _delay(0),
+    _deviceNumber(0),
     _isWebCam(false),
     _firstRun(true),
     _vidState(nooba::StoppedState),
@@ -35,12 +39,15 @@ MainWindow::MainWindow(QWidget *parent) :
     _outputWind("output", this)
 {
 	ui->setupUi(this);
-    connect(&_timer, SIGNAL(timeout()), this, SLOT(updateFrame()));
-    updateDockWidgets();
-    connectSignalSlots();
-    _pluginLoader.loadPrevConfig();
-    _pluginLoader.loadPluginInfo();
-    initMDIArea();
+    setCentralWidget(new CameraView());
+//    connect(&_timer, SIGNAL(timeout()), this, SLOT(updateFrame()));
+
+
+//    updateDockWidgets();
+//    connectSignalSlots();
+//    _pluginLoader.loadPrevConfig();
+//    _pluginLoader.loadPluginInfo();
+//    initMDIArea();
     setWindowTitle(nooba::ProgramName);
 }
 
@@ -98,7 +105,7 @@ void MainWindow::onOpenFile()
         return;
     }
     _isWebCam = false;
-    ui->prevButton->setEnabled(true);   // enable the previous button on this mode.
+//    ui->prevButton->setEnabled(true);   // enable the previous button on this mode.
     _params.setFrameId(0);
 
     if(!_firstRun)
@@ -110,19 +117,23 @@ void MainWindow::onOpenFile()
 
 void MainWindow::onOpenWebCam()
 {
-    _vidCapture.release();
+//    _vidCapture.release();
     setVideoState(nooba::StoppedState);
 
-    if(!_vidCapture.open(0))
-	{
-		QMessageBox errMsg;
-		errMsg.setText(tr("Failed to open web-cam"));
+    _deviceNumber = 0;
+    _captureThread = new CaptureThread(_sharedImageBuffer, _deviceNumber,true);
+    if(!_captureThread->connectToCamera())
+//    if(!_vidCapture.open(0))
+    {
+        QMessageBox errMsg;
+        errMsg.setText(tr("Failed to open web-cam"));
         errMsg.setIcon(QMessageBox::Critical);
-		errMsg.exec();
-		return;
-	}
+        errMsg.exec();
+        delete _captureThread;
+        return;
+    }
     _isWebCam = true;
-    ui->prevButton->setDisabled(true);  // disable on web cam mode, irrelavant
+//    ui->prevButton->setDisabled(true);  // disable on web cam mode, irrelavant
     _params.setFrameId(-1);
 
     if(!_firstRun)
@@ -152,14 +163,14 @@ QImage MainWindow::cvt2QImage(cv::Mat& cvImg)
 
 void MainWindow::on_nextButton_clicked()
 {
-    updateFrame();	
+//    updateFrame();
 }
 
 void MainWindow::on_prevButton_clicked()
 {
-    double cTime = _vidCapture.get(CV_CAP_PROP_POS_MSEC);
-    _vidCapture.set(CV_CAP_PROP_POS_MSEC, cTime - _delay * 2); // set previous frame to be read next
-    updateFrame();
+//    double cTime = _vidCapture.get(CV_CAP_PROP_POS_MSEC);
+//    _vidCapture.set(CV_CAP_PROP_POS_MSEC, cTime - _delay * 2); // set previous frame to be read next
+//    updateFrame();
 }
 
 void MainWindow::on_controlButton_clicked()
@@ -170,20 +181,20 @@ void MainWindow::on_controlButton_clicked()
         return;
     }
 
-    double rate= _vidCapture.get(CV_CAP_PROP_FPS);
+//    double rate= _vidCapture.get(CV_CAP_PROP_FPS);
 
-    if(rate > 0)    // video file
-    {
-        _delay = 1000/rate;
-        _params.setFrameRate(rate);
-    }
-    else    // on web cam open
-    {
-        _delay = 50;   // assume 10 fps
-        _params.setFrameRate(20);
-    }
+//    if(rate > 0)    // video file
+//    {
+//        _delay = 1000/rate;
+//        _params.setFrameRate(rate);
+//    }
+//    else    // on web cam open
+//    {
+//        _delay = 50;   // assume 10 fps
+//        _params.setFrameRate(20);
+//    }
 
-    _timer.start(_delay);
+//    _timer.start(_delay);
     setVideoState(nooba::PlayingState);
 }
 
@@ -199,57 +210,58 @@ void MainWindow::updateFrame()
         onPluginAct_triggerred(); // pop plugin config window
     }
 
-    if (!_vidCapture.read(_frame))
-	{
-        setVideoState(nooba::StoppedState);
-        _vidCapture.set(CV_CAP_PROP_POS_FRAMES, 0);
-		return;
-	}
+//    if (!_vidCapture.read(_frame))
+//	{
+//        setVideoState(nooba::StoppedState);
+//        _vidCapture.set(CV_CAP_PROP_POS_FRAMES, 0);
+//		return;
+//	}
 
-    if(!_isWebCam)
-        _params.setFrameId(_vidCapture.get(CV_CAP_PROP_POS_FRAMES) - 1);
+//    if(!_isWebCam)
+//        _params.setFrameId(_vidCapture.get(CV_CAP_PROP_POS_FRAMES) - 1);
 
-    cv::cvtColor(_frame, _frame, CV_BGR2RGB); // convert layout from BGR to RGB.
-    _inputWind.updateFrame(cvt2QImage(_frame));
-	cv::Mat editedFrame;
+//    cv::cvtColor(_frame, _frame, CV_BGR2RGB); // convert layout from BGR to RGB.
+//    _inputWind.updateFrame(cvt2QImage(_frame));
+//	cv::Mat editedFrame;
 
-    if(_pluginLoader.getBasePlugin()->procFrame(_frame, editedFrame, _params))
-	{
-        _outputWind.updateFrame(cvt2QImage(editedFrame));
-	}
+//    if(_pluginLoader.getBasePlugin()->procFrame(_frame, editedFrame, _params))
+//	{
+//        _outputWind.updateFrame(cvt2QImage(editedFrame));
+//	}
 }
 
 void MainWindow::setVideoState( nooba::VideoState state )
 {
-	switch(state){
+//	switch(state){
 
-    case nooba::StoppedState:
-		{
-            _vidState = nooba::StoppedState;
-            _timer.stop();
-            ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-play.png"));
-            ui->controlButton->setToolTip(tr("Play"));
-            break;
-		}
-    case nooba::PausedState:
-		{
-            _vidState = nooba::PausedState;
-            ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-play.png"));
-            ui->controlButton->setToolTip(tr("Play"));
-            _timer.stop();
-            break;
-		}
-    case nooba::PlayingState:
-		{
-            _vidState = nooba::PlayingState;
-            ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-pause.png"));
-            ui->controlButton->setToolTip(tr("Pause"));
-            break;
-		}
-	default:
-        break;
-    }
-    _params.setVidState(_vidState);
+//    case nooba::StoppedState:
+//		{
+//            _vidState = nooba::StoppedState;
+//            ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-play.png"));
+//            ui->controlButton->setToolTip(tr("Play"));
+//            stopCaptureThread();
+//            break;
+//		}
+//    case nooba::PausedState:
+//		{
+//            _vidState = nooba::PausedState;
+//            ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-play.png"));
+//            ui->controlButton->setToolTip(tr("Play"));
+//            stopCaptureThread();
+//            break;
+//		}
+//    case nooba::PlayingState:
+//		{
+//            _vidState = nooba::PlayingState;
+//            ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-pause.png"));
+//            ui->controlButton->setToolTip(tr("Pause"));
+//            _captureThread->start(QThread::NormalPriority);
+//            break;
+//		}
+//	default:
+//        break;
+//    }
+//    _params.setVidState(_vidState);
 }
 
 void MainWindow::updateDockWidgets()
@@ -278,21 +290,36 @@ void MainWindow::connectSignalSlots()
     connect(&_pluginLoader, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), this, SLOT(onPluginAboutToRelease(NoobaPlugin*)));
 }
 
+void MainWindow::stopCaptureThread()
+{
+    if(!_captureThread)
+        return;
+
+    qDebug() << "[" << _deviceNumber << "] About to stop capture thread...";
+    _captureThread->stop();
+    _sharedImageBuffer->wakeAll(); // This allows the thread to be stopped if it is in a wait-state
+    // Take one frame off a FULL queue to allow the capture thread to finish
+    if(_sharedImageBuffer->getByDeviceNumber(_deviceNumber)->isFull())
+        _sharedImageBuffer->getByDeviceNumber(_deviceNumber)->get();
+    _captureThread->wait();
+    qDebug() << "[" << _deviceNumber << "] Capture thread successfully stopped.";
+}
+
 void MainWindow::initMDIArea()
 {
-    ui->mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    ui->mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+//    ui->mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+//    ui->mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-    addMDISubWindow(&_inputWind);
-    addMDISubWindow(&_outputWind);
-    ui->mdiArea->tileSubWindows();
+//    addMDISubWindow(&_inputWind);
+//    addMDISubWindow(&_outputWind);
+//    ui->mdiArea->tileSubWindows();
 }
 
 QMdiSubWindow* MainWindow::addMDISubWindow(FrameViewer *frameViewer)
 {
-    QMdiSubWindow *mdiWind = ui->mdiArea->addSubWindow(frameViewer);
-    mdiWind->setContentsMargins(0,0,0,0);
-    return mdiWind;
+//    QMdiSubWindow *mdiWind = ui->mdiArea->addSubWindow(frameViewer);
+//    mdiWind->setContentsMargins(0,0,0,0);
+//    return mdiWind;
 }
 
 void MainWindow::onPluginAct_triggerred()
@@ -317,7 +344,7 @@ void MainWindow::on_actionAbout_NoobaVSS_triggered()
 
 void MainWindow::on_TileviewButton_clicked()
 {
-    ui->mdiArea->tileSubWindows();
+//    ui->mdiArea->tileSubWindows();
 }
 
 void MainWindow::onPluginLoad(NoobaPlugin *plugin)

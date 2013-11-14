@@ -29,12 +29,19 @@ HEADERS += \
     ParamConfigWind.h \
     ParamDelegate.h \
     pluginconndelegate.h \
-    FrameViewer.h
+    FrameViewer.h \
+    Structures.h \
+    SharedImageBuffer.h \
+    Config.h \
+    CaptureThread.h \
+    Buffer.h \
+    CameraView.h
 
 FORMS += Forms/MainWindow.ui Forms/PluginsConfigUI.ui \
     Forms/OutputWind.ui \
     Forms/ParamConfigWind.ui \
-    Forms/FrameViewer.ui
+    Forms/FrameViewer.ui \
+    Forms/CameraView.ui
 
 SOURCES += \
            main.cpp \
@@ -46,7 +53,10 @@ SOURCES += \
     ParamConfigWind.cpp \
     ParamDelegate.cpp \
     pluginconndelegate.cpp \
-    FrameViewer.cpp
+    FrameViewer.cpp \
+    SharedImageBuffer.cpp \
+    CaptureThread.cpp \
+    CameraView.cpp
 
 RESOURCES += Resources/mainwind.qrc
 
