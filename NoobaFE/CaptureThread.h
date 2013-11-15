@@ -36,6 +36,7 @@
 // Qt
 #include <QtCore/QTime>
 #include <QtCore/QThread>
+#include <QTimer>
 // OpenCV
 #include "opencv/highgui.h"
 // Local
@@ -51,42 +52,51 @@ class CaptureThread : public QThread
 {
     Q_OBJECT
 
-    public:
+public:
 
-        CaptureThread(SharedImageBuffer *sharedImageBuffer, int deviceNumber, bool dropFrameIfBufferFull, int width = -1, int height = -1);
-        void stop();
-        bool connectToCamera();
-        bool disconnectCamera();
-        bool isCameraConnected();
-        int getInputSourceWidth();
-        int getInputSourceHeight();
+    CaptureThread(SharedImageBuffer *sharedImageBuffer, int deviceNumber, bool dropFrameIfBufferFull, int width = -1, int height = -1);
+    void stop();
+    bool connectToCamera();
+    bool connectToFileStream(const QString filepath);
+    bool disconnectCaptureDevice();
+    bool isCameraConnected();
+    int getInputSourceWidth();
+    int getInputSourceHeight();
 
-    private:
+private slots:
 
-        void updateFPS(int);
-        SharedImageBuffer *sharedImageBuffer;
-        VideoCapture cap;
-        Mat grabbedFrame;
-        QTime t;
-        QMutex doStopMutex;
-        QQueue<int> fps;
-        struct ThreadStatisticsData statsData;
-        volatile bool doStop;
-        int captureTime;
-        int sampleNumber;
-        int fpsSum;
-        bool dropFrameIfBufferFull;
-        int deviceNumber;
-        int width;
-        int height;
+    void captureFrame();
 
-    protected:
+protected:
 
-        void run();
+    void run();
 
-    signals:
+signals:
 
-        void updateStatisticsInGUI(struct ThreadStatisticsData);
+    void updateStatisticsInGUI(struct ThreadStatisticsData);
+
+private:
+
+    void updateFPS(int);
+    SharedImageBuffer   *sharedImageBuffer;
+    VideoCapture        cap;
+    Mat                 grabbedFrame;
+    QTimer              timer;
+    QTime               t;
+    QMutex              doStopMutex;
+    QQueue<int>         fps;
+    struct ThreadStatisticsData statsData;
+    volatile bool       doStop;
+    int                 captureTime;
+    int                 sampleNumber;
+    int                 fpsSum;
+    bool                dropFrameIfBufferFull;
+    bool                cameraMode;
+    int                 deviceNumber;
+    int                 width;
+    int                 height;
+    int                 delay;
+
 };
 
 #endif // CAPTURETHREAD_H

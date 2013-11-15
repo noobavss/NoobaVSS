@@ -50,7 +50,7 @@ private slots:
 private:
 
     void updateDockWidgets(ParamConfigWind *paramConfig, OutputWind *debugMsgWind, StatPanel* statPanel);
-    CameraView *addNewSourceTab();
+    QMdiSubWindow *addNewSourceTab(CameraView *camView);
     void initMDIArea();
     CameraView *getActiveCameraView();
 

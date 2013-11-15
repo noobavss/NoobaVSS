@@ -40,8 +40,8 @@ public:
 
 public slots:
 
-    void connectToCamera();
-    void connectToVideoFileStream();
+    bool connectToCamera();
+    bool connectToVideoFileStream();
     void on_controlButton_clicked();
 
 private slots:

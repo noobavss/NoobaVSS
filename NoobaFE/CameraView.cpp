@@ -41,11 +41,12 @@ CameraView::CameraView(SharedImageBuffer *sharedImageBuffer, QWidget *parent) :
 
 CameraView::~CameraView()
 {
+
     // Stop processing thread
-    if(_processingThread->isRunning())
+    if(_processingThread && _processingThread->isRunning())
         stopProcessingThread();
     // Stop capture thread
-    if(_captureThread->isRunning())
+    if(_captureThread && _captureThread->isRunning())
         stopCaptureThread();
 
     // Automatically start frame processing (for other streams)
@@ -55,10 +56,10 @@ CameraView::~CameraView()
     // Remove from shared buffer
     _sharedImageBuffer->removeByDeviceNumber(_deviceNumber);
     // Disconnect camera
-    if(_captureThread->disconnectCamera())
-        qDebug() << "[" << _deviceNumber << "] Camera successfully disconnected.";
+    if(_captureThread && _captureThread->disconnectCaptureDevice())
+        qDebug() << "[" << _deviceNumber << "] Capture device successfully disconnected.";
     else
-        qDebug() << "[" << _deviceNumber << "] WARNING: Camera already disconnected.";
+        qDebug() << "[" << _deviceNumber << "] WARNING: capture device already disconnected.";
 
     QMap<NoobaPlugin*, QMap<QString, MdiSubWindData* > >::iterator i = _frameViewerMap.begin();
     for(;i != _frameViewerMap.end(); i++)
@@ -78,7 +79,7 @@ CameraView::~CameraView()
     return;
 }
 
-void CameraView::connectToCamera()
+bool CameraView::connectToCamera()
 {
     _deviceNumber = 0;
     setupSharedBufferForNewDevice();
@@ -93,7 +94,7 @@ void CameraView::connectToCamera()
         errMsg.setText(tr("Failed to open web-cam"));
         errMsg.setIcon(QMessageBox::Critical);
         errMsg.exec();
-        return;
+        return false;
     }
 
     _statPanel->setDeviceName(QString::number(_deviceNumber));
@@ -105,10 +106,10 @@ void CameraView::connectToCamera()
     _isWebCam = true;
     ui->prevButton->setDisabled(true); // disable on web cam mode, irrelavant
     _params.setFrameId(-1);
-    return;
+    return true;
 }
 
-void CameraView::connectToVideoFileStream()
+bool CameraView::connectToVideoFileStream()
 {
 #if QT_VERSION >= 0x050000
     QString path = QFileDialog::getOpenFileName(this, tr("Open file"),
@@ -118,7 +119,24 @@ void CameraView::connectToVideoFileStream()
                                                 QDesktopServices::storageLocation(QDesktopServices::DesktopLocation));
 #endif
     if(path.isEmpty())
-        return;
+        return false;
+
+    _deviceNumber = 1000;
+    _isWebCam = false;
+    setupSharedBufferForNewDevice();
+    _statPanel->setDeviceName(path);
+    _captureThread.reset(new CaptureThread(_sharedImageBuffer, _deviceNumber,true));
+    _processingThread.reset(new ProcessingThread(_sharedImageBuffer, _pluginLoader.data(), _deviceNumber));
+    if(_captureThread->connectToFileStream(path))
+    {
+        addMDISubWindow(&_inputWind);
+        qRegisterMetaType<struct ThreadStatisticsData>("ThreadStatisticsData");
+        connect(_processingThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
+        connect(_processingThread.data(), SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)), this, SLOT(updateProcessingThreadStats(ThreadStatisticsData)));
+        connect(_captureThread.data(), SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)), this, SLOT(updateCaptureThreadStats(ThreadStatisticsData)));
+        return true;
+    }
+    return false;
 }
 
 void CameraView::stopCaptureThread()
@@ -134,7 +152,7 @@ void CameraView::stopCaptureThread()
         _sharedImageBuffer->getByDeviceNumber(_deviceNumber)->get();
     _captureThread->wait();
     qDebug() << "[" << _deviceNumber << "] Capture thread successfully stopped.";
-    return;
+
 }
 
 void CameraView::stopProcessingThread()
@@ -192,20 +210,6 @@ void CameraView::on_controlButton_clicked()
         return;
     }
 
-//    double rate= _vidCapture.get(CV_CAP_PROP_FPS);
-
-//    if(rate > 0)    // video file
-//    {
-//        _delay = 1000/rate;
-//        _params.setFrameRate(rate);
-//    }
-//    else    // on web cam open
-//    {
-//        _delay = 50;   // assume 10 fps
-//        _params.setFrameRate(20);
-//    }
-
-//    _timer.start(_delay);
     setVideoState(nooba::PlayingState);
     return;
 }

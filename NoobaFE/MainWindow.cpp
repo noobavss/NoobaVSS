@@ -59,6 +59,16 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::onOpenFile()
 {
+    CameraView* camView = new CameraView(_sharedImageBuffer);
+    if(camView->connectToVideoFileStream())
+    {
+        addNewSourceTab(camView);
+        ui->statusBar->showMessage(tr("file stream opened to read frames"));
+    }
+    else
+    {
+        delete camView;
+    }
 
 //    _vidCapture.release();  // release any currently loaded capture device if any
 //    setVideoState(nooba::StoppedState);
@@ -84,9 +94,16 @@ void MainWindow::onOpenFile()
 
 void MainWindow::onOpenWebCam()
 {
-    CameraView* camView = addNewSourceTab();
-    camView->connectToCamera();
-    ui->statusBar->showMessage(tr("Web cam is set as default input source."));
+    CameraView* camView = new CameraView(_sharedImageBuffer);
+    if(camView->connectToCamera())
+    {
+        addNewSourceTab(camView);
+        ui->statusBar->showMessage(tr("Web cam is set as default input source."));
+    }
+    else
+    {
+        delete camView;
+    }
 }
 
 //void MainWindow::onNextButton_clicked()
@@ -202,12 +219,12 @@ void MainWindow::updateDockWidgets(ParamConfigWind* paramConfig, OutputWind* deb
 
 }
 
-CameraView* MainWindow::addNewSourceTab()
+QMdiSubWindow* MainWindow::addNewSourceTab(CameraView* camView)
 {
-    CameraView* camView = new CameraView(_sharedImageBuffer);
     QMdiSubWindow* subWind = ui->mdiArea->addSubWindow(camView);
     subWind->showMaximized();
-    return camView;
+    ui->mdiArea->setActiveSubWindow(subWind);
+    return subWind;
 }
 
 void MainWindow::initMDIArea()

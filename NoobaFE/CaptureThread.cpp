@@ -41,6 +41,7 @@ CaptureThread::CaptureThread(SharedImageBuffer *sharedImageBuffer, int deviceNum
     this->height = height;
     // Initialize variables(s)
     doStop=false;
+    cameraMode = false;
     sampleNumber=0;
     fpsSum=0;
     fps.clear();
@@ -71,19 +72,7 @@ void CaptureThread::run()
         // Start timer (used to calculate capture rate)
         t.start();
 
-        // Synchronize with other streams (if enabled for this stream)
-        sharedImageBuffer->sync(deviceNumber);
-
-        // Capture frame (if available)
-        if (!cap.grab())
-            continue;
-
-        // Retrieve frame
-        cap.retrieve(grabbedFrame);
-        // Add frame to buffer
-
-        sharedImageBuffer->getByDeviceNumber(deviceNumber)->add(grabbedFrame, dropFrameIfBufferFull);
-
+        captureFrame();
         // Update statistics
         updateFPS(captureTime);
         statsData.nFramesProcessed++;
@@ -96,6 +85,7 @@ void CaptureThread::run()
 bool CaptureThread::connectToCamera()
 {
     // Open camera
+    cameraMode = true;
     bool camOpenResult = cap.open(deviceNumber);
     // Set resolution
     if(width != -1)
@@ -106,7 +96,24 @@ bool CaptureThread::connectToCamera()
     return camOpenResult;
 }
 
-bool CaptureThread::disconnectCamera()
+bool CaptureThread::connectToFileStream(const QString filepath)
+{
+    deviceNumber = 1000;
+    cameraMode = false;
+    bool fileOpenResult = cap.open(filepath.toStdString());
+    if(fileOpenResult)
+    {
+        double rate = cap.get(CV_CAP_PROP_FPS);
+
+        if(rate > 0)    // video file
+        {
+            delay = 1000/rate;
+        }
+    }
+    return fileOpenResult;
+}
+
+bool CaptureThread::disconnectCaptureDevice()
 {
     // Camera is connected
     if(cap.isOpened())
@@ -145,6 +152,22 @@ void CaptureThread::updateFPS(int timeElapsed)
         // Reset sample number
         sampleNumber=0;
     }
+}
+
+void CaptureThread::captureFrame()
+{
+    // Synchronize with other streams (if enabled for this stream)
+    sharedImageBuffer->sync(deviceNumber);
+    if(!cameraMode)
+        msleep(delay);
+    // Capture frame (if available)
+    if (!cap.grab())
+        return;
+
+    // Retrieve frame
+    cap.retrieve(grabbedFrame);
+    // Add frame to buffer
+    sharedImageBuffer->getByDeviceNumber(deviceNumber)->add(grabbedFrame, dropFrameIfBufferFull);
 }
 
 void CaptureThread::stop()
