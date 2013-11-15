@@ -35,7 +35,9 @@ HEADERS += \
     Config.h \
     CaptureThread.h \
     Buffer.h \
-    CameraView.h
+    CameraView.h \
+    ProcessingThread.h \
+    MatToQImage.h
 
 FORMS += Forms/MainWindow.ui Forms/PluginsConfigUI.ui \
     Forms/OutputWind.ui \
@@ -56,7 +58,9 @@ SOURCES += \
     FrameViewer.cpp \
     SharedImageBuffer.cpp \
     CaptureThread.cpp \
-    CameraView.cpp
+    CameraView.cpp \
+    ProcessingThread.cpp \
+    MatToQImage.cpp
 
 RESOURCES += Resources/mainwind.qrc
 

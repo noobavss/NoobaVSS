@@ -17,6 +17,7 @@ class CameraView;
 }
 class SharedImageBuffer;
 class CaptureThread;
+class ProcessingThread;
 class PluginLoader;
 class NoobaPlugin;
 class QMdiSubWindow;
@@ -42,6 +43,7 @@ public slots:
 private slots:
 
     void on_controlButton_clicked();
+    void onInputFrameUpdate(const QImage &in);
 
     void onPluginLoad(NoobaPlugin *plugin);
     void onPluginAboutToUnload(NoobaPlugin *plugin);
@@ -66,7 +68,7 @@ private:
      \brief get a color QImage from cv::Mat
      \return QImage with three color channels
      */
-    inline QImage cvt2QImage(cv::Mat &cvImg);
+    inline QImage cvt2QImage(const cv::Mat &cvImg);
 
     /*
      *	Updates the current video state
@@ -74,25 +76,27 @@ private:
      */
     void setVideoState(nooba::VideoState state);
     void stopCaptureThread();
+    void stopProcessingThread();
     void connectSignalSlots();
     void initializeMdiArea();
     inline void setupSharedBufferForNewDevice();
     QMdiSubWindow *addMDISubWindow(FrameViewer* frameViewer);
 
-    bool                            _isWebCam;
-    Ui::CameraView                  *ui;
-    SharedImageBuffer               *_sharedImageBuffer;
-    QScopedPointer<CaptureThread>   _captureThread;
-    QScopedPointer<PluginLoader>    _pluginLoader;
+    bool                                _isWebCam;
+    Ui::CameraView                      *ui;
+    SharedImageBuffer                   *_sharedImageBuffer;
+    QScopedPointer<CaptureThread>       _captureThread;
+    QScopedPointer<ProcessingThread>    _processingThread;
+    QScopedPointer<PluginLoader>        _pluginLoader;
 
-    int                             _deviceNumber;
-    int                             _imageBufferSize;
-    nooba::VideoState               _vidState;
-    ProcParams                      _params;
-    QTimer				            _timer;
-    FrameViewer                     _inputWind;
-    OutputWind                      *_debugOutWind;
-    ParamConfigWind                 *_paramConfigUI;
+    int                                 _deviceNumber;
+    int                                 _imageBufferSize;
+    nooba::VideoState                   _vidState;
+    ProcParams                          _params;
+    QTimer                              _timer;
+    FrameViewer                         _inputWind;
+    OutputWind                          *_debugOutWind;
+    ParamConfigWind                     *_paramConfigUI;
     QMap<NoobaPlugin*, QMap<QString, MdiSubWindData*> >  _frameViewerMap;
 };
 

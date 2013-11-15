@@ -222,13 +222,13 @@ void MainWindow::onPluginAct_triggerred()
 void MainWindow::on_actionAbout_NoobaVSS_triggered()
 {
     QMessageBox::about(this, "Nooba VSS",
-                       QString("<b>Nooba is an open source surveillance video analysis tool</b><ul><li>API Version:\t\t\t")
-                       .append(QString::number(API_MAJOR_VERSION)).append(".").append(QString::number(API_MINOR_VERSION))
-                       .append("</li><li>OpenCV version:\t\t\t").append(QString::number(CV_MAJOR_VERSION))
-                       .append(".").append(QString::number(CV_MINOR_VERSION))
-                       .append("</li><li>App version:\t\t\t").append(QString("").number(nooba::MajorVersion))
-                       .append(".").append(QString::number(nooba::MinorVersion)).append("</li><li>")
-                       .append("Qt version:\t\t\t").append(QT_VERSION_STR).append("</li></ul>")
-                       .append("<p>Build on %1</p>").arg(QDateTime::currentDateTime().toString())
-                       );
+        QString("<b>Nooba is an open source surveillance video <br>analysis tool</b><ul><li>API Version:\t\t\t")
+        .append(QString::number(API_MAJOR_VERSION)).append(".").append(QString::number(API_MINOR_VERSION))
+        .append("</li><li>OpenCV version:\t\t\t").append(QString::number(CV_MAJOR_VERSION))
+        .append(".").append(QString::number(CV_MINOR_VERSION))
+        .append("</li><li>App version:\t\t\t").append(QString("").number(nooba::MajorVersion))
+        .append(".").append(QString::number(nooba::MinorVersion)).append("</li><li>")
+        .append("Qt version:\t\t\t").append(QT_VERSION_STR).append("</li></ul>")
+        .append("<p>Build on %1</p>").arg(QDateTime::currentDateTime().toString())
+        );
 }

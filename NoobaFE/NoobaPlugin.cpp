@@ -15,6 +15,8 @@ NoobaPlugin::NoobaPlugin(const QString &fileName, const QString& alias, NoobaPlu
     _fileName(fileName),
     _alias(alias)
 {
+    qRegisterMetaType<PluginPassData>("PluginPassData");
+
 }
 
 NoobaPlugin::~NoobaPlugin()
@@ -113,6 +115,9 @@ void NoobaPlugin::initSignalSlots()
     connect(_api, SIGNAL(createMultiValParamRequest(QString,QStringList)), this, SLOT(onCreateMultiValParam(QString,QStringList)));
     connect(_api, SIGNAL(createPointParamRequest(QString,QPointF)), this, SLOT(onCreatePointParam(QString,QPointF)));
     connect(_api, SIGNAL(createRectParamRequest(QString,QRectF)), this, SLOT(onCreateRectParam(QString,QRectF)));
+
+    qRegisterMetaType<PluginPassData>("PluginPassData");
+//    qRegisterMetaType<PluginPassDataPrivate*>("PluginPassDataPrivate");
     connect(_api, SIGNAL(outputDataRequest(PluginPassData)), this, SIGNAL(outputData(PluginPassData)));
     connect(_api, SIGNAL(createFrameViewerRequest(QString)), this, SIGNAL(createFrameViewer(QString)));
     connect(_api, SIGNAL(updateFrameViewerRequest(QString,QImage)), this, SIGNAL(updateFrameViewer(QString,QImage)));

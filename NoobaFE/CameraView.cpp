@@ -2,6 +2,7 @@
 #include "ui_CameraView.h"
 #include "SharedImageBuffer.h"
 #include "CaptureThread.h"
+#include "ProcessingThread.h"
 #include "PluginLoader.h"
 #include "NoobaPlugin.h"
 
@@ -10,6 +11,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QMdiSubWindow>
+#include <QMetaType>
 
 CameraView::CameraView(SharedImageBuffer *sharedImageBuffer, QWidget *parent) :
     QWidget(parent),
@@ -28,16 +30,16 @@ CameraView::CameraView(SharedImageBuffer *sharedImageBuffer, QWidget *parent) :
     ui->setupUi(this);
     setWindowTitle(tr("Camera View"));
     connectSignalSlots();
-    _pluginLoader->loadPrevConfig();
     _pluginLoader->loadPluginInfo();
+    _pluginLoader->loadPrevConfig();
     return;
 }
 
 CameraView::~CameraView()
 {
-//    // Stop processing thread
-//    if(processingThread->isRunning())
-//        stopProcessingThread();
+    // Stop processing thread
+    if(_processingThread->isRunning())
+        stopProcessingThread();
     // Stop capture thread
     if(_captureThread->isRunning())
         stopCaptureThread();
@@ -77,6 +79,7 @@ void CameraView::connectToCamera()
     setupSharedBufferForNewDevice();
 
     _captureThread.reset(new CaptureThread(_sharedImageBuffer, _deviceNumber,true));
+    _processingThread.reset(new ProcessingThread(_sharedImageBuffer, _pluginLoader.data(), _deviceNumber));
     if(!_captureThread->connectToCamera())
     {
         QMessageBox errMsg;
@@ -85,11 +88,14 @@ void CameraView::connectToCamera()
         errMsg.exec();
         return;
     }
+
+    addMDISubWindow(&_inputWind);
+    connect(_processingThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
+
     _isWebCam = true;
     ui->prevButton->setDisabled(true); // disable on web cam mode, irrelavant
     _params.setFrameId(-1);
     return;
-
 }
 
 void CameraView::connectToVideoFileStream()
@@ -118,6 +124,18 @@ void CameraView::stopCaptureThread()
         _sharedImageBuffer->getByDeviceNumber(_deviceNumber)->get();
     _captureThread->wait();
     qDebug() << "[" << _deviceNumber << "] Capture thread successfully stopped.";
+    return;
+}
+
+void CameraView::stopProcessingThread()
+{
+    if(!_processingThread)
+        return;
+    qDebug() << "[" << _deviceNumber << "] About to stop processing thread...";
+    _processingThread->stop();
+    _sharedImageBuffer->wakeAll(); // This allows the thread to be stopped if it is in a wait-state
+    _processingThread->wait();
+    qDebug() << "[" << _deviceNumber << "] Processing thread successfully stopped.";
     return;
 }
 
@@ -152,6 +170,7 @@ QMdiSubWindow *CameraView::addMDISubWindow(FrameViewer *frameViewer)
 {
     QMdiSubWindow *mdiWind = ui->mdiArea->addSubWindow(frameViewer);
     mdiWind->setContentsMargins(0,0,0,0);
+    mdiWind->setVisible(true);
     return mdiWind;
 }
 
@@ -179,6 +198,11 @@ void CameraView::on_controlButton_clicked()
 //    _timer.start(_delay);
     setVideoState(nooba::PlayingState);
     return;
+}
+
+void CameraView::onInputFrameUpdate(const QImage &in)
+{
+    _inputWind.updateFrame(in);
 }
 
 void CameraView::onPluginLoad(NoobaPlugin *plugin)
@@ -223,7 +247,6 @@ void CameraView::onCreateFrameViewerRequest(const QString &title)
 
     FrameViewer *fv = new FrameViewer(title, this);
     QMdiSubWindow* sw = addMDISubWindow(fv);
-    sw->setVisible(true);
     MdiSubWindData* data = new MdiSubWindData(p, sw, fv);
     _frameViewerMap[p].insert(title, data);
     connect(p, SIGNAL(updateFrameViewer(QString,QImage)), this, SLOT(onFrameViewerUpdate(QString,QImage)));
@@ -241,7 +264,7 @@ void CameraView::onFrameViewerUpdate(const QString &title, const QImage &frame)
     return;
 }
 
-QImage CameraView::cvt2QImage(Mat &cvImg)
+QImage CameraView::cvt2QImage(const Mat &cvImg)
 {
     QImage img;
     if(cvImg.channels() == 1)
@@ -268,6 +291,7 @@ void CameraView::setVideoState(nooba::VideoState state)
         ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-play.png"));
         ui->controlButton->setToolTip(tr("Play"));
         stopCaptureThread();
+        stopProcessingThread();
         break;
     }
     case nooba::PausedState:
@@ -276,6 +300,7 @@ void CameraView::setVideoState(nooba::VideoState state)
         ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-play.png"));
         ui->controlButton->setToolTip(tr("Play"));
         stopCaptureThread();
+        stopProcessingThread();
         break;
     }
     case nooba::PlayingState:
@@ -284,6 +309,7 @@ void CameraView::setVideoState(nooba::VideoState state)
         ui->controlButton->setIcon(QIcon(":/Resources/super-mono-iconset/button-pause.png"));
         ui->controlButton->setToolTip(tr("Pause"));
         _captureThread->start(QThread::NormalPriority);
+        _processingThread->start(QThread::HighPriority);
         break;
     }
     default:
