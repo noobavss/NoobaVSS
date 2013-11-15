@@ -4,13 +4,13 @@
 //#include "NoobaPluginAPI_global.h"
 #include "noobapluginbase.h"
 
+//Qt
 #include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QtPlugin>
 #include <QMetaType>
-
-class QImage;
+#include <QImage>
 
 /************************************************************************/
 /* IMPORTANT: ANY CHANGE TO THE API CORRESPOND TO A CHANGE IN THE       */
@@ -251,6 +251,11 @@ public:
     void outputData(const PluginPassData& data)
     {   emit outputDataRequest(data); }
 
+    void outputData(const QString& str, QList<QImage> imageList)
+    {   emit outputDataRequest(str, imageList); }
+
+
+
     /**
      * @brief createOutputWind creates MDI SubWindow to show the frame outputs
      * @param title title of the subWindow
@@ -271,6 +276,7 @@ signals:
     void createRectParamRequest(const QString& varName, const QRectF& val);
     void debugMsgRequest(const QString& msg);
     void outputDataRequest(const PluginPassData& data);
+    void outputDataRequest(const QString& str, QList<QImage> imageList);
     void createFrameViewerRequest(const QString& title);
     void updateFrameViewerRequest(const QString& title, const QImage& frame);
 
@@ -311,6 +317,10 @@ public slots:
      */
     virtual void inputData(const PluginPassData& data){
         Q_UNUSED(data)
+    }
+
+    virtual void inputData(const QString& str, QList<QImage> imageList){
+        Q_UNUSED(str) Q_UNUSED(imageList)
     }
 
 protected:

@@ -265,7 +265,7 @@ void PluginPassData::appendStrList(const QString &str)
 
 void PluginPassData::setImage(const QImage &image)
 {
-    d->_img = image;
+    d->_img = QImage(image);
 }
 
 QImage &PluginPassData::getImage() const

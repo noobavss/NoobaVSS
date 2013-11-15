@@ -184,5 +184,22 @@
  <resources>
   <include location="../Resources/mainwind.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>TileviewButton</sender>
+   <signal>clicked()</signal>
+   <receiver>mdiArea</receiver>
+   <slot>tileSubWindows()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>701</x>
+     <y>482</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>362</x>
+     <y>230</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
