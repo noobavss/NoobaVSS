@@ -3,8 +3,7 @@
 
 #include "NoobaEye.h"
 #include "FrameViewer.h"
-#include "OutputWind.h"
-#include "ParamConfigWind.h"
+#include "Structures.h"
 
 // Qt
 #include <QWidget>
@@ -17,6 +16,9 @@ class CameraView;
 }
 class SharedImageBuffer;
 class CaptureThread;
+class OutputWind;
+class ParamConfigWind;
+class StatPanel;
 class ProcessingThread;
 class PluginLoader;
 class NoobaPlugin;
@@ -33,16 +35,17 @@ public:
 
     ParamConfigWind* getParamConfigWind() { return _paramConfigUI; }
     OutputWind* getDebugMsgWind() { return _debugOutWind; }
+    StatPanel* getStatPanel() { return _statPanel; }
     PluginLoader* getPluginLoader() { return _pluginLoader.data(); }
 
 public slots:
 
     void connectToCamera();
     void connectToVideoFileStream();
+    void on_controlButton_clicked();
 
 private slots:
 
-    void on_controlButton_clicked();
     void onInputFrameUpdate(const QImage &in);
 
     void onPluginLoad(NoobaPlugin *plugin);
@@ -51,6 +54,8 @@ private slots:
     void onPluginAboutToRelease(NoobaPlugin* plugin);
     void onCreateFrameViewerRequest(const QString& title);
     void onFrameViewerUpdate(const QString& title, const QImage& frame);
+    void updateCaptureThreadStats(struct ThreadStatisticsData statData);
+    void updateProcessingThreadStats(struct ThreadStatisticsData statData);
 
 private:
 
@@ -97,6 +102,7 @@ private:
     FrameViewer                         _inputWind;
     OutputWind                          *_debugOutWind;
     ParamConfigWind                     *_paramConfigUI;
+    StatPanel                           *_statPanel;
     QMap<NoobaPlugin*, QMap<QString, MdiSubWindData*> >  _frameViewerMap;
 };
 

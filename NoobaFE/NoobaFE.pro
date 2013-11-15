@@ -37,13 +37,15 @@ HEADERS += \
     Buffer.h \
     CameraView.h \
     ProcessingThread.h \
-    MatToQImage.h
+    MatToQImage.h \
+    StatPanel.h
 
 FORMS += Forms/MainWindow.ui Forms/PluginsConfigUI.ui \
     Forms/OutputWind.ui \
     Forms/ParamConfigWind.ui \
     Forms/FrameViewer.ui \
-    Forms/CameraView.ui
+    Forms/CameraView.ui \
+    Forms/StatPanel.ui
 
 SOURCES += \
            main.cpp \
@@ -60,7 +62,8 @@ SOURCES += \
     CaptureThread.cpp \
     CameraView.cpp \
     ProcessingThread.cpp \
-    MatToQImage.cpp
+    MatToQImage.cpp \
+    StatPanel.cpp
 
 RESOURCES += Resources/mainwind.qrc
 

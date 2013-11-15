@@ -7,6 +7,7 @@
 #include "CameraView.h"
 #include "ParamConfigWind.h"
 #include "OutputWind.h"
+#include "StatPanel.h"
 
 // Qt includes
 #include <QMainWindow>
@@ -37,25 +38,27 @@ private slots:
 
     void onOpenFile();
 	void onOpenWebCam();	
-    void on_nextButton_clicked();
-    void on_prevButton_clicked();
+//    void onNextButton_clicked();
+//    void onPrevButton_clicked();
 	void updateFrame();
     void onPluginAct_triggerred();
     
     void on_actionAbout_NoobaVSS_triggered();
-    void on_controlButton_clicked();
+    void onControlButton_clicked();
     void onMdiSubWindowActivated(QMdiSubWindow* subWindow);
 
 private:
 
-    void updateDockWidgets(ParamConfigWind *paramConfig, OutputWind *debugMsgWind);
+    void updateDockWidgets(ParamConfigWind *paramConfig, OutputWind *debugMsgWind, StatPanel* statPanel);
     CameraView *addNewSourceTab();
     void initMDIArea();
+    CameraView *getActiveCameraView();
 
     Ui::MainWindow                  *ui;
     SharedImageBuffer               *_sharedImageBuffer;
     ParamConfigWind                 _paramConfigUI;
     OutputWind                      _debugWind;
+    StatPanel                       _statPanel;
 
 };
 

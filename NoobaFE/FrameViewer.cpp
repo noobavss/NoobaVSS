@@ -40,3 +40,4 @@ void FrameViewer::resizeEvent(QResizeEvent *event)
     ui->canvas->setPixmap(ui->canvas->pixmap()->scaled(event->size(), Qt::KeepAspectRatio));
 }
 
+

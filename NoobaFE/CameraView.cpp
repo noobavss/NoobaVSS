@@ -5,6 +5,9 @@
 #include "ProcessingThread.h"
 #include "PluginLoader.h"
 #include "NoobaPlugin.h"
+#include "StatPanel.h"
+#include "OutputWind.h"
+#include "ParamConfigWind.h"
 
 // Qt
 #include  <QMessageBox>
@@ -24,7 +27,8 @@ CameraView::CameraView(SharedImageBuffer *sharedImageBuffer, QWidget *parent) :
     _imageBufferSize(1),
     _inputWind(tr("Video Input")),
     _debugOutWind(new OutputWind()),
-    _paramConfigUI(new ParamConfigWind())
+    _paramConfigUI(new ParamConfigWind()),
+    _statPanel(new StatPanel)
 {
     _vidState = nooba::StoppedState;
     ui->setupUi(this);
@@ -69,6 +73,7 @@ CameraView::~CameraView()
 
     _debugOutWind->deleteLater();
     _paramConfigUI->deleteLater();
+    _statPanel->deleteLater();
     delete ui;
     return;
 }
@@ -77,6 +82,8 @@ void CameraView::connectToCamera()
 {
     _deviceNumber = 0;
     setupSharedBufferForNewDevice();
+
+    _statPanel->setImageBufferBarSize(0, _sharedImageBuffer->getByDeviceNumber(_deviceNumber)->maxSize());
 
     _captureThread.reset(new CaptureThread(_sharedImageBuffer, _deviceNumber,true));
     _processingThread.reset(new ProcessingThread(_sharedImageBuffer, _pluginLoader.data(), _deviceNumber));
@@ -89,9 +96,12 @@ void CameraView::connectToCamera()
         return;
     }
 
+    _statPanel->setDeviceName(QString::number(_deviceNumber));
     addMDISubWindow(&_inputWind);
+    qRegisterMetaType<struct ThreadStatisticsData>("ThreadStatisticsData");
     connect(_processingThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
-
+    connect(_processingThread.data(), SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)), this, SLOT(updateProcessingThreadStats(ThreadStatisticsData)));
+    connect(_captureThread.data(), SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)), this, SLOT(updateCaptureThreadStats(ThreadStatisticsData)));
     _isWebCam = true;
     ui->prevButton->setDisabled(true); // disable on web cam mode, irrelavant
     _params.setFrameId(-1);
@@ -220,7 +230,6 @@ void CameraView::onPluginAboutToUnload(NoobaPlugin *plugin)
     foreach (MdiSubWindData* d, subWindMap)
     {
         delete d->_mdiSubWind;
-        //delete d->_frameViewer;
         delete d;
     }
     _frameViewerMap.remove(plugin);
@@ -260,7 +269,39 @@ void CameraView::onFrameViewerUpdate(const QString &title, const QImage &frame)
         return;
 
     MdiSubWindData* d = _frameViewerMap.value(p).value(title);
-    d->_frameViewer->updateFrame(frame);
+    if(d)
+    {
+        d->_frameViewer->updateFrame(frame);
+    }
+    else
+    {
+        qDebug() << tr("frame viewer with title \'%1\' is not registered. use \"createFrameViewer()\" function"
+                       " to register a frame viewer for the %2 plugin").arg(title).arg(p->alias()) << Q_FUNC_INFO;
+    }
+    return;
+}
+
+void CameraView::updateCaptureThreadStats(ThreadStatisticsData statData)
+{
+    // Show [number of images in buffer / image buffer size] in imageBufferLabel
+    _statPanel->setImageBufferLabel(QString("[")+QString::number(_sharedImageBuffer->getByDeviceNumber(_deviceNumber)->size())+
+                                  QString("/")+QString::number(_sharedImageBuffer->getByDeviceNumber(_deviceNumber)->maxSize())+QString("]"));
+    // Show percentage of image bufffer full in imageBufferBar
+    _statPanel->setImageBufferBarValue(_sharedImageBuffer->getByDeviceNumber(_deviceNumber)->size());
+
+    // Show processing rate in captureRateLabel
+    _statPanel->setCaptureRateLabel(QString::number(statData.averageFPS)+" fps");
+    // Show number of frames captured in nFramesCapturedLabel
+    _statPanel->setnFramesCapturedLabel(QString("[") + QString::number(statData.nFramesProcessed) + QString("]"));
+    return;
+}
+
+void CameraView::updateProcessingThreadStats(ThreadStatisticsData statData)
+{
+    // Show processing rate in processingRateLabel
+    _statPanel->setProcessingRate(QString::number(statData.averageFPS)+" fps");
+    // Show number of frames processed in nFramesProcessedLabel
+    _statPanel->setnFramesProcessedLabel(QString("[") + QString::number(statData.nFramesProcessed) + QString("]"));
     return;
 }
 

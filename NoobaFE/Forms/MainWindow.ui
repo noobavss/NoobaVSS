@@ -131,6 +131,15 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_3"/>
   </widget>
+  <widget class="QDockWidget" name="statPanelDock">
+   <property name="windowTitle">
+    <string>Stat Panel</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2"/>
+  </widget>
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="../Resources/mainwind.qrc">
@@ -298,39 +307,7 @@
    <sender>actionPlay_Pause</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>on_controlButton_clicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>423</x>
-     <y>257</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionNext_Frame</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>on_nextButton_clicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>423</x>
-     <y>257</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionPrevious_Frame</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>on_prevButton_clicked()</slot>
+   <slot>onControlButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -346,10 +323,8 @@
  <slots>
   <slot>onOpenFile()</slot>
   <slot>onFlip()</slot>
-  <slot>on_controlButton_clicked()</slot>
   <slot>onOpenWebCam()</slot>
   <slot>onPluginAct_triggerred()</slot>
-  <slot>on_nextButton_clicked()</slot>
-  <slot>on_prevButton_clicked()</slot>
+  <slot>onControlButton_clicked()</slot>
  </slots>
 </ui>

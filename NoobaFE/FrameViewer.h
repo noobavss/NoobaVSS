@@ -16,11 +16,14 @@ public:
     explicit FrameViewer(const QString& title, QWidget *parent = 0);
     ~FrameViewer();
 
+    void setStatPanelVisible(bool isVisible);
+
 public slots:
 
     void closeEvent(QCloseEvent *event);
     bool updateFrame(const QImage& in);
     void resizeEvent(QResizeEvent *event);
+
 private:
 
 

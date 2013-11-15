@@ -30,7 +30,14 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QMdiArea" name="mdiArea"/>
+    <widget class="QMdiArea" name="mdiArea">
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAsNeeded</enum>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAsNeeded</enum>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QFrame" name="toolbar">

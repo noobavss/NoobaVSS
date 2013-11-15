@@ -73,7 +73,6 @@ void ProcessingThread::run()
         processingTime=t.elapsed();
         // Start timer (used to calculate processing rate)
         t.start();
-        //qDebug("d");
 //        processingMutex.lock();
         // Get frame from queue, store in currentFrame, set ROI
         currentFrame=_sharedImageBuffer->getByDeviceNumber(_deviceNumber)->get().clone();
