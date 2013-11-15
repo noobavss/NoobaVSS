@@ -30,8 +30,8 @@ public:
     explicit CameraView(SharedImageBuffer* sharedImageBuffer, QWidget *parent = 0);
     ~CameraView();
 
-    ParamConfigWind* getParamConfigWind() { return _paramConfigUI.data(); }
-    OutputWind* getDebugMsgWind() { return _debugOutWind.data(); }
+    ParamConfigWind* getParamConfigWind() { return _paramConfigUI; }
+    OutputWind* getDebugMsgWind() { return _debugOutWind; }
     PluginLoader* getPluginLoader() { return _pluginLoader.data(); }
 
 public slots:
@@ -50,14 +50,12 @@ private slots:
     void onCreateFrameViewerRequest(const QString& title);
     void onFrameViewerUpdate(const QString& title, const QImage& frame);
 
-    void onDebugMsg(const QString& debugMsg);
-
 private:
 
     struct MdiSubWindData
     {
         MdiSubWindData(NoobaPlugin* plugin, QMdiSubWindow* subWind, FrameViewer* frameViewer)
-            :_plugin(plugin), _mdiSubWind(subWind), _frameViewer(frameViewer){}
+            :_plugin(plugin), _mdiSubWind(subWind), _frameViewer(frameViewer) {}
 
         NoobaPlugin*    _plugin;
         QMdiSubWindow*  _mdiSubWind;
@@ -78,6 +76,7 @@ private:
     void stopCaptureThread();
     void connectSignalSlots();
     void initializeMdiArea();
+    inline void setupSharedBufferForNewDevice();
     QMdiSubWindow *addMDISubWindow(FrameViewer* frameViewer);
 
     bool                            _isWebCam;
@@ -92,8 +91,8 @@ private:
     ProcParams                      _params;
     QTimer				            _timer;
     FrameViewer                     _inputWind;
-    QScopedPointer<OutputWind>      _debugOutWind;
-    QScopedPointer<ParamConfigWind> _paramConfigUI;
+    OutputWind                      *_debugOutWind;
+    ParamConfigWind                 *_paramConfigUI;
     QMap<NoobaPlugin*, QMap<QString, MdiSubWindData*> >  _frameViewerMap;
 };
 

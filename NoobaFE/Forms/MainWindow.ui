@@ -92,9 +92,15 @@
     <addaction name="actionNext_Frame"/>
     <addaction name="actionPrevious_Frame"/>
    </widget>
+   <widget class="QMenu" name="menu_Window">
+    <property name="title">
+     <string>&amp;Window</string>
+    </property>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPlayback"/>
    <addaction name="menuImage"/>
+   <addaction name="menu_Window"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>

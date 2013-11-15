@@ -21,8 +21,8 @@ CameraView::CameraView(SharedImageBuffer *sharedImageBuffer, QWidget *parent) :
     _deviceNumber(-1),
     _imageBufferSize(1),
     _inputWind(tr("Video Input")),
-    _paramConfigUI(new ParamConfigWind()),
-    _debugOutWind(new OutputWind())
+    _debugOutWind(new OutputWind()),
+    _paramConfigUI(new ParamConfigWind())
 {
     _vidState = nooba::StoppedState;
     ui->setupUi(this);
@@ -30,6 +30,7 @@ CameraView::CameraView(SharedImageBuffer *sharedImageBuffer, QWidget *parent) :
     connectSignalSlots();
     _pluginLoader->loadPrevConfig();
     _pluginLoader->loadPluginInfo();
+    return;
 }
 
 CameraView::~CameraView()
@@ -64,20 +65,16 @@ CameraView::~CameraView()
     }
     _frameViewerMap.clear();
 
+    _debugOutWind->deleteLater();
+    _paramConfigUI->deleteLater();
     delete ui;
+    return;
 }
 
 void CameraView::connectToCamera()
 {
     _deviceNumber = 0;
-    Buffer<cv::Mat> *imgBuffer = new Buffer<cv::Mat>(_imageBufferSize);
-    bool addWithSync = false;
-    _sharedImageBuffer->add(_deviceNumber, imgBuffer, addWithSync);
-    _sharedImageBuffer->setSyncEnabled(true);
-    if(_sharedImageBuffer->isSyncEnabledForDeviceNumber(_deviceNumber))
-        qDebug() << tr("Camera connected. Waiting...") << Q_FUNC_INFO;
-    else
-        qDebug() << tr("Connecting to camera...") << Q_FUNC_INFO;
+    setupSharedBufferForNewDevice();
 
     _captureThread.reset(new CaptureThread(_sharedImageBuffer, _deviceNumber,true));
     if(!_captureThread->connectToCamera())
@@ -130,13 +127,25 @@ void CameraView::connectSignalSlots()
     connect(_pluginLoader.data(), SIGNAL(pluginInitialised(NoobaPlugin*)), this, SLOT(onPluginInitialised(NoobaPlugin*)));
     connect(_pluginLoader.data(), SIGNAL(pluginAboutToRelease(NoobaPlugin*)), this, SLOT(onPluginAboutToRelease(NoobaPlugin*)));
     connect(_pluginLoader.data(), SIGNAL(pluginAboutToUnloaded(NoobaPlugin*)), this, SLOT(onPluginAboutToUnload(NoobaPlugin*)));
-
     return;
 }
 
 void CameraView::initializeMdiArea()
 {
     addMDISubWindow(&_inputWind);
+}
+
+void CameraView::setupSharedBufferForNewDevice()
+{
+    Buffer<cv::Mat> *imgBuffer = new Buffer<cv::Mat>(_imageBufferSize);
+    bool addWithSync = false;
+    _sharedImageBuffer->add(_deviceNumber, imgBuffer, addWithSync);
+    _sharedImageBuffer->setSyncEnabled(true);
+    if(_sharedImageBuffer->isSyncEnabledForDeviceNumber(_deviceNumber))
+        qDebug() << tr("Camera connected. Waiting...") << Q_FUNC_INFO;
+    else
+        qDebug() << tr("Connecting to camera...") << Q_FUNC_INFO;
+    return;
 }
 
 QMdiSubWindow *CameraView::addMDISubWindow(FrameViewer *frameViewer)
@@ -151,7 +160,6 @@ void CameraView::on_controlButton_clicked()
     if(_vidState == nooba::PlayingState)
     {
         setVideoState(nooba::PausedState);
-
         return;
     }
 
@@ -175,9 +183,10 @@ void CameraView::on_controlButton_clicked()
 
 void CameraView::onPluginLoad(NoobaPlugin *plugin)
 {
-    connect(plugin, SIGNAL(debugMsg(QString)), _debugOutWind.data(), SLOT(onDebugMsg(QString)));
+    connect(plugin, SIGNAL(debugMsg(QString)), _debugOutWind, SLOT(onDebugMsg(QString)));
     connect(plugin, SIGNAL(createFrameViewer(QString)), this, SLOT(onCreateFrameViewerRequest(QString)));
     _frameViewerMap.insert(plugin, QMap<QString, MdiSubWindData* >());
+    return;
 }
 
 void CameraView::onPluginAboutToUnload(NoobaPlugin *plugin)
@@ -191,16 +200,19 @@ void CameraView::onPluginAboutToUnload(NoobaPlugin *plugin)
         delete d;
     }
     _frameViewerMap.remove(plugin);
+    return;
 }
 
 void CameraView::onPluginInitialised(NoobaPlugin *plugin)
 {
     _paramConfigUI->addPlugin(plugin);
+    return;
 }
 
 void CameraView::onPluginAboutToRelease(NoobaPlugin *plugin)
 {
     _paramConfigUI->removePlugin(plugin);
+    return;
 }
 
 void CameraView::onCreateFrameViewerRequest(const QString &title)
@@ -215,6 +227,7 @@ void CameraView::onCreateFrameViewerRequest(const QString &title)
     MdiSubWindData* data = new MdiSubWindData(p, sw, fv);
     _frameViewerMap[p].insert(title, data);
     connect(p, SIGNAL(updateFrameViewer(QString,QImage)), this, SLOT(onFrameViewerUpdate(QString,QImage)));
+    return;
 }
 
 void CameraView::onFrameViewerUpdate(const QString &title, const QImage &frame)
@@ -225,11 +238,7 @@ void CameraView::onFrameViewerUpdate(const QString &title, const QImage &frame)
 
     MdiSubWindData* d = _frameViewerMap.value(p).value(title);
     d->_frameViewer->updateFrame(frame);
-}
-
-void CameraView::onDebugMsg(const QString &debugMsg)
-{
-
+    return;
 }
 
 QImage CameraView::cvt2QImage(Mat &cvImg)
@@ -281,4 +290,5 @@ void CameraView::setVideoState(nooba::VideoState state)
         break;
     }
     _params.setVidState(_vidState);
+    return;
 }

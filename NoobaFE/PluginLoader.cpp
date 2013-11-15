@@ -23,9 +23,6 @@ PluginLoader::PluginLoader(QObject *parent)
 PluginLoader::~PluginLoader()
 {
     saveCurrentConfig();    // this should be at the TOP
-    if(_basePlugin)
-        _basePlugin->release();
-
     unloadPlugins();
 }
 
@@ -39,9 +36,12 @@ int PluginLoader::loadPluginInfo()
     // go through the directory and try to load the plugin files
     foreach (QString fileName, _dir.entryList(QDir::Files))
     {        
-        QPluginLoader pluginLoader(_dir.absoluteFilePath(fileName)); // use a scoped pluginLoader (separate from the m_QPluginLoader ) instance so that loading
+        if(!QLibrary::isLibrary(fileName))
+            continue;
+
+        QPluginLoader qPluginLoader(_dir.absoluteFilePath(fileName)); // use a scoped pluginLoader (separate from the m_QPluginLoader ) instance so that loading
                                                                      // plugins to retrieve information and unloading doesn't affect the currently loaded plugin
-        QObject *plugin = pluginLoader.instance();
+        QObject *plugin = qPluginLoader.instance();
         if (!plugin)
             break;
 
@@ -56,10 +56,10 @@ int PluginLoader::loadPluginInfo()
         NoobaPluginAPI* api = qobject_cast<NoobaPluginAPI* >(plugin);
         nooba::PluginData pluginData(fileName, api->getPluginInfo(),api->APIMajorVersion(), api->APIMinorVersion());
         _pluginInfoList.append(pluginData);
-        pluginLoader.unload();  // unload after getting the details of the plugin
+        qPluginLoader.unload();  // unload after getting the details of the plugin
         pluginCount++;
 
-        pluginLoader.unload();   // additional unload call, just to be safe :)
+        qPluginLoader.unload();   // additional unload call, just to be safe :)
     }
 
     if(!errStr.isEmpty())

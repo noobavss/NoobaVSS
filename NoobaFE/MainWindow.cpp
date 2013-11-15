@@ -30,13 +30,10 @@ MainWindow::MainWindow(QWidget *parent) :
     _sharedImageBuffer(new SharedImageBuffer())
 {
 	ui->setupUi(this);
-//    connect(&_timer, SIGNAL(timeout()), this, SLOT(updateFrame()));
-
-
-//    updateDockWidgets();
-//    connectSignalSlots();
-
-//    initMDIArea();
+    initMDIArea();
+    ui->menu_Window->addAction(ui->paramConfigDock->toggleViewAction());
+    ui->menu_Window->addAction(ui->debugOutputDock->toggleViewAction());
+    updateDockWidgets(&_paramConfigUI, &_debugWind);
     setWindowTitle(nooba::ProgramName);
 }
 
@@ -89,7 +86,7 @@ void MainWindow::onOpenWebCam()
 {
     CameraView* camView = addNewSourceTab();
     camView->connectToCamera();
-//    ui->statusBar->showMessage(tr("Web cam is set as default input source."));
+    ui->statusBar->showMessage(tr("Web cam is set as default input source."));
 }
 
 void MainWindow::on_nextButton_clicked()
@@ -106,6 +103,22 @@ void MainWindow::on_prevButton_clicked()
 
 void MainWindow::on_controlButton_clicked()
 {
+}
+
+void MainWindow::onMdiSubWindowActivated(QMdiSubWindow *subWindow)
+{
+    if(!subWindow)
+    {
+        updateDockWidgets(&_paramConfigUI, &_debugWind);
+        return;
+    }
+
+    CameraView* camView = qobject_cast<CameraView* >(subWindow->widget());
+    if(!camView)
+        return;
+
+    updateDockWidgets(camView->getParamConfigWind(), camView->getDebugMsgWind());
+    return;
 }
 
 void MainWindow::updateFrame()
@@ -140,22 +153,34 @@ void MainWindow::updateFrame()
 //	}
 }
 
-void MainWindow::updateDockWidgets(CameraView* camView)
+void MainWindow::updateDockWidgets(ParamConfigWind* paramConfig, OutputWind* debugMsgWind)
 {
-    //    QVBoxLayout *layout = new QVBoxLayout;
-    //    layout->addWidget(_paramConfigUI);
-    //    layout->setContentsMargins(0,0,0,0);
-    //    ui->paramConfigDock->widget()->setLayout(layout);
 
-    //    layout = new QVBoxLayout;
-    //    layout->addWidget(&_dbugOutWind);
-    //    layout->setContentsMargins(0,0,0,0);
-    //    ui->debugOutputDock->widget()->setLayout(layout);
+    QVBoxLayout *layout = qobject_cast<QVBoxLayout*>(ui->paramConfigDock->widget()->layout());
+    if(layout)
+    {
+        QWidget *w = layout->itemAt(0)->widget();
+        if(w)
+            w->setParent(0);
+        delete layout;
+    }
+    layout = new QVBoxLayout;
+    layout->addWidget(paramConfig);
+    layout->setContentsMargins(0,0,0,0);
+    ui->paramConfigDock->widget()->setLayout(layout);
 
-    //    if(_pluginLoader.getBasePlugin())
-    //    {
-    //       onPluginLoad(_pluginLoader.getBasePlugin());
-    //    }
+    layout = qobject_cast<QVBoxLayout*>(ui->debugOutputDock->widget()->layout());
+    if(layout)
+    {
+        QWidget* w = layout->itemAt(0)->widget();
+        if(w)
+            w->setParent(0);
+        delete layout;
+    }
+    layout = new QVBoxLayout;
+    layout->addWidget(debugMsgWind);
+    layout->setContentsMargins(0,0,0,0);
+    ui->debugOutputDock->widget()->setLayout(layout);
 }
 
 CameraView* MainWindow::addNewSourceTab()
@@ -168,6 +193,15 @@ CameraView* MainWindow::addNewSourceTab()
 
 void MainWindow::initMDIArea()
 {
+    // adjust tab bar width
+    QList<QTabBar *> tabBarList = ui->mdiArea->findChildren<QTabBar*>();
+    QTabBar *tabBar = tabBarList.first();
+    if (tabBar) {
+        tabBar->setExpanding(false);
+    }
+
+    // listen to subwindow changes
+    connect(ui->mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(onMdiSubWindowActivated(QMdiSubWindow*)));
 }
 
 

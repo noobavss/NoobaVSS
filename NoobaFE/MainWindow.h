@@ -5,17 +5,13 @@
 #include "NoobaEye.h"
 #include "SharedImageBuffer.h"
 #include "CameraView.h"
+#include "ParamConfigWind.h"
+#include "OutputWind.h"
 
 // Qt includes
 #include <QMainWindow>
 #include <QScopedPointer>
 #include <QMdiSubWindow>
-#include <QMap>
-#include <QTimer>
-
-// Opencv includes
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
 
 namespace Ui {
     class MainWindow;
@@ -29,9 +25,12 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
 public:
+
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
 public slots:
+
     void closeEvent(QCloseEvent *event);
 
 private slots:
@@ -45,19 +44,18 @@ private slots:
     
     void on_actionAbout_NoobaVSS_triggered();
     void on_controlButton_clicked();
+    void onMdiSubWindowActivated(QMdiSubWindow* subWindow);
 
 private:
 
-
-
-    void updateDockWidgets(CameraView *camView);
+    void updateDockWidgets(ParamConfigWind *paramConfig, OutputWind *debugMsgWind);
     CameraView *addNewSourceTab();
-
     void initMDIArea();
 
     Ui::MainWindow                  *ui;
     SharedImageBuffer               *_sharedImageBuffer;
-
+    ParamConfigWind                 _paramConfigUI;
+    OutputWind                      _debugWind;
 
 };
 
