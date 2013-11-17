@@ -74,6 +74,8 @@ protected:
 signals:
 
     void updateStatisticsInGUI(struct ThreadStatisticsData);
+    void endFileOfStream();
+    void frameAddedToImageBuffer();
 
 private:
 

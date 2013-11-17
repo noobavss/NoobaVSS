@@ -10,12 +10,11 @@ StatPanel::StatPanel(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->imageBufferBar->setValue(0);
-    ui->imageBufferLabel->setText("[000/000]");
+    ui->imageBufferLabel->setText("[00/00]");
     ui->captureRateLabel->setText("");
     ui->processingRateLabel->setText("");
     ui->deviceNumberLabel->setText("");
     ui->cameraResolutionLabel->setText("");
-    ui->roiLabel->setText("");
     ui->mouseCursorPosLabel->setText("");
 }
 

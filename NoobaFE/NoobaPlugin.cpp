@@ -15,8 +15,6 @@ NoobaPlugin::NoobaPlugin(const QString &fileName, const QString& alias, NoobaPlu
     _fileName(fileName),
     _alias(alias)
 {
-    qRegisterMetaType<PluginPassData>("PluginPassData");
-
 }
 
 NoobaPlugin::~NoobaPlugin()
@@ -29,11 +27,13 @@ NoobaPlugin::~NoobaPlugin()
 bool NoobaPlugin::init()
 {
     // TODO: Need to load previous configurations from QSettings
-    qDebug() << _alias << " init " << Q_FUNC_INFO;
+    qDebug() << _alias << " about to initialise " << Q_FUNC_INFO;
     initSignalSlots();
     bool ok =  _api->init();
     if(!ok)
         qDebug() << tr("plugin: '%1' initialisation failed!").arg(_alias) << Q_FUNC_INFO;
+    else
+        qDebug() << _alias << " initialised successfully " << Q_FUNC_INFO;
     emit onInit(this);
     return ok;
 }
@@ -117,7 +117,6 @@ void NoobaPlugin::initSignalSlots()
     connect(_api, SIGNAL(createRectParamRequest(QString,QRectF)), this, SLOT(onCreateRectParam(QString,QRectF)));
 
     qRegisterMetaType<PluginPassData>("PluginPassData");
-//    qRegisterMetaType<PluginPassDataPrivate*>("PluginPassDataPrivate");
     connect(_api, SIGNAL(outputDataRequest(PluginPassData)), this, SIGNAL(outputData(PluginPassData)));
     qRegisterMetaType< QList<QImage> >("QList<QImage>");
     connect(_api, SIGNAL(outputDataRequest(QString,QList<QImage>)), this, SIGNAL(outputData(QString,QList<QImage>)));

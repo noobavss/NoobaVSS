@@ -49,55 +49,87 @@
 
 using namespace cv;
 
+struct PluginConnData;
 class PluginLoader;
+class NoobaPlugin;
+
+class FrameProcessor: public QObject
+{
+    Q_OBJECT
+
+public:
+    FrameProcessor(SharedImageBuffer *_sharedImageBuffer, PluginLoader* pluginLoader, int deviceNumber, QObject* parent = 0);
+    ~FrameProcessor();
+
+public slots:
+    void processFrame();
+
+signals:
+    void updateStatisticsInGUI(struct ThreadStatisticsData);
+    void inputFrame(const QImage& inputFrame);
+
+private:
+    void updateFPS(int timeElapsed);
+
+    int                             fpsSum;
+    int                             _deviceNumber;
+    int                             _sampleNumber;
+    SharedImageBuffer               *_sharedImageBuffer;
+    PluginLoader                    *_pluginLoader;
+    Mat                             currentFrame;
+    Mat                             currentFrameGrayscale;
+    Rect                            currentROI;
+    QImage                          frame;
+    QTime                           t;
+    QQueue<int>                     fps;
+    QMutex                          processingMutex;
+    struct ThreadStatisticsData     statsData;
+
+
+};
 
 class ProcessingThread : public QThread
 {
     Q_OBJECT
 
     public:
-        ProcessingThread(SharedImageBuffer *_sharedImageBuffer, PluginLoader* pluginloader, int _deviceNumber);
+        ProcessingThread(SharedImageBuffer *_sharedImageBuffer, int _deviceNumber);
         QRect getCurrentROI();
-        void stop();
+        PluginLoader* getPluginLoader();
 
-    private:
-        void updateFPS(int);
+private:
+
         void setROI();
         void resetROI();
+
         SharedImageBuffer               *_sharedImageBuffer;
         PluginLoader                    *_pluginLoader;
-        Mat                             currentFrame;
-        Mat                             currentFrameGrayscale;
-        Rect                            currentROI;
-        QImage                          frame;
-        QTime                           t;
-        QQueue<int>                     fps;
         QMutex                          doStopMutex;
-        QMutex                          processingMutex;
+        QMutex                          pluginLoaderMutex;
         Size                            frameSize;
         Point                           framePoint;
         struct ImageProcessingFlags     imgProcFlags;
         struct ImageProcessingSettings  imgProcSettings;
-        struct ThreadStatisticsData     statsData;
+
         volatile bool                   _doStop;
-        int                             processingTime;
-        int                             fpsSum;
-        int                             _sampleNumber;
         int                             _deviceNumber;
         bool                            enableFrameProcessing;
 
-    protected:
+protected:
         void run();
 
-    private slots:
-        void updateImageProcessingFlags(struct ImageProcessingFlags);
-        void updateImageProcessingSettings(struct ImageProcessingSettings);
-        void setROI(QRect roi);
-
-    signals:
+signals:
         void newFrame(const QImage &frame);
         void updateStatisticsInGUI(struct ThreadStatisticsData);
         void inputFrame(const QImage& inputFrame);
+        void pluginLoaded(NoobaPlugin* plugin);
+        void pluginInitialised(NoobaPlugin* plugin);
+        void pluginAboutToRelease(NoobaPlugin* plugin);
+        void pluginAboutToUnload(NoobaPlugin* plugin);
+        void basePluginChanged(NoobaPlugin* newBasePlugin);
+        void pluginsDisconnected(PluginConnData* pcd);
+        void pluginsConnected(PluginConnData* pcd);
+        void FrameAddedToImageBuffer();
 };
 
 #endif // PROCESSINGTHREAD_H

@@ -6,10 +6,10 @@
 #include <QDir>
 #include <QPluginLoader>
 #include <QApplication>
-#include <QMessageBox>
 #include <QDebug>
 #include <QObject>
 #include <QSettings>
+#include <QThread>
 
 PluginLoader::PluginLoader(QObject *parent)
 	: QObject(parent),
@@ -64,10 +64,8 @@ int PluginLoader::loadPluginInfo()
 
     if(!errStr.isEmpty())
     {
-        QMessageBox msgBox;
-        msgBox.setText(tr("Some plugins were not loaded."));
-        msgBox.setDetailedText(tr("%1").arg(errStr));
-        msgBox.exec();
+        emit errMsg(tr("Some plugins were not loaded."), tr("%1").arg(errStr) );
+        qDebug() << errStr << Q_FUNC_INFO;
     }
     return pluginCount;
 }
@@ -109,10 +107,8 @@ NoobaPlugin *PluginLoader::loadPlugin(const QString& fileName, bool isBase)
     // on unsuccessful plugin loading
     pl->unload();       // unload
     delete pl;          // delete loader
-    QMessageBox msgBox;
-    msgBox.setText(tr("Plugin: %1 loading failed").arg(fileName));
+    emit errMsg(tr("Plugin: %1 loading failed").arg(fileName));
     qDebug() << tr("Plugin: %1 loading failed").arg(fileName) << Q_FUNC_INFO;
-    msgBox.exec();      // show error message
     return NULL;        // no plugin loaded, Unsuccessful
 }
 
@@ -179,14 +175,14 @@ const QList<NoobaPlugin* > PluginLoader::getInputPluginList(const QString &outPl
     return _loadedPlugins;
 }
 
-bool PluginLoader::connectAllPlugins(QList<PluginLoader::PluginConnData *> configList)
+bool PluginLoader::connectAllPlugins(QList<PluginConnData *> configList)
 {
     // NOTE:    NO checking for compatibility of plugins done here. It is assumed that is done in
     //          plugin configuration.
 
     disconnectAllPlugins();         // disconnect all plugins and connect new plugins
     qDebug() << tr("plugin connected") << Q_FUNC_INFO;
-    foreach(PluginLoader::PluginConnData* pcd, configList)
+    foreach(PluginConnData* pcd, configList)
     {
         updatePluginConnection(pcd, true);
     }
@@ -194,14 +190,14 @@ bool PluginLoader::connectAllPlugins(QList<PluginLoader::PluginConnData *> confi
     return true;
 }
 
-void PluginLoader::connectPlugins(PluginLoader::PluginConnData* pcd)
+void PluginLoader::connectPlugins(PluginConnData* pcd)
 {
     updatePluginConnection(pcd, true);
     _pcdList.append(pcd);
     return;
 }
 
-bool PluginLoader::disconnectPlugin(PluginLoader::PluginConnData *pcd)
+bool PluginLoader::disconnectPlugin(PluginConnData *pcd)
 {
     bool ok = false;
     updatePluginConnection(pcd, false);
@@ -220,7 +216,7 @@ bool PluginLoader::disconnectPlugin(PluginLoader::PluginConnData *pcd)
 
 bool PluginLoader::disconnectAllPlugins()
 {
-    foreach (PluginLoader::PluginConnData* pcd, _pcdList) {
+    foreach (PluginConnData* pcd, _pcdList) {
         updatePluginConnection(pcd, false);
         delete pcd;
     }
@@ -262,6 +258,7 @@ void PluginLoader::saveCurrentConfig()
 
 void PluginLoader::loadPrevConfig()
 {
+    qDebug() << QThread::currentThreadId() << Q_FUNC_INFO;
     QSettings s(nooba::Organisation, nooba::ProgramName);
     s.beginGroup(nooba::Settings_PluginConfig_block);
     QString baseFilename = s.value(nooba::Settings_BasePlugin_Filename, "").toString();
@@ -280,9 +277,7 @@ void PluginLoader::loadPrevConfig()
         if(!p)
         {
             unloadPlugins();
-            QMessageBox msgBox;
-            msgBox.setText(tr("Plugin loading from previous configuration failed. %1 not found").arg(fName));
-            msgBox.exec();
+            emit errMsg(tr("Plugin loading from previous configuration failed. %1 not found").arg(fName));
             return;
         }
     }
@@ -418,7 +413,7 @@ QString PluginLoader::getPluginAlias(const QString& pluginName)
     return QString("%1[%2]").arg(pluginName).arg(count);
 }
 
-void PluginLoader::updatePluginConnection(PluginLoader::PluginConnData *pcd, bool isConnect)
+void PluginLoader::updatePluginConnection(PluginConnData *pcd, bool isConnect)
 {
     if(isConnect)
     {

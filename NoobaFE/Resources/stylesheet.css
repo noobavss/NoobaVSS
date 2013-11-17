@@ -21,7 +21,6 @@ QFrame#toolbar > QToolButton:hover
 QStatusBar {
     background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                        stop:0 #606060, stop:1 #303030);
-
     color: white;
  }
 
@@ -31,6 +30,25 @@ QTreeView
     border-top: none;
 }
 
+QDockWidget {
+    border: 2px solid #606060;
+    color: #308cc6;
+
+}
+
+QDockWidget::title {
+    text-align: left; /* align the text to the left */
+    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #fcfcfc, stop:1 #f1f1f1);
+    padding-left: 5px;
+    color: white;
+}
+
+QMainWindow::separator {
+    background: black;
+    width: 1px; /* when vertical */
+    height: 1px; /* when horizontal */
+}
 /************************************************************/
 
 QMenu {
@@ -47,7 +65,9 @@ QMenu {
 
  QMenu::item:selected {
      border-color: none;
-     background: rgba(15, 130, 190, 150);
+     background: #308cc6;
+     color: white;
+/*     background: rgba(15, 130, 190, 150);*/
 /*     border-radius: 0px;*/
  }
 
@@ -76,8 +96,15 @@ QMenu {
 /************************************************************/
 
 QMenuBar {
-     background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+/*    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #c1c1c1, stop:1 #a1a1a1);*/
+
+    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                       stop:0 #606060, stop:1 #303030);
+    /* background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                        stop:0 rgb(150, 150, 150), stop:1 rgb(90, 90, 90));
+     */
+
      border: none;
      color: white;
  }
@@ -85,16 +112,22 @@ QMenuBar {
  QMenuBar::item {
      spacing: 3px; /* spacing between menu bar items */
      padding: 1px 4px;
+     border: 2px solid transparent;
      background: transparent;
 /*     border-radius: 2px;*/
  }
 
- QMenuBar::item:selected { /* when selected using mouse or keyboard */
-     background: #a8a8a8;
- }
+/* QMenuBar::item:selected { *//* when selected using mouse or keyboard */
+/*     background: #a8a8a8;
+ }*/
 
  QMenuBar::item:pressed {
-     background: #888888;
+    border: 1px solid gray;
+    color: #308cc6;
+    top-left-radius: 2px;
+    top-right-radius: 2px;
+
+    background: white;
  }
 
  QHeaderView::section {

@@ -36,17 +36,18 @@ public:
     ParamConfigWind* getParamConfigWind() { return _paramConfigUI; }
     OutputWind* getDebugMsgWind() { return _debugOutWind; }
     StatPanel* getStatPanel() { return _statPanel; }
-    PluginLoader* getPluginLoader() { return _pluginLoader.data(); }
 
 public slots:
 
     bool connectToCamera();
     bool connectToVideoFileStream();
     void on_controlButton_clicked();
+    void configurePlugins();
 
 private slots:
 
     void onInputFrameUpdate(const QImage &in);
+    void onFileStreamEOF();
 
     void onPluginLoad(NoobaPlugin *plugin);
     void onPluginAboutToUnload(NoobaPlugin *plugin);
@@ -82,7 +83,7 @@ private:
     void setVideoState(nooba::VideoState state);
     void stopCaptureThread();
     void stopProcessingThread();
-    void connectSignalSlots();
+    void connectThreadSignalSlots();
     void initializeMdiArea();
     inline void setupSharedBufferForNewDevice();
     QMdiSubWindow *addMDISubWindow(FrameViewer* frameViewer);
@@ -92,7 +93,6 @@ private:
     SharedImageBuffer                   *_sharedImageBuffer;
     QScopedPointer<CaptureThread>       _captureThread;
     QScopedPointer<ProcessingThread>    _processingThread;
-    QScopedPointer<PluginLoader>        _pluginLoader;
 
     int                                 _deviceNumber;
     int                                 _imageBufferSize;

@@ -15,8 +15,8 @@ PluginsConfigUI::PluginsConfigUI(PluginLoader& pluginLoader, QWidget *parent)
     ALIAS_ROLE = Qt::UserRole +2;
     ui.setupUi(this);
     updateUI();
-    connect(&_pluginLoader, SIGNAL(pluginsDisconnected(PluginLoader::PluginConnData*)), this,
-            SLOT(onPluginsDisconnected(PluginLoader::PluginConnData*)));
+    connect(&_pluginLoader, SIGNAL(pluginsDisconnected(PluginConnData*)), this,
+            SLOT(onPluginsDisconnected(PluginConnData*)));
 }
 
 PluginsConfigUI::~PluginsConfigUI()
@@ -128,8 +128,8 @@ void PluginsConfigUI::updateUI()
     }
 
     // update connection table
-    QList<PluginLoader::PluginConnData* > lst = _pluginLoader.getPCDList();
-    foreach(PluginLoader::PluginConnData* pcd, lst)
+    QList<PluginConnData* > lst = _pluginLoader.getPCDList();
+    foreach(PluginConnData* pcd, lst)
     {
         QTreeWidgetItem* itm = new QTreeWidgetItem(ui.pluginConfigTree);
         itm->setFlags(itm->flags()| Qt::ItemIsEditable);
@@ -171,7 +171,7 @@ void PluginsConfigUI::on_removeButton_clicked()
 
 void PluginsConfigUI::on_applyButton_clicked()
 {
-    QList<PluginLoader::PluginConnData* > lst;
+    QList<PluginConnData* > lst;
     for(int r=0; r < ui.pluginConfigTree->topLevelItemCount(); r++)
     {
         QTreeWidgetItem* itm = ui.pluginConfigTree->topLevelItem(r);
@@ -179,7 +179,7 @@ void PluginsConfigUI::on_applyButton_clicked()
             continue;
         if(itm->text(0).isEmpty() || itm->text(1).isEmpty())    // empty line
             continue;
-        PluginLoader::PluginConnData* connData = new PluginLoader::PluginConnData;
+        PluginConnData* connData = new PluginConnData;
         QVariant v = itm->data(0, Qt::UserRole);
         NoobaPlugin* p = v.value<NoobaPlugin* >();
         connData->_outPlug = p;
@@ -256,7 +256,7 @@ void PluginsConfigUI::on_cancelButton_clicked()
     close();
 }
 
-void PluginsConfigUI::onPluginsDisconnected(PluginLoader::PluginConnData *pcd)
+void PluginsConfigUI::onPluginsDisconnected(PluginConnData *pcd)
 {
     for(int r = 0; r < ui.pluginConfigTree->topLevelItemCount(); r++)
     {

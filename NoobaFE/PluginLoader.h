@@ -12,19 +12,22 @@
  
 class NoobaPlugin;
 
+struct PluginConnData {
+
+    QString         _outPlugAlias;
+    QString         _inPlugAlias;
+    NoobaPlugin*    _inPlug;
+    NoobaPlugin*    _outPlug;
+};
+
+Q_DECLARE_METATYPE(PluginConnData)
+Q_DECLARE_METATYPE(PluginConnData*)
+
 class PluginLoader : public QObject
 {
 	Q_OBJECT
 
 public:
-
-    struct PluginConnData {
-
-        QString         _outPlugAlias;
-        QString         _inPlugAlias;
-        NoobaPlugin*    _inPlug;
-        NoobaPlugin*    _outPlug;
-    };
 
     PluginLoader(QObject *parent = 0);
 	~PluginLoader();
@@ -118,10 +121,11 @@ signals:
 
     void pluginLoaded(NoobaPlugin* plugin);
     void pluginAboutToUnloaded(NoobaPlugin* plugin);
-    void pluginsDisconnected(PluginLoader::PluginConnData* pcd);
-    void pluginsConnected(PluginLoader::PluginConnData* pcd);
+    void pluginsDisconnected(PluginConnData* pcd);
+    void pluginsConnected(PluginConnData* pcd);
     void pluginInitialised(NoobaPlugin* plugin);
     void pluginAboutToRelease(NoobaPlugin* plugin);
+    void errMsg(const QString& errMsg, const QString& detailedErrMsg = QString());
 
     /**
      * @brief basePluginChanged

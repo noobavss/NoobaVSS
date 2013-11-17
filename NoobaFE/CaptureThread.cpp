@@ -32,6 +32,7 @@
 
 #include "CaptureThread.h"
 
+
 CaptureThread::CaptureThread(SharedImageBuffer *sharedImageBuffer, int deviceNumber, bool dropFrameIfBufferFull, int width, int height) : QThread(), sharedImageBuffer(sharedImageBuffer)
 {
     // Save passed parameters
@@ -161,13 +162,21 @@ void CaptureThread::captureFrame()
     if(!cameraMode)
         msleep(delay);
     // Capture frame (if available)
-    if (!cap.grab())
+    if (!cap.grab())    // on end of stream
+    {
+        if(!cameraMode) // in file stream mode
+        {
+            cap.set(CV_CAP_PROP_POS_FRAMES, 0); // set frame to begining
+            emit endFileOfStream();
+        }
         return;
+    }
 
     // Retrieve frame
     cap.retrieve(grabbedFrame);
     // Add frame to buffer
     sharedImageBuffer->getByDeviceNumber(deviceNumber)->add(grabbedFrame, dropFrameIfBufferFull);
+    emit frameAddedToImageBuffer();
 }
 
 void CaptureThread::stop()

@@ -5,6 +5,8 @@
 /* ProcessingThread.cpp                                                 */
 /*                                                                      */
 /* Nick D'Ademo <nickdademo@gmail.com>                                  */
+/* Modified to fit NoobaVSS by                                          */
+/*      D.A.U.Nanayakkara <daun07@gmail.com>                            */
 /*                                                                      */
 /* Copyright (c) 2012-2013 Nick D'Ademo                                 */
 /*                                                                      */
@@ -35,80 +37,138 @@
 #include "PluginLoader.h"
 #include "NoobaPlugin.h"
 
-ProcessingThread::ProcessingThread(SharedImageBuffer *sharedImageBuffer, PluginLoader* pluginLoader, int deviceNumber) :
+ProcessingThread::ProcessingThread(SharedImageBuffer *sharedImageBuffer, int deviceNumber) :
     QThread(),
     _sharedImageBuffer(sharedImageBuffer),
-    _pluginLoader(pluginLoader)
+    _pluginLoader(NULL)
 {
     // Save Device Number
     _deviceNumber = deviceNumber;
     // Initialize members
     _doStop=false;
-    _sampleNumber = 0;
+}
+
+void ProcessingThread::run()
+{        
+    _pluginLoader = new PluginLoader();
+    FrameProcessor frameProc(_sharedImageBuffer, _pluginLoader, _deviceNumber);
+
+    qRegisterMetaType< struct ThreadStatisticsData>("ThreadStatisticsData");
+    connect(&frameProc, SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)), this, SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)));
+
+    qRegisterMetaType< NoobaPlugin* >("NoobaPlugin");
+    connect(_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SIGNAL(pluginLoaded(NoobaPlugin*)));
+    connect(_pluginLoader, SIGNAL(pluginInitialised(NoobaPlugin*)), this, SIGNAL(pluginInitialised(NoobaPlugin*)));
+    connect(_pluginLoader, SIGNAL(pluginAboutToUnloaded(NoobaPlugin*)), this, SIGNAL(pluginAboutToUnload(NoobaPlugin*)));
+    connect(_pluginLoader, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), this, SIGNAL(pluginAboutToRelease(NoobaPlugin*)));
+    connect(_pluginLoader, SIGNAL(basePluginChanged(NoobaPlugin*)), this, SIGNAL(basePluginChanged(NoobaPlugin*)));
+
+    qRegisterMetaType< struct PluginConnData* >("PluginConnData");
+    connect(_pluginLoader, SIGNAL(pluginsConnected(PluginConnData*)), this, SIGNAL(pluginsConnected(PluginConnData*)));
+    connect(_pluginLoader, SIGNAL(pluginsDisconnected(PluginConnData*)), this, SIGNAL(pluginsDisconnected(PluginConnData*)));
+    connect(this, SIGNAL(FrameAddedToImageBuffer()), &frameProc, SLOT(processFrame()));
+    connect(&frameProc, SIGNAL(inputFrame(QImage)), this, SIGNAL(inputFrame(QImage)));
+    // after connecting plugin loader signals
+    _pluginLoader->loadPluginInfo();
+    _pluginLoader->loadPrevConfig();
+
+    qDebug() << tr("[ %1 ] Starting processing thread").arg(_deviceNumber);
+    exec();
+
+    /**
+      Plugin loader deleted
+      */
+    pluginLoaderMutex.lock();
+    _pluginLoader->deleteLater();
+    _pluginLoader = NULL;
+    pluginLoaderMutex.unlock();
+    /**
+      unloc mutex
+      */
+    qDebug() << tr("[ %1 ] Stopping processing thread").arg(_deviceNumber);
+}
+
+PluginLoader *ProcessingThread::getPluginLoader()
+{
+    QMutexLocker locker(&pluginLoaderMutex);
+    qDebug() << currentThreadId() << Q_FUNC_INFO;
+    return _pluginLoader;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Class ProcessInput
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief ProcessInput::ProcessInput
+ * @param sharedImageBuffer
+ * @param pluginLoader
+ * @param deviceNumber
+ * @param parent
+ */
+FrameProcessor::FrameProcessor(SharedImageBuffer *sharedImageBuffer, PluginLoader *pluginLoader, int deviceNumber, QObject *parent)
+    : QObject(parent),
+      _deviceNumber(deviceNumber),
+      _sharedImageBuffer(sharedImageBuffer),
+      _pluginLoader(pluginLoader)
+{
     fpsSum = 0;
     fps.clear();
+    _sampleNumber = 0;
     statsData.averageFPS = 0;
     statsData.nFramesProcessed = 0;
 }
 
-void ProcessingThread::run()
+FrameProcessor::~FrameProcessor()
 {
-    while(1)
-    {
-        ////////////////////////////////
-        // Stop thread if doStop=TRUE //
-        ////////////////////////////////
-        doStopMutex.lock();
-        if(_doStop)
-        {
-            _doStop=false;
-            doStopMutex.unlock();
-            break;
-        }
-        doStopMutex.unlock();
-        /////////////////////////////////
-        /////////////////////////////////
-
-        // Save processing time
-        processingTime=t.elapsed();
-        // Start timer (used to calculate processing rate)
-        t.start();
-//        processingMutex.lock();
-        // Get frame from queue, store in currentFrame, set ROI
-        currentFrame=_sharedImageBuffer->getByDeviceNumber(_deviceNumber)->get().clone();
-
-        emit inputFrame(MatToQImage(currentFrame));
-        // Example of how to grab a frame from another stream (where Device Number=1)
-        // Note: This requires stream synchronization to be ENABLED (in the Options menu of MainWindow) and frame processing for the stream you are grabbing FROM to be DISABLED.
-        /*
-        if(sharedImageBuffer->containsImageBufferForDeviceNumber(1))
-        {
-            // Grab frame from another stream (connected to camera with Device Number=1)
-            Mat frameFromAnotherStream = Mat(sharedImageBuffer->getByDeviceNumber(1)->getFrame(), currentROI);
-            // Linear blend images together using OpenCV and save the result to currentFrame. Note: beta=1-alpha
-            addWeighted(frameFromAnotherStream, 0.5, currentFrame, 0.5, 0.0, currentFrame);
-        }
-        */
-        NoobaPlugin* p = _pluginLoader->getBasePlugin();
-        if(!p)  // wait till the base blugin loaded
-            continue;
-        cv::Mat out;
-        ProcParams params;
-        cvtColor(currentFrame, currentFrame, CV_BGR2RGB);
-        p->procFrame(currentFrame, out, params);
-
-//        processingMutex.unlock();
-
-         // Update statistics
-        updateFPS(processingTime);
-        statsData.nFramesProcessed++;
-        // Inform GUI of updated statistics
-        emit updateStatisticsInGUI(statsData);
-    }
-    qDebug() << "Stopping processing thread...";
 }
 
-void ProcessingThread::updateFPS(int timeElapsed)
+void FrameProcessor::processFrame()
+{
+    QMutexLocker locker(&processingMutex);
+
+    int processingTime = t.elapsed();
+    // Start timer (used to calculate processing rate)
+    t.start();
+
+
+    Buffer<Mat> *buffer = _sharedImageBuffer->getByDeviceNumber(_deviceNumber);
+    if(buffer->isEmpty())
+        return;
+
+    // Get frame from queue, store in currentFrame
+    currentFrame = buffer->get().clone();
+    emit inputFrame(MatToQImage(currentFrame));
+    // Example of how to grab a frame from another stream (where Device Number=1)
+    // Note: This requires stream synchronization to be ENABLED (in the Options menu of MainWindow) and frame processing for the stream you are grabbing FROM to be DISABLED.
+    /*
+    if(sharedImageBuffer->containsImageBufferForDeviceNumber(1))
+    {
+        // Grab frame from another stream (connected to camera with Device Number=1)
+        Mat frameFromAnotherStream = Mat(sharedImageBuffer->getByDeviceNumber(1)->getFrame(), currentROI);
+        // Linear blend images together using OpenCV and save the result to currentFrame. Note: beta=1-alpha
+        addWeighted(frameFromAnotherStream, 0.5, currentFrame, 0.5, 0.0, currentFrame);
+    }
+    */
+    NoobaPlugin* p = _pluginLoader->getBasePlugin();
+    if(!p)  // wait till the base blugin loaded
+        return;
+    cv::Mat out;
+    ProcParams params;
+    cvtColor(currentFrame, currentFrame, CV_BGR2RGB);
+    p->procFrame(currentFrame, out, params);
+
+     // Update statistics
+    updateFPS(processingTime);
+    statsData.nFramesProcessed++;
+    // Inform GUI of updated statistics
+    emit updateStatisticsInGUI(statsData);
+    return;
+}
+
+void FrameProcessor::updateFPS(int timeElapsed)
 {
     // Add instantaneous FPS value to queue
     if(timeElapsed>0)
@@ -119,68 +179,20 @@ void ProcessingThread::updateFPS(int timeElapsed)
     }
 
     // Maximum size of queue is DEFAULT_PROCESSING_FPS_STAT_QUEUE_LENGTH
-    if(fps.size()>PROCESSING_FPS_STAT_QUEUE_LENGTH)
+    if(fps.size() > PROCESSING_FPS_STAT_QUEUE_LENGTH)
         fps.dequeue();
 
     // Update FPS value every DEFAULT_PROCESSING_FPS_STAT_QUEUE_LENGTH samples
-    if((fps.size()==PROCESSING_FPS_STAT_QUEUE_LENGTH)&&(_sampleNumber==PROCESSING_FPS_STAT_QUEUE_LENGTH))
+    if((fps.size() == PROCESSING_FPS_STAT_QUEUE_LENGTH)&&(_sampleNumber==PROCESSING_FPS_STAT_QUEUE_LENGTH))
     {
         // Empty queue and store sum
         while(!fps.empty())
-            fpsSum+=fps.dequeue();
+            fpsSum += fps.dequeue();
         // Calculate average FPS
         statsData.averageFPS=fpsSum/PROCESSING_FPS_STAT_QUEUE_LENGTH;
         // Reset sum
-        fpsSum=0;
+        fpsSum = 0;
         // Reset sample number
-        _sampleNumber=0;
+        _sampleNumber = 0;
     }
-}
-
-void ProcessingThread::stop()
-{
-    QMutexLocker locker(&doStopMutex);
-    _doStop=true;
-}
-
-void ProcessingThread::updateImageProcessingFlags(struct ImageProcessingFlags imgProcFlags)
-{
-//    QMutexLocker locker(&processingMutex);
-//    this->imgProcFlags.grayscaleOn=imgProcFlags.grayscaleOn;
-//    this->imgProcFlags.smoothOn=imgProcFlags.smoothOn;
-//    this->imgProcFlags.dilateOn=imgProcFlags.dilateOn;
-//    this->imgProcFlags.erodeOn=imgProcFlags.erodeOn;
-//    this->imgProcFlags.flipOn=imgProcFlags.flipOn;
-//    this->imgProcFlags.cannyOn=imgProcFlags.cannyOn;
-}
-
-void ProcessingThread::updateImageProcessingSettings(struct ImageProcessingSettings imgProcSettings)
-{
-//    QMutexLocker locker(&processingMutex);
-//    this->imgProcSettings.smoothType=imgProcSettings.smoothType;
-//    this->imgProcSettings.smoothParam1=imgProcSettings.smoothParam1;
-//    this->imgProcSettings.smoothParam2=imgProcSettings.smoothParam2;
-//    this->imgProcSettings.smoothParam3=imgProcSettings.smoothParam3;
-//    this->imgProcSettings.smoothParam4=imgProcSettings.smoothParam4;
-//    this->imgProcSettings.dilateNumberOfIterations=imgProcSettings.dilateNumberOfIterations;
-//    this->imgProcSettings.erodeNumberOfIterations=imgProcSettings.erodeNumberOfIterations;
-//    this->imgProcSettings.flipCode=imgProcSettings.flipCode;
-//    this->imgProcSettings.cannyThreshold1=imgProcSettings.cannyThreshold1;
-//    this->imgProcSettings.cannyThreshold2=imgProcSettings.cannyThreshold2;
-//    this->imgProcSettings.cannyApertureSize=imgProcSettings.cannyApertureSize;
-//    this->imgProcSettings.cannyL2gradient=imgProcSettings.cannyL2gradient;
-}
-
-void ProcessingThread::setROI(QRect roi)
-{
-//    QMutexLocker locker(&processingMutex);
-//    currentROI.x = roi.x();
-//    currentROI.y = roi.y();
-//    currentROI.width = roi.width();
-//    currentROI.height = roi.height();
-}
-
-QRect ProcessingThread::getCurrentROI()
-{
-    return QRect(currentROI.x, currentROI.y, currentROI.width, currentROI.height);
 }

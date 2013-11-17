@@ -255,9 +255,8 @@ void MainWindow::onPluginAct_triggerred()
     CameraView  *camView = getActiveCameraView();
     if(!camView)
         return;
+    camView->configurePlugins();
 
-    PluginsConfigUI dlg(*camView->getPluginLoader(), this);
-    dlg.exec();
 }
 
 void MainWindow::on_actionAbout_NoobaVSS_triggered()
