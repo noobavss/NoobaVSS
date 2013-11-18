@@ -5,7 +5,9 @@
 
 QFrame#toolbar
 {
-    background-color: white;
+    border-top: 1px solid black;
+    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+    stop:0 #fcfcfc, stop:1 #f1f1f1);
 }
 
 QFrame#toolbar > QToolButton
@@ -15,7 +17,7 @@ QFrame#toolbar > QToolButton
 
 QFrame#toolbar > QToolButton:hover
 {
-    background-color: rgba(255,155,0);
+    background-color: rgba(255,155,0, 200);
 }
 
 QStatusBar {
@@ -124,8 +126,8 @@ QMenuBar {
  QMenuBar::item:pressed {
     border: 1px solid gray;
     color: #308cc6;
-    top-left-radius: 2px;
-    top-right-radius: 2px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
 
     background: white;
  }
@@ -138,3 +140,39 @@ QMenuBar {
      padding-left: 4px;
      border: 1px solid #6c6c6c;
  }
+
+/*******************************************************************************/
+QTabWidget::pane { /* The tab widget frame */
+    border-top: 2px solid #308cc6;
+    position: absolute;
+    top: -0.5em;
+}
+
+QTabWidget::tab-bar {
+    alignment: center;
+}
+
+/* Style the tab using the tab sub-control. Note that
+    it reads QTabBar _not_ QTabWidget */
+QTabBar::tab {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #fff, stop: 0.4 #e1e1e1,
+                                stop: 0.5 #efefef, stop: 1.0 #eee);
+    border: 2px solid #C4C4C3;
+    border-bottom-color: #308cc6; /* same as the pane color */
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    min-width: 8ex;
+    padding: 2px;
+}
+
+QTabBar::tab:selected, QTabBar::tab:hover {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #fafafa, stop: 0.4 #f4f4f4,
+                                stop: 0.5 #e7e7e7, stop: 1.0 #fafafa);
+}
+
+QTabBar::tab:selected {
+    border-color: #9B9B9B;
+    border-bottom-color: #C2C7CB; /* same as pane color */
+}

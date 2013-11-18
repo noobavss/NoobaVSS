@@ -44,6 +44,12 @@ namespace nooba {
         PausedState     = 1,
         StoppedState    = 2
     };
+
+    enum NoobaAlert {
+        RedAlert    = 0,
+        AmberAlert  = 1,
+
+    };
 }
 
 Q_DECLARE_METATYPE(nooba::ParamType)   // now ParamTypes can be used with QVariants
@@ -251,10 +257,8 @@ public:
     void outputData(const PluginPassData& data)
     {   emit outputDataRequest(data); }
 
-    void outputData(const QString& str, QList<QImage> imageList)
-    {   emit outputDataRequest(str, imageList); }
-
-
+    void outputData(const QStringList& strList, QList<QImage> imageList)
+    {   emit outputDataRequest(strList, imageList); }
 
     /**
      * @brief createOutputWind creates MDI SubWindow to show the frame outputs
@@ -276,9 +280,10 @@ signals:
     void createRectParamRequest(const QString& varName, const QRectF& val);
     void debugMsgRequest(const QString& msg);
     void outputDataRequest(const PluginPassData& data);
-    void outputDataRequest(const QString& str, QList<QImage> imageList);
+    void outputDataRequest(const QStringList& strList, QList<QImage> imageList);
     void createFrameViewerRequest(const QString& title);
     void updateFrameViewerRequest(const QString& title, const QImage& frame);
+    void anomalyDetected();
 
 public slots:
 
@@ -319,8 +324,8 @@ public slots:
         Q_UNUSED(data)
     }
 
-    virtual void inputData(const QString& str, QList<QImage> imageList){
-        Q_UNUSED(str) Q_UNUSED(imageList)
+    virtual void inputData(const QStringList& strList, QList<QImage> imageList){
+        Q_UNUSED(strList) Q_UNUSED(imageList)
     }
 
 protected:

@@ -119,7 +119,7 @@ void NoobaPlugin::initSignalSlots()
     qRegisterMetaType<PluginPassData>("PluginPassData");
     connect(_api, SIGNAL(outputDataRequest(PluginPassData)), this, SIGNAL(outputData(PluginPassData)));
     qRegisterMetaType< QList<QImage> >("QList<QImage>");
-    connect(_api, SIGNAL(outputDataRequest(QString,QList<QImage>)), this, SIGNAL(outputData(QString,QList<QImage>)));
+    connect(_api, SIGNAL(outputDataRequest(QStringList,QList<QImage>)), this, SIGNAL(outputData(QStringList,QList<QImage>)));
     connect(_api, SIGNAL(createFrameViewerRequest(QString)), this, SIGNAL(createFrameViewer(QString)));
     connect(_api, SIGNAL(updateFrameViewerRequest(QString,QImage)), this, SIGNAL(updateFrameViewer(QString,QImage)));
 }
@@ -170,9 +170,9 @@ void NoobaPlugin::inputData(const PluginPassData& data)
     _api->inputData(data);
 }
 
-void NoobaPlugin::inputData(const QString &str, QList<QImage> imageList)
+void NoobaPlugin::inputData(const QStringList &strList, QList<QImage> imageList)
 {
-    _api->inputData(str, imageList);
+    _api->inputData(strList, imageList);
 }
 
 void NoobaPlugin::saveConfig(const QString &filename)

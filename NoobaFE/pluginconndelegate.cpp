@@ -1,12 +1,14 @@
 #include "pluginconndelegate.h"
 #include "PluginLoader.h"
 #include "NoobaPlugin.h"
+#include "PluginsConfigUI.h"
 
 #include <QComboBox>
+#include <QStringList>
 
-PluginConnDelegate::PluginConnDelegate(PluginLoader* loader, QObject *parent) :
-    QStyledItemDelegate(parent),
-    _plugLoader(loader)
+PluginConnDelegate::PluginConnDelegate(PluginsConfigUI* configUi) :
+    QStyledItemDelegate(configUi),
+    _plugConfUI(configUi)
 {
 }
 
@@ -23,30 +25,24 @@ void PluginConnDelegate::setEditorData(QWidget *editor, const QModelIndex &index
     if(!c)
         return;
 
-    QList<NoobaPlugin* > data;
+    QStringList data;
     if(index.column() == 0) // output plugin
     {
-        data = _plugLoader->getOutputPluginList("");
+        data = _plugConfUI->getOutputPluginList("");
     }
     else    // input plugin
     {
-        data = _plugLoader->getInputPluginList("");
+        data = _plugConfUI->getInputPluginList("");
 
     }
-    foreach(NoobaPlugin* p, data)
+
+    foreach(const QString& name, data)
     {
-        QVariant v;
-        v.setValue(p);
-        c->addItem(p->alias(), v);
+        c->addItem(name);
     }
 }
 
 void PluginConnDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
-    QComboBox* c = qobject_cast<QComboBox* >(editor);
-    if(!c)
-        return;
-
-    model->setData(index, c->currentText());
-    model->setData(index, c->itemData(c->currentIndex()), Qt::UserRole); // saved to model
+    QStyledItemDelegate::setModelData(editor, model, index);
 }

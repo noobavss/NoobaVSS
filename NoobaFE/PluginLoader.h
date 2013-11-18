@@ -9,6 +9,7 @@
 #include <QList>
 #include <QPluginLoader>
 #include <QDir>
+#include <QMutex>
  
 class NoobaPlugin;
 
@@ -33,16 +34,39 @@ public:
 	~PluginLoader();
 
     /**
-     * Get plugin details of plugins in the plugins directory
-     */
-    int loadPluginInfo();
-
-    /**
      * Returns currently available plugins information
      * NOTE: Need to call loadPlugins before this if you need to get an upto date
      * plugins information.
      */
     const QList<nooba::PluginData> getPluginInfo() const { return _pluginInfoList; }
+
+    /**
+     * @brief getActivePlugin main plugin that does the initial processing. Only this plugins ProcFrame(..)
+     *                        functions is called by the FE.
+     * @return
+     */
+    NoobaPlugin *getBasePlugin() const;
+
+    /**
+     * @brief getActivePlugins currently loaded plugins are returned
+     * @return plugins are returned as a QList od NoobaPlugin pointers.
+     */
+    QList<NoobaPlugin* > getActivePlugins() const { return _loadedPlugins; }
+    const QList<NoobaPlugin* > getOutputPluginList(const QString& inPlugAlias) const;
+    const QList<NoobaPlugin* > getInputPluginList(const QString& outPlugAlias) const;
+
+    /**
+     * @brief getPCDList returns the PluginConnData list
+     * @return
+     */
+    QList<PluginConnData *> getPCDList();
+
+public slots:
+
+    /**
+     * Get plugin details of plugins in the plugins directory
+     */
+    int loadPluginInfo();
 
     /**
      * @brief loadPlugin Load the plugin in the plugins directory with the file name fileName
@@ -52,18 +76,6 @@ public:
      */
     NoobaPlugin* loadPlugin(const QString& fileName, bool isBase = false);
 
-    /**
-     * @brief getActivePlugin main plugin that does the initial processing. Only this plugins ProcFrame(..)
-     *                        functions is called by the FE.
-     * @return
-     */
-    NoobaPlugin* getBasePlugin() const { return _basePlugin; }
-
-    /**
-     * @brief getActivePlugins currently loaded plugins are returned
-     * @return plugins are returned as a QList od NoobaPlugin pointers.
-     */
-    QList<NoobaPlugin* > getActivePlugins() const { return _loadedPlugins; }
     /**
      * @brief unloadActivePlugin    unloads the actvie plugin.
      * @return  if successfull returns true, otherwise false. incase there is no active
@@ -79,9 +91,6 @@ public:
      */
     bool unloadPlugin(const QString& alias);
 
-    const QList<NoobaPlugin* > getOutputPluginList(const QString& inPlugAlias) const;
-    const QList<NoobaPlugin* > getInputPluginList(const QString& outPlugAlias) const;
-
     /**
      * @brief connectPlugins    All previous connections are disconnected before connecting the
      *                          given set of plugins.
@@ -91,11 +100,7 @@ public:
     bool connectAllPlugins(QList<PluginConnData*> configList);
     void connectPlugins(PluginConnData *pcd);
 
-    /**
-     * @brief getPCDList returns the PluginConnData list
-     * @return
-     */
-    QList<PluginConnData*> getPCDList() { return _pcdList; }
+    void connectPlugins(const QString& outPlugAlias, const QString& inPlugAlias);
 
     /**
      * @brief disconnectPlugin  disconnect a single connection according to the plugin connection
@@ -141,6 +146,10 @@ private:
     void updateBasePlugin(NoobaPlugin *pluginToBeRemoved);
     inline void releaseAndUnload(NoobaPlugin* plugin);
 
+    mutable QMutex              _basePluginMutex;
+    mutable QMutex              _pcdMutex;
+    mutable QMutex              _loadedPluginsMutex;
+    mutable QMutex              _pluginInfoListMutex;
     QList<nooba::PluginData>    _pluginInfoList;
     NoobaPlugin                 *_basePlugin;
     QDir                        _dir;

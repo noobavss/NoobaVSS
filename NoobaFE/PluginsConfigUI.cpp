@@ -1,4 +1,5 @@
 #include <QMessageBox>
+#include <QDebug>
 
 #include "PluginsConfigUI.h"
 #include "NoobaPlugin.h"
@@ -6,26 +7,42 @@
 PluginsConfigUI::PluginsConfigUI(PluginLoader& pluginLoader, QWidget *parent)
     : QDialog(parent),
       _pluginLoader(pluginLoader),
-      _pluginConnDelegate(new PluginConnDelegate(&pluginLoader,this)),
+      _pluginConnDelegate(NULL),
       ACTIVE(tr("Active")),
       DISABLED(tr("Disabled"))
 {
+    _pluginConnDelegate = new PluginConnDelegate(this);
     _applyConfig = false;
     FILENAME_ROLE = Qt::UserRole;
     ALIAS_ROLE = Qt::UserRole +2;
     ui.setupUi(this);
     updateUI();
-    connect(&_pluginLoader, SIGNAL(pluginsDisconnected(PluginConnData*)), this,
-            SLOT(onPluginsDisconnected(PluginConnData*)));
+
+    connect(this, SIGNAL(loadPlugin(QString,bool)), &_pluginLoader, SLOT(loadPlugin(QString,bool)));
+//    connect(this)
 }
 
 PluginsConfigUI::~PluginsConfigUI()
 {
 }
 
+QStringList PluginsConfigUI::getOutputPluginList(const QString &inPlugAlias)
+{
+    Q_UNUSED(inPlugAlias)
+    // TODO update the list according to inPlug
+    return _toBeLoadedPlugins;
+}
+
+QStringList PluginsConfigUI::getInputPluginList(const QString &outPlugAlias)
+{
+    Q_UNUSED(outPlugAlias)
+    // TODO update the list according to outplug
+    return _toBeLoadedPlugins;
+}
+
 void PluginsConfigUI::onReloadButtonClicked()
 {
-    _pluginLoader.loadPluginInfo();
+    emit loadPluginInfo();
     updateUI();
 }
 
@@ -59,7 +76,6 @@ void PluginsConfigUI::updateUI()
     ui.pluginListTree->clear();
     ui.pluginListTree->setColumnCount(2);
     ui.pluginListTree->setHeaderLabels(QStringList() << tr("Property") << tr("Value"));
-
 
     foreach(const nooba::PluginData& pluginData, _pluginLoader.getPluginInfo())
     {
@@ -146,7 +162,6 @@ void PluginsConfigUI::updateUI()
     ui.pluginConfigTree->setItemDelegate(_pluginConnDelegate);
 }
 
-
 void PluginsConfigUI::on_addButton_clicked()
 {
     QTreeWidgetItem* itm = new QTreeWidgetItem(1);
@@ -171,27 +186,39 @@ void PluginsConfigUI::on_removeButton_clicked()
 
 void PluginsConfigUI::on_applyButton_clicked()
 {
-    QList<PluginConnData* > lst;
-    for(int r=0; r < ui.pluginConfigTree->topLevelItemCount(); r++)
+    if(ui.loadedPluginsTree->topLevelItemCount() == 0)
     {
-        QTreeWidgetItem* itm = ui.pluginConfigTree->topLevelItem(r);
-        if(!itm)
-            continue;
-        if(itm->text(0).isEmpty() || itm->text(1).isEmpty())    // empty line
-            continue;
-        PluginConnData* connData = new PluginConnData;
-        QVariant v = itm->data(0, Qt::UserRole);
-        NoobaPlugin* p = v.value<NoobaPlugin* >();
-        connData->_outPlug = p;
-        connData->_outPlugAlias = p->alias();
-        v = itm->data(1, Qt::UserRole);
-        p = v.value<NoobaPlugin* >();
-        connData->_inPlug = p;
-        connData->_inPlugAlias = p->alias();
-        lst.append(connData);
+        emit saveCurrentConfig();
+        return;
     }
-    _pluginLoader.connectAllPlugins(lst);
-    _pluginLoader.saveCurrentConfig();
+
+    emit loadPlugin(ui.loadedPluginsTree->topLevelItem(0)->text(0), false);
+    for(int i = 1; i < ui.loadedPluginsTree->topLevelItemCount();  i++)
+    {
+        emit loadPlugin(ui.loadedPluginsTree->topLevelItem(i)->text(0), false);
+    }
+
+//    QList<PluginConnData* > lst;
+//    for(int r=0; r < ui.pluginConfigTree->topLevelItemCount(); r++)
+//    {
+//        QTreeWidgetItem* itm = ui.pluginConfigTree->topLevelItem(r);
+//        if(!itm)
+//            continue;
+//        if(itm->text(0).isEmpty() || itm->text(1).isEmpty())    // empty line
+//            continue;
+//        PluginConnData* connData = new PluginConnData;
+//        QVariant v = itm->data(0, Qt::UserRole);
+//        NoobaPlugin* p = v.value<NoobaPlugin* >();
+//        connData->_outPlug = p;
+//        connData->_outPlugAlias = p->alias();
+//        v = itm->data(1, Qt::UserRole);
+//        p = v.value<NoobaPlugin* >();
+//        connData->_inPlug = p;
+//        connData->_inPlugAlias = p->alias();
+//        lst.append(connData);
+//    }
+//    _pluginLoader.connectAllPlugins(lst);
+//    _pluginLoader.saveCurrentConfig();
     _applyConfig = true;
 }
 
@@ -208,30 +235,26 @@ void PluginsConfigUI::on_loadPluginButton_clicked()
 
     // TODO: Need to check for the already loaded plugin of the same type and rename it.
     //       This should be consistent with other parts.
-    QTreeWidgetItem* itm = l.first();
-
-    bool isBase;
-    (ui.loadedPluginsTree->topLevelItemCount() == 0) ? isBase =true: isBase = false;
-    NoobaPlugin* p = _pluginLoader.loadPlugin(itm->data(0, FILENAME_ROLE).toString(), isBase);
-    addLoadedPluginToTree(p);
-
+    MoveTreeWidgetItem(ui.availablePluginsTree, ui.loadedPluginsTree, l.first());
 }
 
 void PluginsConfigUI::addLoadedPluginToTree(NoobaPlugin *p)
 {
-    QTreeWidgetItem* pluginItm = new QTreeWidgetItem(ui.loadedPluginsTree);
-    pluginItm->setData(0, ALIAS_ROLE, QVariant(p->alias()));
-    if(p->isBasePlugin())
+    QList<QTreeWidgetItem* > lst = ui.availablePluginsTree->findItems(p->alias(), Qt::MatchExactly, 0);
+
+    if(lst.isEmpty())
     {
-        pluginItm->setText(0, QString("[Base]").append(p->alias()));
-        pluginItm->setForeground(0, QBrush(QColor(155,120,0)));
+        qDebug() << tr("plugin [ %1 ] not found in available plugins list").arg(p->alias()) << Q_FUNC_INFO ;
+        return;
     }
-    else
-    {
-        pluginItm->setText(0, p->alias());
-    }
-    pluginItm->setData(0, FILENAME_ROLE, p->fileName()); // used to identify the plugin.
-    pluginItm->setToolTip(0, tr("Plugin: <b>%1</b>\nFileName: <b>%2</b>" ).arg(p->getPluginInfo().name()).arg(p->fileName()));
+
+    MoveTreeWidgetItem(ui.availablePluginsTree, ui.loadedPluginsTree, lst.first());
+}
+
+void PluginsConfigUI::MoveTreeWidgetItem(QTreeWidget *from, QTreeWidget *to, QTreeWidgetItem* item)
+{
+    from->takeTopLevelItem(from->indexOfTopLevelItem(item));
+    to->addTopLevelItem(item);
 }
 
 void PluginsConfigUI::on_unloadPluginButton_clicked()
@@ -244,10 +267,7 @@ void PluginsConfigUI::on_unloadPluginButton_clicked()
         errMsg.exec();
         return;
     }
-
-    _pluginLoader.unloadPlugin(l.first()->data(0, ALIAS_ROLE).toString());
-    delete l.first();
-    return;
+    MoveTreeWidgetItem(ui.loadedPluginsTree, ui.availablePluginsTree, l.first());
 }
 
 void PluginsConfigUI::on_cancelButton_clicked()
@@ -256,17 +276,17 @@ void PluginsConfigUI::on_cancelButton_clicked()
     close();
 }
 
-void PluginsConfigUI::onPluginsDisconnected(PluginConnData *pcd)
-{
-    for(int r = 0; r < ui.pluginConfigTree->topLevelItemCount(); r++)
-    {
-        QTreeWidgetItem* itm = ui.pluginConfigTree->topLevelItem(r);
-        if(itm->text(0).compare(pcd->_outPlugAlias) == 0 && itm->text(1).compare(pcd->_inPlugAlias) == 0)
-        {
-            delete itm;
-        }
-    }
-}
+//void PluginsConfigUI::onPluginsDisconnected(PluginConnData *pcd)
+//{
+//    for(int r = 0; r < ui.pluginConfigTree->topLevelItemCount(); r++)
+//    {
+//        QTreeWidgetItem* itm = ui.pluginConfigTree->topLevelItem(r);
+//        if(itm->text(0).compare(pcd->_outPlugAlias) == 0 && itm->text(1).compare(pcd->_inPlugAlias) == 0)
+//        {
+//            delete itm;
+//        }
+//    }
+//}
 
 void PluginsConfigUI::closeEvent(QCloseEvent *)
 {

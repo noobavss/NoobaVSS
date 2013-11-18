@@ -1,7 +1,10 @@
 #ifndef PLUGINSCONFIGUI_H
 #define PLUGINSCONFIGUI_H
 
+//Qt
 #include <QDialog>
+#include  <QStringList>
+
 #include "ui_PluginsConfigUI.h"
 #include "pluginconndelegate.h"
 #include "PluginLoader.h"
@@ -14,8 +17,10 @@ class PluginsConfigUI : public QDialog
 
 public:
 
-    PluginsConfigUI(PluginLoader& pluginLoader, QWidget *parent = 0);
+    PluginsConfigUI(PluginLoader& pluginLoader, QWidget* parent = 0);
     ~PluginsConfigUI();
+    QStringList getOutputPluginList(const QString& inPlugAlias);
+    QStringList getInputPluginList(const QString& outPlugAlias);
 
 private slots:
 
@@ -27,15 +32,22 @@ private slots:
     void on_loadPluginButton_clicked();
     void on_unloadPluginButton_clicked();
     void on_cancelButton_clicked();
-    void onPluginsDisconnected(PluginConnData* pcd);
+//    void onPluginsDisconnected(PluginConnData* pcd);
     void closeEvent(QCloseEvent *);
-
     void on_doneButton_clicked();
+
+signals:
+
+    void loadPlugin(const QString& name, bool isBase);
+    void unloadPlugin(const QString& alias);
+    void loadPluginInfo();
+    void saveCurrentConfig();
 
 private:
 
     void updateUI();
     void addLoadedPluginToTree(NoobaPlugin* p);
+    void MoveTreeWidgetItem(QTreeWidget* from, QTreeWidget* to, QTreeWidgetItem *item);
 
     Ui::PluginsConfigUI ui;
     Qt::ItemDataRole    FILENAME_ROLE;
@@ -44,7 +56,8 @@ private:
     PluginLoader        &_pluginLoader;
     PluginConnDelegate* _pluginConnDelegate;
     const QString       ACTIVE;
-    const QString       DISABLED;    
+    const QString       DISABLED;
+    const QStringList   _toBeLoadedPlugins;
 };
 
 #endif // PLUGINSCONFIGUI_H

@@ -3,19 +3,20 @@
 
 #include <QStyledItemDelegate>
 class PluginLoader;
+class PluginsConfigUI;
 
 class PluginConnDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit PluginConnDelegate(PluginLoader* loader, QObject *parent = 0);
+    explicit PluginConnDelegate(PluginsConfigUI *configUi);
 
     QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
     void setEditorData(QWidget *editor, const QModelIndex &index) const;
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
 
 private:
-    PluginLoader*   _plugLoader;
+    PluginsConfigUI*   _plugConfUI;
 };
 
 #endif // PLUGINCONNDELEGATE_H

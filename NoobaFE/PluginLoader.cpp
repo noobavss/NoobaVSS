@@ -10,6 +10,7 @@
 #include <QObject>
 #include <QSettings>
 #include <QThread>
+#include <QMutexLocker>
 
 PluginLoader::PluginLoader(QObject *parent)
 	: QObject(parent),
@@ -26,8 +27,15 @@ PluginLoader::~PluginLoader()
     unloadPlugins();
 }
 
+NoobaPlugin *PluginLoader::getBasePlugin() const
+{
+    const QMutexLocker locker(&_basePluginMutex);
+    return _basePlugin;
+}
+
 int PluginLoader::loadPluginInfo()
 {
+    QMutexLocker locker(&_pluginInfoListMutex);
     /*QDir pluginsDir(QApplication::instance()->applicationDirPath());*/
     _pluginInfoList.clear();
     int pluginCount = 0;
@@ -97,9 +105,28 @@ NoobaPlugin *PluginLoader::loadPlugin(const QString& fileName, bool isBase)
 
             nPlug->setIsBasePlugin(isBase);
             nPlug->init();
+
+            ///////////////////////////////////////
+            // LOCK loaded plugin list
+            ///////////////////////////////////////
+            _loadedPluginsMutex.lock();
             _loadedPlugins.append(nPlug);
+            _loadedPluginsMutex.unlock();
+            ////////////////////////////////////////
+            // UNLOCK
+            ////////////////////////////////////////
             if(isBase)
+            {
+                ////////////////////////////////////
+                // base plugin update lock
+                ////////////////////////////////////
+                _basePluginMutex.lock();
                 _basePlugin = nPlug;
+                _basePluginMutex.unlock();
+                ////////////////////////////////////
+                // UNLOCK
+                ////////////////////////////////////
+            }
             return nPlug; // return plugin, successful
         }
     }    
@@ -116,8 +143,12 @@ bool PluginLoader::unloadPlugins()
 {
     bool ok = true;
     disconnectAllPlugins();
-    _basePlugin = NULL;
 
+    _basePluginMutex.lock();
+    _basePlugin = NULL;
+    _basePluginMutex.unlock();
+
+    QMutexLocker locker(&_loadedPluginsMutex);
     foreach(NoobaPlugin* plugin, _loadedPlugins)
     {
         if(plugin) // plugin reference is not null
@@ -140,6 +171,9 @@ bool PluginLoader::unloadPlugins()
 
 bool PluginLoader::unloadPlugin(const QString &alias)
 {
+
+    QMutexLocker locker(&_loadedPluginsMutex);
+
     for(int i=0; i < _loadedPlugins.size(); i++) {
         if(_loadedPlugins.at(i)->alias().compare(alias) == 0)
         {
@@ -157,6 +191,7 @@ bool PluginLoader::unloadPlugin(const QString &alias)
 
 const QList<NoobaPlugin* > PluginLoader::getOutputPluginList(const QString &inPlugAlias) const
 {
+    QMutexLocker locker(&_loadedPluginsMutex);
     if(inPlugAlias.isEmpty())
         return _loadedPlugins;
 
@@ -167,12 +202,18 @@ const QList<NoobaPlugin* > PluginLoader::getOutputPluginList(const QString &inPl
 
 const QList<NoobaPlugin* > PluginLoader::getInputPluginList(const QString &outPlugAlias) const
 {
-
+    QMutexLocker locker(&_loadedPluginsMutex);
     if(outPlugAlias.isEmpty())
         return _loadedPlugins;
 
     // TODO do a check for compatibility and return list appropriately.
     return _loadedPlugins;
+}
+
+QList<PluginConnData *> PluginLoader::getPCDList()
+{
+    QMutexLocker locker(&_pcdMutex);
+    return _pcdList;
 }
 
 bool PluginLoader::connectAllPlugins(QList<PluginConnData *> configList)
@@ -186,19 +227,29 @@ bool PluginLoader::connectAllPlugins(QList<PluginConnData *> configList)
     {
         updatePluginConnection(pcd, true);
     }
+    _pcdMutex.lock();
     _pcdList = configList;
+    _pcdMutex.unlock();
     return true;
 }
 
 void PluginLoader::connectPlugins(PluginConnData* pcd)
 {
     updatePluginConnection(pcd, true);
+    _pcdMutex.lock();
     _pcdList.append(pcd);
+    _pcdMutex.unlock();
     return;
+}
+
+void PluginLoader::connectPlugins(const QString &outPlugAlias, const QString &inPlugAlias)
+{
+    bool inFound = false, outFound = false;
 }
 
 bool PluginLoader::disconnectPlugin(PluginConnData *pcd)
 {
+    QMutexLocker locker(&_pcdMutex);
     bool ok = false;
     updatePluginConnection(pcd, false);
     for(int i = 0; i < _pcdList.count(); i++)
@@ -216,6 +267,7 @@ bool PluginLoader::disconnectPlugin(PluginConnData *pcd)
 
 bool PluginLoader::disconnectAllPlugins()
 {
+    QMutexLocker locker(&_pcdMutex);
     foreach (PluginConnData* pcd, _pcdList) {
         updatePluginConnection(pcd, false);
         delete pcd;
@@ -230,6 +282,8 @@ void PluginLoader::saveCurrentConfig()
 
     s.beginGroup(nooba::Settings_PluginConfig_block);
     s.remove("");
+
+    QMutexLocker locker(&_basePluginMutex);
     if(_basePlugin)
     {
         s.setValue(nooba::Settings_BasePlugin_Filename, _basePlugin->fileName());
@@ -292,6 +346,12 @@ void PluginLoader::loadPrevConfig()
         pcd->_inPlugAlias = s.value(nooba::Settings_InPlug_Alias, tr("!Error")).toString();
         pcd->_outPlugAlias = s.value(nooba::Settings_OutPlug_Alias, tr("!Error")).toString();
         bool inFound = false, outFound = false;
+
+        /////////////////////////////////////////////
+        // Lock on loaded plugins
+        ////////////////////////////////////////////
+        _loadedPluginsMutex.lock();
+
         foreach(NoobaPlugin* p, _loadedPlugins) // search for the loaded plugins for the relevant
                                                 // plugins to be connected.
         {
@@ -308,6 +368,12 @@ void PluginLoader::loadPrevConfig()
             if(outFound && inFound)
                 break;
         }
+
+        ////////////////////////////////////////////
+        // UNLOCK
+        ///////////////////////////////////////////
+        _loadedPluginsMutex.unlock();
+
         if(!inFound || !outFound) // if one of the plugins not found remove connection
         {
             delete pcd;
@@ -315,13 +381,13 @@ void PluginLoader::loadPrevConfig()
         connectPlugins(pcd);    // connect the plugins
     }
     s.endArray();
-
     s.endGroup();
     return;
 }
 
 void PluginLoader::refreshPlugins()
 {
+    QMutexLocker locker(&_loadedPluginsMutex);
     foreach (NoobaPlugin* p, _loadedPlugins) {
         p->release();
         p->init();        
@@ -330,6 +396,7 @@ void PluginLoader::refreshPlugins()
 
 bool PluginLoader::versionCheckOk(NoobaPluginAPIBase *apiBase, const QString& filename, QString& errStr)
 {
+    // NOTE: PRIVATE function. NOT Thread safe call with caution
     int pluginAPIMajorVer = apiBase->APIMajorVersion();
     int pluginAPIMinorVer = apiBase->APIMinorVersion();
     bool ok = true;
@@ -358,6 +425,7 @@ bool PluginLoader::versionCheckOk(NoobaPluginAPIBase *apiBase, const QString& fi
 
 bool PluginLoader::disconnectPlugin(NoobaPlugin *plugin)
 {
+    QMutexLocker locker(&_pcdMutex);
     for(int i= _pcdList.count()-1; i >=0; i--)
     {
         PluginConnData* pcd = _pcdList.at(i);
@@ -374,7 +442,8 @@ bool PluginLoader::disconnectPlugin(NoobaPlugin *plugin)
 }
 
 void PluginLoader::updateBasePlugin(NoobaPlugin* pluginToBeRemoved)
-{
+{    
+    // NOTE: PRIVATE function. NOT Thread safe call with caution
     if(!pluginToBeRemoved->isBasePlugin())
         return;
 
@@ -396,6 +465,7 @@ void PluginLoader::updateBasePlugin(NoobaPlugin* pluginToBeRemoved)
 
 void PluginLoader::releaseAndUnload(NoobaPlugin *plugin)
 {
+    // NOTE: PRIVATE function. NOT Thread safe call with caution
     // release then unload
     plugin->release();
     emit pluginAboutToUnloaded(plugin);  // this should be called after release();
@@ -404,6 +474,7 @@ void PluginLoader::releaseAndUnload(NoobaPlugin *plugin)
 
 QString PluginLoader::getPluginAlias(const QString& pluginName)
 {
+    // NOTE: PRIVATE function. NOT Thread safe call with caution
     int count = 1;
     foreach(NoobaPlugin* p, _loadedPlugins)
     {
@@ -415,16 +486,17 @@ QString PluginLoader::getPluginAlias(const QString& pluginName)
 
 void PluginLoader::updatePluginConnection(PluginConnData *pcd, bool isConnect)
 {
+    // NOTE: PRIVATE function. NOT Thread safe call with caution
     if(isConnect)
     {
         connect(pcd->_outPlug, SIGNAL(outputData(PluginPassData)), pcd->_inPlug, SLOT(inputData(PluginPassData)));
-        connect(pcd->_outPlug, SIGNAL(outputData(QString,QList<QImage>)), pcd->_inPlug, SLOT(inputData(QString,QList<QImage>)));
+        connect(pcd->_outPlug, SIGNAL(outputData(QStringList,QList<QImage>)), pcd->_inPlug, SLOT(inputData(QStringList,QList<QImage>)));
         emit pluginsConnected(pcd);
     }
     else
     {
         disconnect(pcd->_outPlug, SIGNAL(outputData(PluginPassData)), pcd->_inPlug, SLOT(inputData(PluginPassData)));
-        disconnect(pcd->_outPlug, SIGNAL(outputData(QString,QList<QImage>)), pcd->_inPlug, SLOT(inputData(QString,QList<QImage>)));
+        disconnect(pcd->_outPlug, SIGNAL(outputData(QStringList,QList<QImage>)), pcd->_inPlug, SLOT(inputData(QStringList,QList<QImage>)));
         emit pluginsDisconnected(pcd);
     }
     return;

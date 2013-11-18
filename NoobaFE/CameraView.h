@@ -10,6 +10,7 @@
 #include <QMap>
 #include <QTimer>
 #include <QScopedPointer>
+#include <QMutex>
 
 namespace Ui {
 class CameraView;
@@ -99,6 +100,7 @@ private:
     nooba::VideoState                   _vidState;
     ProcParams                          _params;
     QTimer                              _timer;
+    QMutex                              _pluginUpdateMutex;
     FrameViewer                         _inputWind;
     OutputWind                          *_debugOutWind;
     ParamConfigWind                     *_paramConfigUI;

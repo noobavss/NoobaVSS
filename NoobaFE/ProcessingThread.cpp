@@ -57,11 +57,11 @@ void ProcessingThread::run()
     connect(&frameProc, SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)), this, SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)));
 
     qRegisterMetaType< NoobaPlugin* >("NoobaPlugin");
-    connect(_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SIGNAL(pluginLoaded(NoobaPlugin*)));
-    connect(_pluginLoader, SIGNAL(pluginInitialised(NoobaPlugin*)), this, SIGNAL(pluginInitialised(NoobaPlugin*)));
-    connect(_pluginLoader, SIGNAL(pluginAboutToUnloaded(NoobaPlugin*)), this, SIGNAL(pluginAboutToUnload(NoobaPlugin*)));
-    connect(_pluginLoader, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), this, SIGNAL(pluginAboutToRelease(NoobaPlugin*)));
-    connect(_pluginLoader, SIGNAL(basePluginChanged(NoobaPlugin*)), this, SIGNAL(basePluginChanged(NoobaPlugin*)));
+    connect(_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SIGNAL(pluginLoaded(NoobaPlugin*)), Qt::DirectConnection);
+    connect(_pluginLoader, SIGNAL(pluginInitialised(NoobaPlugin*)), this, SIGNAL(pluginInitialised(NoobaPlugin*)), Qt::DirectConnection);
+    connect(_pluginLoader, SIGNAL(pluginAboutToUnloaded(NoobaPlugin*)), this, SIGNAL(pluginAboutToUnload(NoobaPlugin*)), Qt::DirectConnection);
+    connect(_pluginLoader, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), this, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), Qt::DirectConnection);
+    connect(_pluginLoader, SIGNAL(basePluginChanged(NoobaPlugin*)), this, SIGNAL(basePluginChanged(NoobaPlugin*)), Qt::DirectConnection);
 
     qRegisterMetaType< struct PluginConnData* >("PluginConnData");
     connect(_pluginLoader, SIGNAL(pluginsConnected(PluginConnData*)), this, SIGNAL(pluginsConnected(PluginConnData*)));

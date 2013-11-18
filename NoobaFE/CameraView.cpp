@@ -17,6 +17,7 @@
 #include <QMdiSubWindow>
 #include <QMetaType>
 #include <QDebug>
+#include <QMutexLocker>
 
 CameraView::CameraView(SharedImageBuffer *sharedImageBuffer, QWidget *parent) :
     QWidget(parent),
@@ -40,7 +41,6 @@ CameraView::CameraView(SharedImageBuffer *sharedImageBuffer, QWidget *parent) :
 
 CameraView::~CameraView()
 {
-
     // Stop processing thread
     if(_processingThread && _processingThread->isRunning())
         stopProcessingThread();
@@ -238,8 +238,11 @@ void CameraView::configurePlugins()
         return;
     }
 
+    nooba::VideoState state = _vidState;
+    setVideoState(nooba::StoppedState);
     PluginsConfigUI pluginConfUi(*pl);
     pluginConfUi.exec();
+    setVideoState(state);
 }
 
 void CameraView::onInputFrameUpdate(const QImage &in)
@@ -254,6 +257,7 @@ void CameraView::onFileStreamEOF()
 
 void CameraView::onPluginLoad(NoobaPlugin *plugin)
 {
+    QMutexLocker locker(&_pluginUpdateMutex);
     bool b = connect(plugin, SIGNAL(debugMsg(QString)), _debugOutWind, SLOT(onDebugMsg(QString)));
     b = connect(plugin, SIGNAL(createFrameViewer(QString)), this, SLOT(onCreateFrameViewerRequest(QString)), Qt::QueuedConnection);
     _frameViewerMap.insert(plugin, QMap<QString, MdiSubWindData* >());
@@ -262,6 +266,7 @@ void CameraView::onPluginLoad(NoobaPlugin *plugin)
 
 void CameraView::onPluginAboutToUnload(NoobaPlugin *plugin)
 {
+    QMutexLocker locker(&_pluginUpdateMutex);
     QMap<QString, MdiSubWindData*> subWindMap = _frameViewerMap.value(plugin);
 
     foreach (MdiSubWindData* d, subWindMap)
@@ -275,18 +280,22 @@ void CameraView::onPluginAboutToUnload(NoobaPlugin *plugin)
 
 void CameraView::onPluginInitialised(NoobaPlugin *plugin)
 {
+    QMutexLocker locker(&_pluginUpdateMutex);
     _paramConfigUI->addPlugin(plugin);
     return;
 }
 
 void CameraView::onPluginAboutToRelease(NoobaPlugin *plugin)
 {
+    QMutexLocker locker(&_pluginUpdateMutex);
     _paramConfigUI->removePlugin(plugin);
     return;
 }
 
 void CameraView::onCreateFrameViewerRequest(const QString &title)
 {
+    qDebug() << Q_FUNC_INFO;
+    QMutexLocker locker(&_pluginUpdateMutex);
     NoobaPlugin* p = qobject_cast<NoobaPlugin*>(sender());  // get the sender of the signal
     if(!p)
         return;
@@ -305,7 +314,9 @@ void CameraView::onFrameViewerUpdate(const QString &title, const QImage &frame)
     if(!p)
         return;
 
+    _pluginUpdateMutex.lock();
     MdiSubWindData* d = _frameViewerMap.value(p).value(title);
+    _pluginUpdateMutex.unlock();
     if(d)
     {
         d->_frameViewer->updateFrame(frame);
