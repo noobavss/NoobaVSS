@@ -7,6 +7,7 @@
 #include <QStringList>
 #include <QRectF>
 #include <QPointF>
+#include <QImage>
 
 // forward declerations
 class NoobaPluginAPI;
@@ -161,6 +162,7 @@ signals:
     
     void debugMsg(const QString& msg);
     void outputData(const PluginPassData& data);
+    void outputData(const QStringList& strList, QList<QImage> imageList);
     void onInit(NoobaPlugin* plugin);
     void onAboutToRelease(NoobaPlugin* plugin);
     void createFrameViewer(const QString& title);
@@ -176,6 +178,7 @@ public slots:
     void onPointParamUpdate(const QString& varName, const QPointF& val);
     void onRectParamUpdate(const QString& varName, const QRectF& val);
     void inputData(const PluginPassData& data);
+    void inputData(const QStringList& strList, QList<QImage> imageList);
     void saveConfig(const QString& filename);
     void loadPrevConfig();
 

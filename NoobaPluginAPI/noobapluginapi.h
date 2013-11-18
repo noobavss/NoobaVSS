@@ -4,13 +4,13 @@
 //#include "NoobaPluginAPI_global.h"
 #include "noobapluginbase.h"
 
+//Qt
 #include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QtPlugin>
 #include <QMetaType>
-
-class QImage;
+#include <QImage>
 
 /************************************************************************/
 /* IMPORTANT: ANY CHANGE TO THE API CORRESPOND TO A CHANGE IN THE       */
@@ -43,6 +43,12 @@ namespace nooba {
         PlayingState    = 0,
         PausedState     = 1,
         StoppedState    = 2
+    };
+
+    enum NoobaAlert {
+        RedAlert    = 0,
+        AmberAlert  = 1,
+
     };
 }
 
@@ -251,6 +257,9 @@ public:
     void outputData(const PluginPassData& data)
     {   emit outputDataRequest(data); }
 
+    void outputData(const QStringList& strList, QList<QImage> imageList)
+    {   emit outputDataRequest(strList, imageList); }
+
     /**
      * @brief createOutputWind creates MDI SubWindow to show the frame outputs
      * @param title title of the subWindow
@@ -271,8 +280,10 @@ signals:
     void createRectParamRequest(const QString& varName, const QRectF& val);
     void debugMsgRequest(const QString& msg);
     void outputDataRequest(const PluginPassData& data);
+    void outputDataRequest(const QStringList& strList, QList<QImage> imageList);
     void createFrameViewerRequest(const QString& title);
     void updateFrameViewerRequest(const QString& title, const QImage& frame);
+    void anomalyDetected();
 
 public slots:
 
@@ -311,6 +322,10 @@ public slots:
      */
     virtual void inputData(const PluginPassData& data){
         Q_UNUSED(data)
+    }
+
+    virtual void inputData(const QStringList& strList, QList<QImage> imageList){
+        Q_UNUSED(strList) Q_UNUSED(imageList)
     }
 
 protected:

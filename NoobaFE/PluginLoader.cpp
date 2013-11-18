@@ -423,11 +423,13 @@ void PluginLoader::updatePluginConnection(PluginLoader::PluginConnData *pcd, boo
     if(isConnect)
     {
         connect(pcd->_outPlug, SIGNAL(outputData(PluginPassData)), pcd->_inPlug, SLOT(inputData(PluginPassData)));
+        connect(pcd->_outPlug, SIGNAL(outputData(QStringList,QList<QImage>)), pcd->_inPlug, SLOT(inputData(QStringList,QList<QImage>)));
         emit pluginsConnected(pcd);
     }
     else
     {
         disconnect(pcd->_outPlug, SIGNAL(outputData(PluginPassData)), pcd->_inPlug, SLOT(inputData(PluginPassData)));
+        disconnect(pcd->_outPlug, SIGNAL(outputData(QStringList,QList<QImage>)), pcd->_inPlug, SLOT(inputData(QStringList,QList<QImage>)));
         emit pluginsDisconnected(pcd);
     }
     return;

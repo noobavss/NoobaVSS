@@ -2,6 +2,8 @@
 #include <QDebug>
 #include <QPluginLoader>
 #include <QSettings>
+#include <QImage>
+#include <QList>
 
 #include <NoobaEye.h>
 #include <noobapluginapi.h>
@@ -114,6 +116,9 @@ void NoobaPlugin::initSignalSlots()
     connect(_api, SIGNAL(createPointParamRequest(QString,QPointF)), this, SLOT(onCreatePointParam(QString,QPointF)));
     connect(_api, SIGNAL(createRectParamRequest(QString,QRectF)), this, SLOT(onCreateRectParam(QString,QRectF)));
     connect(_api, SIGNAL(outputDataRequest(PluginPassData)), this, SIGNAL(outputData(PluginPassData)));
+
+    qRegisterMetaType< QList<QImage> >("QList<QImage>");
+    connect(_api, SIGNAL(outputDataRequest(QStringList,QList<QImage>)), this, SIGNAL(outputData(QStringList,QList<QImage>)));
     connect(_api, SIGNAL(createFrameViewerRequest(QString)), this, SIGNAL(createFrameViewer(QString)));
     connect(_api, SIGNAL(updateFrameViewerRequest(QString,QImage)), this, SIGNAL(updateFrameViewer(QString,QImage)));
 }
@@ -162,6 +167,11 @@ void NoobaPlugin::onRectParamUpdate(const QString &varName, const QRectF &val)
 void NoobaPlugin::inputData(const PluginPassData& data)
 {
     _api->inputData(data);
+}
+
+void NoobaPlugin::inputData(const QStringList &strList, QList<QImage> imageList)
+{
+    _api->inputData(strList, imageList);
 }
 
 void NoobaPlugin::saveConfig(const QString &filename)
