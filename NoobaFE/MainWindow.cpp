@@ -221,6 +221,13 @@ void MainWindow::updateDockWidgets(ParamConfigWind* paramConfig, OutputWind* deb
 
 QMdiSubWindow* MainWindow::addNewSourceTab(CameraView* camView)
 {
+    if( ui->mdiArea->subWindowList().count() == 1)
+    {
+        QMessageBox msg;
+        msg.setText(tr("Waaaaaat? You want another tab? Nice try broheim... No more tabs for you.."));
+        msg.exec();
+        return NULL;
+    }
     QMdiSubWindow* subWind = ui->mdiArea->addSubWindow(camView);
     subWind->showMaximized();
     ui->mdiArea->setActiveSubWindow(subWind);
