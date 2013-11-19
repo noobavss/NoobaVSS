@@ -83,6 +83,7 @@ bool CameraView::connectToCamera()
     _deviceNumber = 0;
     setupSharedBufferForNewDevice();
 
+    setWindowTitle(tr("Camera View [ %1 ]").arg(_deviceNumber));
     _statPanel->setImageBufferBarSize(0, _sharedImageBuffer->getByDeviceNumber(_deviceNumber)->maxSize());
 
     _captureThread.reset(new CaptureThread(_sharedImageBuffer, _deviceNumber,true));
@@ -119,6 +120,7 @@ bool CameraView::connectToVideoFileStream()
         return false;
 
     _deviceNumber = 1000;
+    setWindowTitle(tr("File Stream"));
     _isWebCam = false;
     setupSharedBufferForNewDevice();
     _statPanel->setDeviceName(path);
