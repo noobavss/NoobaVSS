@@ -3,8 +3,6 @@
 
 #include <QWidget>
 #include <QPixmap>
-#include <QImage>
-#include <QMutex>
 
 // forward declaration VidOutputSubWind
 namespace Ui { class FrameViewer; }
@@ -29,9 +27,7 @@ public slots:
 
 private:
 
-    QString         _title;
     QPixmap         _pixmap;
-    QImage          _img;
     Ui::FrameViewer *ui;
 };
 

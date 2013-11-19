@@ -148,7 +148,7 @@ void CameraView::stopCaptureThread()
     // Take one frame off a FULL queue to allow the capture thread to finish
     if(_sharedImageBuffer->getByDeviceNumber(_deviceNumber)->isFull())
         _sharedImageBuffer->getByDeviceNumber(_deviceNumber)->get();
-    _captureThread->wait();
+    _captureThread->wait(200);
     qDebug() << "[" << _deviceNumber << "] Capture thread successfully stopped.";
 
 }
@@ -162,10 +162,9 @@ void CameraView::stopProcessingThread()
 //    qDebug() << "[" << _deviceNumber << "] This allows the thread to be stopped if it is in a wait-state";
     _sharedImageBuffer->wakeAll(); // This allows the thread to be stopped if it is in a wait-state
 
+     //    qDebug() << "[" << _deviceNumber << "] waiting..." ;
+    _processingThread->wait(200);
     _processingThread->quit();  // exit event loop
-
-    //    qDebug() << "[" << _deviceNumber << "] waiting..." ;
-    _processingThread->wait();
 //    qDebug() << "[" << _deviceNumber << "] Processing thread successfully stopped.";
     return;
 }
