@@ -32,8 +32,7 @@ private slots:
     void on_loadPluginButton_clicked();
     void on_unloadPluginButton_clicked();
     void on_cancelButton_clicked();
-//    void onPluginsDisconnected(PluginConnData* pcd);
-    void closeEvent(QCloseEvent *);
+
     void on_doneButton_clicked();
 
 signals:

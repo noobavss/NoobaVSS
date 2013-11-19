@@ -25,7 +25,7 @@ public:
 public slots:
 
     void addPlugin(NoobaPlugin* plugin);
-    void removePlugin(NoobaPlugin* plugin);
+    void removePlugin(QString alias);
     void clear();
 
 private slots:

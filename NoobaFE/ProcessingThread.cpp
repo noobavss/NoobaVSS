@@ -59,8 +59,8 @@ void ProcessingThread::run()
     qRegisterMetaType< NoobaPlugin* >("NoobaPlugin");
     connect(_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SIGNAL(pluginLoaded(NoobaPlugin*)));
     connect(_pluginLoader, SIGNAL(pluginInitialised(NoobaPlugin*)), this, SIGNAL(pluginInitialised(NoobaPlugin*)));
-    connect(_pluginLoader, SIGNAL(pluginAboutToUnloaded(NoobaPlugin*)), this, SIGNAL(pluginAboutToUnload(NoobaPlugin*)));
-    connect(_pluginLoader, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), this, SIGNAL(pluginAboutToRelease(NoobaPlugin*)));
+    connect(_pluginLoader, SIGNAL(pluginAboutToUnloaded(QString)), this, SIGNAL(pluginAboutToUnload(QString)));
+    connect(_pluginLoader, SIGNAL(pluginAboutToRelease(QString)), this, SIGNAL(pluginAboutToRelease(QString)));
     connect(_pluginLoader, SIGNAL(basePluginChanged(NoobaPlugin*)), this, SIGNAL(basePluginChanged(NoobaPlugin*)));
     connect(_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SLOT(onPluginLoaded(NoobaPlugin*)), Qt::DirectConnection);
 
@@ -91,6 +91,8 @@ void ProcessingThread::run()
 
 PluginLoader *ProcessingThread::getPluginLoader()
 {
+    // TODO Refine this to not block the whole access but
+    // to make sure vital operations the synchronised
     QMutexLocker locker(&pluginLoaderMutex);
     qDebug() << currentThreadId() << Q_FUNC_INFO;
     return _pluginLoader;

@@ -19,15 +19,16 @@ PluginsConfigUI::PluginsConfigUI(PluginLoader& pluginLoader, QWidget *parent)
     updateUI();
     ui.pluginConfigTree->setColumnWidth(0, 307);
 
-    connect(this, SIGNAL(loadPlugins(QStringList)), &_pluginLoader, SLOT(loadPlugins(QStringList)), Qt::BlockingQueuedConnection);
-    connect(this, SIGNAL(loadPluginInfo()), &_pluginLoader, SLOT(loadPluginInfo()), Qt::BlockingQueuedConnection);
-    connect(this, SIGNAL(saveCurrentConfig()), &_pluginLoader, SLOT(saveCurrentConfig()), Qt::BlockingQueuedConnection);
-    connect(this, SIGNAL(unloadAllPlugins()), &_pluginLoader, SLOT(unloadPlugins()), Qt::BlockingQueuedConnection);
-    connect(this, SIGNAL(connectPlugins(QStringList,QStringList)), &_pluginLoader, SLOT(connectPlugins(QStringList,QStringList)), Qt::BlockingQueuedConnection);
+    connect(this, SIGNAL(loadPlugins(QStringList)), &_pluginLoader, SLOT(loadPlugins(QStringList)));
+    connect(this, SIGNAL(loadPluginInfo()), &_pluginLoader, SLOT(loadPluginInfo()));
+    connect(this, SIGNAL(saveCurrentConfig()), &_pluginLoader, SLOT(saveCurrentConfig()));
+    connect(this, SIGNAL(unloadAllPlugins()), &_pluginLoader, SLOT(unloadPlugins()));
+    connect(this, SIGNAL(connectPlugins(QStringList,QStringList)), &_pluginLoader, SLOT(connectPlugins(QStringList,QStringList)));
 }
 
 PluginsConfigUI::~PluginsConfigUI()
 {
+    qDebug() << "delete" << Q_FUNC_INFO;
 }
 
 QStringList PluginsConfigUI::getOutputPluginList(const QString &inPlugAlias)
@@ -65,27 +66,27 @@ void PluginsConfigUI::onReloadButtonClicked()
 
 void PluginsConfigUI::onSetDefaultButtonClicked()
 {
-    QTreeWidgetItem* item = ui.pluginListTree->currentItem();
-    if(!item)
-        return;
+//    QTreeWidgetItem* item = ui.pluginListTree->currentItem();
+//    if(!item)
+//        return;
 
-    if(item->type() != 0)
-    {
-        item = item->parent();
-    }
+//    if(item->type() != 0)
+//    {
+//        item = item->parent();
+//    }
 
-    // set previous active plugin label to disabled
-    QList<QTreeWidgetItem* > itemList = ui.pluginListTree->findItems(ACTIVE, Qt::MatchExactly, 1);
-    foreach(QTreeWidgetItem* i, itemList)
-    {
-        i->setText(1, DISABLED);
-    }
+//    // set previous active plugin label to disabled
+//    QList<QTreeWidgetItem* > itemList = ui.pluginListTree->findItems(ACTIVE, Qt::MatchExactly, 1);
+//    foreach(QTreeWidgetItem* i, itemList)
+//    {
+//        i->setText(1, DISABLED);
+//    }
 
-    QVariant var = item->data(0, Qt::UserRole+1);
-    if(_pluginLoader.loadPlugin(var.toString()))
-    {
-        item->setText(1, ACTIVE);
-    }
+//    QVariant var = item->data(0, Qt::UserRole+1);
+//    if(_pluginLoader.loadPlugin(var.toString()))
+//    {
+//        item->setText(1, ACTIVE);
+//    }
 }
 
 void PluginsConfigUI::updateUI()
@@ -168,10 +169,8 @@ void PluginsConfigUI::updateUI()
     {
         QTreeWidgetItem* itm = new QTreeWidgetItem(ui.pluginConfigTree);
         itm->setFlags(itm->flags()| Qt::ItemIsEditable);
-        QColor c(190, 190,240);
-        itm->setBackgroundColor(0, c);
-        itm->setBackground(1, c);
         itm->setText(0, pcd->_outPlugAlias);
+        itm->setText(1, pcd->_inPlugAlias);
     }
     ui.pluginConfigTree->setItemDelegate(_pluginConnDelegate);
 }
@@ -180,8 +179,9 @@ void PluginsConfigUI::on_addButton_clicked()
 {
     QTreeWidgetItem* itm = new QTreeWidgetItem(1);
     itm->setFlags(itm->flags()| Qt::ItemIsEditable);
-    itm->setBackgroundColor(0, QColor(240, 240,240));
-    itm->setBackground(1, QColor(240, 240,240));
+    QColor c(220, 220,240);
+    itm->setBackgroundColor(0, c);
+    itm->setBackground(1, c);
     ui.pluginConfigTree->addTopLevelItem(itm);
 }
 
@@ -204,7 +204,7 @@ void PluginsConfigUI::on_applyButton_clicked()
     if(ui.loadedPluginsTree->topLevelItemCount() == 0)
     {
         emit saveCurrentConfig();
-        return;
+        accept();
     }
 
     QStringList fNameList;
@@ -231,7 +231,6 @@ void PluginsConfigUI::on_applyButton_clicked()
         emit connectPlugins(out, in);
     }
     emit saveCurrentConfig();
-//    QThread::msleep(200);
 }
 
 void PluginsConfigUI::on_loadPluginButton_clicked()
@@ -285,7 +284,7 @@ void PluginsConfigUI::on_unloadPluginButton_clicked()
 
 void PluginsConfigUI::on_cancelButton_clicked()
 {
-    close();
+    reject();
 }
 
 //void PluginsConfigUI::onPluginsDisconnected(PluginConnData *pcd)
@@ -300,17 +299,10 @@ void PluginsConfigUI::on_cancelButton_clicked()
 //    }
 //}
 
-void PluginsConfigUI::closeEvent(QCloseEvent *)
-{
-   // _pluginLoader.loadPrevConfig(); // this is not reverting back :/ this may lead to loosing the states of plugins
-                                    // this reloads the plugins to its previous state.
-    return;
-}
-
 void PluginsConfigUI::on_doneButton_clicked()
 {
- //   on_applyButton_clicked();
-    close();
+    on_applyButton_clicked();
+    accept();
 }
 
 void PluginsConfigUI::removeConnections(const QString &pluginAlias)

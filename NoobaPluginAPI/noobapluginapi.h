@@ -47,8 +47,7 @@ namespace nooba {
 
     enum NoobaAlert {
         RedAlert    = 0,
-        AmberAlert  = 1,
-
+        AmberAlert  = 1
     };
 }
 
@@ -266,6 +265,11 @@ public:
     void createFrameViewer(const QString& title)
     {   emit createFrameViewerRequest(title); }
 
+    /**
+     * @brief updateFrameViewer
+     * @param title
+     * @param frame QImage
+     */
     void updateFrameViewer(const QString& title, const QImage& frame)
     {   emit updateFrameViewerRequest(title, frame); }
 

@@ -60,10 +60,7 @@ CameraView::~CameraView()
     else
         qDebug() << "[" << _deviceNumber << "] WARNING: capture device already disconnected.";
 
-    if(_processingThread)
-        _processingThread->quit();
-
-    QMap<NoobaPlugin*, QMap<QString, MdiSubWindData* > >::iterator i = _frameViewerMap.begin();
+    QMap<QString, QMap<QString, MdiSubWindData* > >::iterator i = _frameViewerMap.begin();
     for(;i != _frameViewerMap.end(); i++)
     {
         foreach(MdiSubWindData* d, i.value())
@@ -166,21 +163,22 @@ void CameraView::stopProcessingThread()
     _processingThread->quit();  // exit event loop
 
     //    qDebug() << "[" << _deviceNumber << "] waiting..." ;
-//    _processingThread->wait();
+    _processingThread->wait();
 //    qDebug() << "[" << _deviceNumber << "] Processing thread successfully stopped.";
     return;
 }
 
 void CameraView::connectThreadSignalSlots()
 {
-    connect(_processingThread.data(), SIGNAL(pluginLoaded(NoobaPlugin*)), this, SLOT(onPluginLoad(NoobaPlugin*)), Qt::DirectConnection);
-    connect(_processingThread.data(), SIGNAL(pluginInitialised(NoobaPlugin*)), this, SLOT(onPluginInitialised(NoobaPlugin*)), Qt::DirectConnection);
-    connect(_processingThread.data(), SIGNAL(pluginAboutToRelease(NoobaPlugin*)), this, SLOT(onPluginAboutToRelease(NoobaPlugin*)), Qt::QueuedConnection);
-    connect(_processingThread.data(), SIGNAL(pluginAboutToUnload(NoobaPlugin*)), this, SLOT(onPluginAboutToUnload(NoobaPlugin*)), Qt::QueuedConnection);
+    connect(_processingThread.data(), SIGNAL(pluginLoaded(NoobaPlugin*)), this, SLOT(onPluginLoad(NoobaPlugin*)));
+    connect(_processingThread.data(), SIGNAL(pluginInitialised(NoobaPlugin*)), this, SLOT(onPluginInitialised(NoobaPlugin*)));
+    connect(_processingThread.data(), SIGNAL(pluginAboutToRelease(QString)), this, SLOT(onPluginAboutToRelease(QString)));
+    connect(_processingThread.data(), SIGNAL(pluginAboutToUnload(QString)), this, SLOT(onPluginAboutToUnload(QString)));
     connect(_processingThread.data(), SIGNAL(createFrameViewer(QString,NoobaPlugin*)), this, SLOT(onCreateFrameViewerRequest(QString,NoobaPlugin*)));
     connect(_processingThread.data(), SIGNAL(debugMsg(QString)), _debugOutWind, SLOT(onDebugMsg(QString)));
 
     connect(_processingThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
+//    connect(_captureThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
     connect(_processingThread.data(), SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)), this, SLOT(updateProcessingThreadStats(ThreadStatisticsData)));
     connect(_captureThread.data(), SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)), this, SLOT(updateCaptureThreadStats(ThreadStatisticsData)));
     connect(_captureThread.data(), SIGNAL(endFileOfStream()), this, SLOT(onFileStreamEOF()));
@@ -246,7 +244,13 @@ void CameraView::configurePlugins()
 
     PluginsConfigUI pluginConfUi(*pl);
     pluginConfUi.exec();
-//    setVideoState(state);
+
+    //    setVideoState(state);
+}
+
+void CameraView::closeEvent(QCloseEvent *event)
+{
+    setVideoState(nooba::PausedState);
 }
 
 void CameraView::onInputFrameUpdate(const QImage &in)
@@ -262,21 +266,21 @@ void CameraView::onFileStreamEOF()
 void CameraView::onPluginLoad(NoobaPlugin *plugin)
 {
     QMutexLocker locker(&_pluginUpdateMutex);
-    _frameViewerMap.insert(plugin, QMap<QString, MdiSubWindData* >());
+    _frameViewerMap.insert(plugin->alias(), QMap<QString, MdiSubWindData* >());
     return;
 }
 
-void CameraView::onPluginAboutToUnload(NoobaPlugin *plugin)
+void CameraView::onPluginAboutToUnload(QString alias)
 {
     QMutexLocker locker(&_pluginUpdateMutex);
-    QMap<QString, MdiSubWindData*> subWindMap = _frameViewerMap.value(plugin);
+    QMap<QString, MdiSubWindData*> subWindMap = _frameViewerMap.value(alias);
 
     foreach (MdiSubWindData* d, subWindMap)
     {
         delete d->_mdiSubWind;
         delete d;
     }
-    _frameViewerMap.remove(plugin);
+    _frameViewerMap.remove(alias);
     return;
 }
 
@@ -287,10 +291,10 @@ void CameraView::onPluginInitialised(NoobaPlugin *plugin)
     return;
 }
 
-void CameraView::onPluginAboutToRelease(NoobaPlugin *plugin)
+void CameraView::onPluginAboutToRelease(QString alias)
 {
     QMutexLocker locker(&_pluginUpdateMutex);
-    _paramConfigUI->removePlugin(plugin);
+    _paramConfigUI->removePlugin(alias);
     return;
 }
 
@@ -302,14 +306,14 @@ void CameraView::onCreateFrameViewerRequest(const QString &title, NoobaPlugin* p
     connect(plugin, SIGNAL(updateFrameViewer(QString,QImage, NoobaPlugin*)), this, SLOT(onFrameViewerUpdate(QString,QImage, NoobaPlugin*)));
 
     QMutexLocker locker(&_pluginUpdateMutex);
-    _frameViewerMap[plugin].insert(title, data);
+    _frameViewerMap[plugin->alias()].insert(title, data);
     return;
 }
 
 void CameraView::onFrameViewerUpdate(const QString &title, const QImage &frame, NoobaPlugin* plugin)
 {
     _pluginUpdateMutex.lock();
-    MdiSubWindData* d = _frameViewerMap.value(plugin).value(title);
+    MdiSubWindData* d = _frameViewerMap.value(plugin->alias()).value(title);
     _pluginUpdateMutex.unlock();
     if(d)
     {

@@ -130,8 +130,8 @@ signals:
         void debugMsg(const QString& msg);
         void pluginLoaded(NoobaPlugin* plugin);
         void pluginInitialised(NoobaPlugin* plugin);
-        void pluginAboutToRelease(NoobaPlugin* plugin);
-        void pluginAboutToUnload(NoobaPlugin* plugin);
+        void pluginAboutToRelease(QString alias);
+        void pluginAboutToUnload(QString alias);
         void basePluginChanged(NoobaPlugin* newBasePlugin);
         void pluginsDisconnected(PluginConnData* pcd);
         void pluginsConnected(PluginConnData* pcd);

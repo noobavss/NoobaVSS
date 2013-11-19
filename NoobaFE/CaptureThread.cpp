@@ -32,7 +32,6 @@
 
 #include "CaptureThread.h"
 
-
 CaptureThread::CaptureThread(SharedImageBuffer *sharedImageBuffer, int deviceNumber, bool dropFrameIfBufferFull, int width, int height) : QThread(), sharedImageBuffer(sharedImageBuffer)
 {
     // Save passed parameters
@@ -177,6 +176,7 @@ void CaptureThread::captureFrame()
     // Add frame to buffer
     sharedImageBuffer->getByDeviceNumber(deviceNumber)->add(grabbedFrame, dropFrameIfBufferFull);
     emit frameAddedToImageBuffer();
+//    emit inputFrame(MatToQImage(grabbedFrame)); // crashes at slower processing rates
 }
 
 void CaptureThread::stop()

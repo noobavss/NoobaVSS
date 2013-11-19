@@ -62,11 +62,11 @@ void ParamConfigWind::addPlugin(NoobaPlugin *plugin)
     return;
 }
 
-void ParamConfigWind::removePlugin(NoobaPlugin* plugin)
+void ParamConfigWind::removePlugin(QString alias)
 {
     for(int i = 0; i < ui->paramTree->topLevelItemCount(); i++)
     {
-        if(ui->paramTree->topLevelItem(i)->text(0).compare(plugin->alias()) == 0)
+        if(ui->paramTree->topLevelItem(i)->text(0).compare(alias) == 0)
         {
             delete ui->paramTree->topLevelItem(i);
         }

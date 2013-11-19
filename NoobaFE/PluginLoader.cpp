@@ -122,7 +122,7 @@ NoobaPlugin *PluginLoader::loadPlugin(QString fileName, bool isBase)
             emit pluginLoaded(nPlug); // this should be called imediately after creation of NoobaPlugin
 
             connect(nPlug, SIGNAL(onInit(NoobaPlugin*)), this, SIGNAL(pluginInitialised(NoobaPlugin*)));
-            connect(nPlug, SIGNAL(onAboutToRelease(NoobaPlugin*)), this, SIGNAL(pluginAboutToRelease(NoobaPlugin*)));
+            connect(nPlug, SIGNAL(onAboutToRelease(QString)), this, SIGNAL(pluginAboutToRelease(QString)));
 
             nPlug->setIsBasePlugin(isBase);
 
@@ -170,6 +170,9 @@ bool PluginLoader::unloadPlugins()
     _basePluginMutex.unlock();
 
     QMutexLocker locker(&_loadedPluginsMutex);
+    if(_loadedPlugins.isEmpty())
+        return ok;
+
     foreach(NoobaPlugin* plugin, _loadedPlugins)
     {
         if(plugin) // plugin reference is not null
@@ -186,6 +189,9 @@ bool PluginLoader::unloadPlugins()
     if(!ok) // on error print a debug message
     {
         qDebug() << tr("Some of the plugins are not unloaded properly.") << Q_FUNC_INFO;
+    }
+    else {
+        qDebug() << tr("All the plugins successfully unloaded") << Q_FUNC_INFO;
     }
     return ok;
 }
@@ -265,11 +271,14 @@ void PluginLoader::connectPlugins(PluginConnData* pcd)
 
 void PluginLoader::connectPlugins(QStringList outPlugList, QStringList inPlugList)
 {
+    qDebug() << Q_FUNC_INFO;
     if(outPlugList.size() != inPlugList.size())
     {
         qDebug() << tr("intput and output plugin list size mismatch") << Q_FUNC_INFO;
         return;
     }
+
+
     for(int i = 0; i < outPlugList.size(); i++)
     {
         connectPlugins(outPlugList.at(i), inPlugList.at(i));
@@ -292,12 +301,14 @@ void PluginLoader::connectPlugins(QString outPlugAlias, QString inPlugAlias)
         {
             pcd->_outPlug = p;
             pcd->_outPlugAlias = outPlugAlias;
+            outFound = true;
         }
 
         if(p->alias().compare(inPlugAlias) == 0)
         {
             pcd->_inPlug = p;
             pcd->_inPlugAlias = inPlugAlias;
+            inFound = true;
         }
 
         if(inFound && outFound)
@@ -371,6 +382,7 @@ void PluginLoader::saveCurrentConfig()
     }
     s.endGroup();
     s.sync();
+    qDebug() << tr("Plugin configuration saved...") << Q_FUNC_INFO;
 }
 
 void PluginLoader::loadPrevConfig()
@@ -531,7 +543,7 @@ void PluginLoader::releaseAndUnload(NoobaPlugin *plugin)
     // NOTE: PRIVATE function. NOT Thread safe call with caution
     // release then unload
     plugin->release();
-    emit pluginAboutToUnloaded(plugin);  // this should be called after release();
+    emit pluginAboutToUnloaded(plugin->alias());  // this should be called after release();
     delete plugin;
 }
 

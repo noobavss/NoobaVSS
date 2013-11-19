@@ -128,11 +128,11 @@ public slots:
 signals:
 
     void pluginLoaded(NoobaPlugin* plugin);
-    void pluginAboutToUnloaded(NoobaPlugin* plugin);
+    void pluginAboutToUnloaded(QString alias);
     void pluginsDisconnected(PluginConnData* pcd);
     void pluginsConnected(PluginConnData* pcd);
     void pluginInitialised(NoobaPlugin* plugin);
-    void pluginAboutToRelease(NoobaPlugin* plugin);
+    void pluginAboutToRelease(QString alias);
     void errMsg(const QString& errMsg, const QString& detailedErrMsg = QString());
 
     /**

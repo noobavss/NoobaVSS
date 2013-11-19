@@ -165,9 +165,16 @@ signals:
     void outputData(const PluginPassData& data);
     void outputData(const QStringList& strList, QList<QImage> imageList);
     void onInit(NoobaPlugin* plugin);
-    void onAboutToRelease(NoobaPlugin* plugin);
+    void onAboutToRelease(QString alias);
     void createFrameViewer(const QString& title);
     void updateFrameViewer(const QString& title, const QImage& frame, NoobaPlugin* plugin);
+
+    void intParamUpdate(const QString& varName, int val);
+    void doubleParamUpdate(const QString& varName, double val);
+    void stringParamUpdate(const QString& varName, const QString& val);
+    void multiValParamUpdate(const QString& varName, const QString& val);
+    void pointParamUpdate(const QString& varName, const QPointF& val);
+    void rectParamUpdate(const QString& varName, const QRectF& val);
 
 public slots:
 
@@ -207,6 +214,7 @@ private:
     QPluginLoader*                  _pluginLoader;
     QString                         _fileName;
     QString                         _alias;
+    QMap<QString, QImage>           _frameViewerImageMap;
     QMap<QString, IntData* >        _intMap;
     QMap<QString, DoubleData* >     _doubleMap;
     QMap<QString, StringData* >     _stringMap;

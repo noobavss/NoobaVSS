@@ -47,13 +47,14 @@ public slots:
 
 private slots:
 
+    void closeEvent(QCloseEvent *event);
     void onInputFrameUpdate(const QImage &in);
     void onFileStreamEOF();
 
     void onPluginLoad(NoobaPlugin *plugin);
-    void onPluginAboutToUnload(NoobaPlugin *plugin);
+    void onPluginAboutToUnload(QString alias);
     void onPluginInitialised(NoobaPlugin* plugin);
-    void onPluginAboutToRelease(NoobaPlugin* plugin);
+    void onPluginAboutToRelease(QString alias);
     void onCreateFrameViewerRequest(const QString& title, NoobaPlugin *plugin);
     void onFrameViewerUpdate(const QString& title, const QImage& frame, NoobaPlugin *plugin);
     void updateCaptureThreadStats(struct ThreadStatisticsData statData);
@@ -105,7 +106,7 @@ private:
     OutputWind                          *_debugOutWind;
     ParamConfigWind                     *_paramConfigUI;
     StatPanel                           *_statPanel;
-    QMap<NoobaPlugin*, QMap<QString, MdiSubWindData*> >  _frameViewerMap;
+    QMap<QString, QMap<QString, MdiSubWindData*> >  _frameViewerMap;
 };
 
 #endif // CAMERAVIEW_H

@@ -43,7 +43,7 @@ bool NoobaPlugin::init()
 bool NoobaPlugin::release()
 {
     qDebug() << _alias << " release " << Q_FUNC_INFO;
-    emit onAboutToRelease(this);
+    emit onAboutToRelease(_alias);
     // TODO need to save configurations to a QSettings
     releaseSignalSlots();
     deleteMapItems<IntData* >(_intMap);
@@ -54,6 +54,7 @@ bool NoobaPlugin::release()
     deleteMapItems<RectData* >(_rectMap);
 
     bool ok = _api->release();
+
     if(!ok)
         qDebug() << tr("plugin '%1' releasing failed.") << Q_FUNC_INFO;
 
@@ -109,7 +110,10 @@ void NoobaPlugin::onDebugMsg(const QString &msg)
 
 void NoobaPlugin::onUpdateFrameViewerRequest(const QString &title, const QImage &frame)
 {
-    emit updateFrameViewer(title, frame, this);
+    // this intermediate map is used to store a copy of the image to pass the image to
+    // GUI thread without loosing the content;
+    _frameViewerImageMap.insert(title, frame.copy());
+    emit updateFrameViewer(title, _frameViewerImageMap.value(title), this);
 }
 
 void NoobaPlugin::initSignalSlots()
@@ -130,30 +134,38 @@ void NoobaPlugin::initSignalSlots()
     connect(_api, SIGNAL(createFrameViewerRequest(QString)), this, SIGNAL(createFrameViewer(QString)));
     connect(_api, SIGNAL(updateFrameViewerRequest(QString,QImage)), this, SLOT(onUpdateFrameViewerRequest(QString,QImage)));
 
+    connect(this, SIGNAL(intParamUpdate(QString,int)), _api, SLOT(onIntParamChanged(QString,int)));
+    connect(this, SIGNAL(doubleParamUpdate(QString,double)), _api, SLOT(onDoubleParamChanged(QString,double)));
+    connect(this, SIGNAL(stringParamUpdate(QString,QString)), _api, SLOT(onStringParamChanged(QString,QString)));
+    connect(this, SIGNAL(multiValParamUpdate(QString,QString)), _api, SLOT(onMultiValParamChanged(QString,QString)));
+    connect(this, SIGNAL(pointParamUpdate(QString,QPointF)), _api, SLOT(onPointParamChanged(QString,QPointF)));
+    connect(this, SIGNAL(rectParamUpdate(QString,QRectF)), _api, SLOT(onRectParamChanged(QString,QRectF)));
+
 }
 
 void NoobaPlugin::onIntParamUpdate(const QString &varName, int val)
 {
     _intMap.value(varName, 0)->_val = val;
-    _api->onIntParamChanged(varName, val);
+    emit intParamUpdate(varName, val);
 }
 
 void NoobaPlugin::onDoubleParamUpdate(const QString &varName, double val)
 {
     _doubleMap.value(varName, 0)->_val = val;
-    _api->onDoubleParamChanged(varName, val);
+    emit doubleParamUpdate(varName, val);
 }
 
 void NoobaPlugin::onStringParamUpdate(const QString &varName, const QString &val)
 {
     _stringMap.value(varName)->_val = val;
-    _api->onStringParamChanged(varName, val);
+    emit stringParamUpdate(varName, val);
 }
 
 void NoobaPlugin::onMultiValParamUpdate(const QString &varName, const QString &val)
 {
+
     _stringListMap.value(varName)->_val = val;
-    _api->onMultiValParamChanged(varName, val);
+    emit multiValParamUpdate(varName, val);
 }
 
 void NoobaPlugin::onPointParamUpdate(const QString &varName, const QPointF &val)
@@ -164,13 +176,13 @@ void NoobaPlugin::onPointParamUpdate(const QString &varName, const QPointF &val)
 
     p->_val.setX(val.x());
     p->_val.setY(val.y());
-    _api->onPointParamChanged(varName, val);
+    emit pointParamUpdate(varName, val);
 }
 
 void NoobaPlugin::onRectParamUpdate(const QString &varName, const QRectF &val)
 {
     _rectMap.value(varName)->_val.setRect(val.x(), val.y(),val.width(), val.height());
-    _api->onRectParamChanged(varName, val);
+   emit rectParamUpdate(varName, val);
 }
 
 void NoobaPlugin::inputData(const PluginPassData& data)

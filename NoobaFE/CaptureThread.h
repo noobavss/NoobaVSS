@@ -75,6 +75,7 @@ signals:
 
     void updateStatisticsInGUI(struct ThreadStatisticsData);
     void endFileOfStream();
+//    void inputFrame(QImage image);
     void frameAddedToImageBuffer();
 
 private:
