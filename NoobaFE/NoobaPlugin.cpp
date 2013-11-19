@@ -1,7 +1,9 @@
 
+// Qt
 #include <QDebug>
 #include <QPluginLoader>
 #include <QSettings>
+#include <QSignalMapper>
 
 #include <NoobaEye.h>
 #include <noobapluginapi.h>
@@ -105,6 +107,11 @@ void NoobaPlugin::onDebugMsg(const QString &msg)
     qDebug() << "Debug MSG: " << msg;
 }
 
+void NoobaPlugin::onUpdateFrameViewerRequest(const QString &title, const QImage &frame)
+{
+    emit updateFrameViewer(title, frame, this);
+}
+
 void NoobaPlugin::initSignalSlots()
 {
     connect(_api, SIGNAL(debugMsgRequest(QString)), this, SIGNAL(debugMsg(QString)));
@@ -121,7 +128,8 @@ void NoobaPlugin::initSignalSlots()
     qRegisterMetaType< QList<QImage> >("QList<QImage>");
     connect(_api, SIGNAL(outputDataRequest(QStringList,QList<QImage>)), this, SIGNAL(outputData(QStringList,QList<QImage>)));
     connect(_api, SIGNAL(createFrameViewerRequest(QString)), this, SIGNAL(createFrameViewer(QString)));
-    connect(_api, SIGNAL(updateFrameViewerRequest(QString,QImage)), this, SIGNAL(updateFrameViewer(QString,QImage)));
+    connect(_api, SIGNAL(updateFrameViewerRequest(QString,QImage)), this, SLOT(onUpdateFrameViewerRequest(QString,QImage)));
+
 }
 
 void NoobaPlugin::onIntParamUpdate(const QString &varName, int val)

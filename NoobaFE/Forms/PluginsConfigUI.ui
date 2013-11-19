@@ -99,7 +99,7 @@
               </property>
               <column>
                <property name="text">
-                <string>Available Plugins</string>
+                <string>Unloaded Plugins</string>
                </property>
               </column>
              </widget>

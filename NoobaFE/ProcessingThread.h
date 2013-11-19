@@ -85,7 +85,6 @@ private:
     QMutex                          processingMutex;
     struct ThreadStatisticsData     statsData;
 
-
 };
 
 class ProcessingThread : public QThread
@@ -115,6 +114,11 @@ private:
         int                             _deviceNumber;
         bool                            enableFrameProcessing;
 
+private slots:
+
+        void onPluginLoaded(NoobaPlugin* plugin);
+        void onCreateFrameRequest(const QString& title);
+
 protected:
         void run();
 
@@ -122,6 +126,8 @@ signals:
         void newFrame(const QImage &frame);
         void updateStatisticsInGUI(struct ThreadStatisticsData);
         void inputFrame(const QImage& inputFrame);
+        void createFrameViewer(const QString& title, NoobaPlugin* plugin);
+        void debugMsg(const QString& msg);
         void pluginLoaded(NoobaPlugin* plugin);
         void pluginInitialised(NoobaPlugin* plugin);
         void pluginAboutToRelease(NoobaPlugin* plugin);

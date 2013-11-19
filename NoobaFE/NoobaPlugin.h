@@ -167,7 +167,7 @@ signals:
     void onInit(NoobaPlugin* plugin);
     void onAboutToRelease(NoobaPlugin* plugin);
     void createFrameViewer(const QString& title);
-    void updateFrameViewer(const QString& title, const QImage& frame);
+    void updateFrameViewer(const QString& title, const QImage& frame, NoobaPlugin* plugin);
 
 public slots:
 
@@ -193,6 +193,7 @@ private slots:
     void onCreatePointParam(const QString& varName, const QPointF& val);
     void onCreateRectParam(const QString& varName, const QRectF& val);
     void onDebugMsg(const QString& msg);
+    void onUpdateFrameViewerRequest(const QString& title, const QImage& frame);
 
 private:
 

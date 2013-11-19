@@ -54,7 +54,6 @@ namespace nooba {
 
 Q_DECLARE_METATYPE(nooba::ParamType)   // now ParamTypes can be used with QVariants
 
-
 struct ProcParamsPrivate;
 struct PluginInfoPrivate;
 struct NoobaPluginAPIPrivate;

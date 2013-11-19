@@ -38,13 +38,16 @@ private slots:
 
 signals:
 
-    void loadPlugin(const QString& name, bool isBase);
-    void unloadPlugin(const QString& alias);
+    void loadPlugins(QStringList);
+    void unloadPlugin(QString alias);
+    void unloadAllPlugins();
     void loadPluginInfo();
     void saveCurrentConfig();
+    void connectPlugins(QStringList outPlugList, QStringList inPugList);
 
 private:
 
+    void removeConnections(const QString& pluginAlias);
     void updateUI();
     void addLoadedPluginToTree(NoobaPlugin* p);
     void MoveTreeWidgetItem(QTreeWidget* from, QTreeWidget* to, QTreeWidgetItem *item);
@@ -52,12 +55,10 @@ private:
     Ui::PluginsConfigUI ui;
     Qt::ItemDataRole    FILENAME_ROLE;
     int                 ALIAS_ROLE;
-    bool                _applyConfig;
     PluginLoader        &_pluginLoader;
     PluginConnDelegate* _pluginConnDelegate;
     const QString       ACTIVE;
     const QString       DISABLED;
-    const QStringList   _toBeLoadedPlugins;
 };
 
 #endif // PLUGINSCONFIGUI_H

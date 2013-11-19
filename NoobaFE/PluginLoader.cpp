@@ -33,6 +33,12 @@ NoobaPlugin *PluginLoader::getBasePlugin() const
     return _basePlugin;
 }
 
+QList<NoobaPlugin* > PluginLoader::getActivePlugins() const
+{
+    QMutexLocker locker(&_loadedPluginsMutex);
+    return _loadedPlugins;
+}
+
 int PluginLoader::loadPluginInfo()
 {
     QMutexLocker locker(&_pluginInfoListMutex);
@@ -78,7 +84,22 @@ int PluginLoader::loadPluginInfo()
     return pluginCount;
 }
 
-NoobaPlugin *PluginLoader::loadPlugin(const QString& fileName, bool isBase)
+void PluginLoader::loadPlugins(QStringList filenameList)
+{
+    if(filenameList.isEmpty())
+    {
+        qDebug() << tr("filename list is empty. Plugin loading failed") << Q_FUNC_INFO;
+        return;
+    }
+    loadPlugin(filenameList.first(), true);
+
+    for(int i = 1; i < filenameList.count(); i++)
+    {
+        loadPlugin(filenameList.at(i));
+    }
+}
+
+NoobaPlugin *PluginLoader::loadPlugin(QString fileName, bool isBase)
 {
     if(fileName.isEmpty())
     {
@@ -86,7 +107,7 @@ NoobaPlugin *PluginLoader::loadPlugin(const QString& fileName, bool isBase)
         return NULL;
     }
 
-    QPluginLoader *pl = new QPluginLoader(_dir.absoluteFilePath(fileName), this);
+    QPluginLoader *pl = new QPluginLoader(_dir.absoluteFilePath(fileName));
     QObject *plugin = pl->instance();
 
     if (plugin) // if plugin loading successful
@@ -104,7 +125,6 @@ NoobaPlugin *PluginLoader::loadPlugin(const QString& fileName, bool isBase)
             connect(nPlug, SIGNAL(onAboutToRelease(NoobaPlugin*)), this, SIGNAL(pluginAboutToRelease(NoobaPlugin*)));
 
             nPlug->setIsBasePlugin(isBase);
-            nPlug->init();
 
             ///////////////////////////////////////
             // LOCK loaded plugin list
@@ -127,6 +147,7 @@ NoobaPlugin *PluginLoader::loadPlugin(const QString& fileName, bool isBase)
                 // UNLOCK
                 ////////////////////////////////////
             }
+            nPlug->init();
             return nPlug; // return plugin, successful
         }
     }    
@@ -169,9 +190,9 @@ bool PluginLoader::unloadPlugins()
     return ok;
 }
 
-bool PluginLoader::unloadPlugin(const QString &alias)
+bool PluginLoader::unloadPlugin(QString alias)
 {
-
+    qDebug() << Q_FUNC_INFO;
     QMutexLocker locker(&_loadedPluginsMutex);
 
     for(int i=0; i < _loadedPlugins.size(); i++) {
@@ -242,9 +263,51 @@ void PluginLoader::connectPlugins(PluginConnData* pcd)
     return;
 }
 
-void PluginLoader::connectPlugins(const QString &outPlugAlias, const QString &inPlugAlias)
+void PluginLoader::connectPlugins(QStringList outPlugList, QStringList inPlugList)
+{
+    if(outPlugList.size() != inPlugList.size())
+    {
+        qDebug() << tr("intput and output plugin list size mismatch") << Q_FUNC_INFO;
+        return;
+    }
+    for(int i = 0; i < outPlugList.size(); i++)
+    {
+        connectPlugins(outPlugList.at(i), inPlugList.at(i));
+    }
+
+    return;
+}
+
+void PluginLoader::connectPlugins(QString outPlugAlias, QString inPlugAlias)
 {
     bool inFound = false, outFound = false;
+
+    PluginConnData* pcd = new PluginConnData;
+    QMutexLocker locker(&_loadedPluginsMutex);
+
+    foreach (NoobaPlugin* p, _loadedPlugins)
+    {
+        // inPlug and outPlug both can be the same plugin
+        if(p->alias().compare(outPlugAlias) == 0)
+        {
+            pcd->_outPlug = p;
+            pcd->_outPlugAlias = outPlugAlias;
+        }
+
+        if(p->alias().compare(inPlugAlias) == 0)
+        {
+            pcd->_inPlug = p;
+            pcd->_inPlugAlias = inPlugAlias;
+        }
+
+        if(inFound && outFound)
+            break;
+    }
+
+    if(inFound && outFound)
+        connectPlugins(pcd);
+    else
+        delete pcd;
 }
 
 bool PluginLoader::disconnectPlugin(PluginConnData *pcd)
@@ -475,13 +538,14 @@ void PluginLoader::releaseAndUnload(NoobaPlugin *plugin)
 QString PluginLoader::getPluginAlias(const QString& pluginName)
 {
     // NOTE: PRIVATE function. NOT Thread safe call with caution
-    int count = 1;
+    /*int count = 1;
     foreach(NoobaPlugin* p, _loadedPlugins)
     {
         if(p->getPluginInfo().name().compare(pluginName) == 0)
             count++;
     }
-    return QString("%1[%2]").arg(pluginName).arg(count);
+    return QString("%1[%2]").arg(pluginName).arg(count)*/;
+    return pluginName;
 }
 
 void PluginLoader::updatePluginConnection(PluginConnData *pcd, bool isConnect)

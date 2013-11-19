@@ -17,6 +17,9 @@ ParamConfigWind::ParamConfigWind(QWidget *parent) :
 
 {
     ui->setupUi(this);
+
+    // Set column width at startup
+    ui->paramTree->setColumnWidth(0, 150);
     PluginPtrRole = Qt::UserRole+1;
     connect(ui->paramTree, SIGNAL(itemChanged(QTreeWidgetItem*,int)),
             this, SLOT(onItemChanged(QTreeWidgetItem*,int)));

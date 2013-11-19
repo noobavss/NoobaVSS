@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
         QString stylesheet = QLatin1String(f.readAll());
         a.setStyleSheet(stylesheet);
     }
-
+//    QApplication::setStyle(QStyleFactory::create("Fusion"));
     a.setApplicationName(nooba::ProgramName);
     a.setOrganizationName(nooba::Organisation);
     a.setApplicationVersion(QString("%1.%2").arg(nooba::MajorVersion).arg(nooba::MinorVersion));

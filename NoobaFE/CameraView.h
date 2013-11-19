@@ -54,8 +54,8 @@ private slots:
     void onPluginAboutToUnload(NoobaPlugin *plugin);
     void onPluginInitialised(NoobaPlugin* plugin);
     void onPluginAboutToRelease(NoobaPlugin* plugin);
-    void onCreateFrameViewerRequest(const QString& title);
-    void onFrameViewerUpdate(const QString& title, const QImage& frame);
+    void onCreateFrameViewerRequest(const QString& title, NoobaPlugin *plugin);
+    void onFrameViewerUpdate(const QString& title, const QImage& frame, NoobaPlugin *plugin);
     void updateCaptureThreadStats(struct ThreadStatisticsData statData);
     void updateProcessingThreadStats(struct ThreadStatisticsData statData);
 

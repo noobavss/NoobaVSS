@@ -51,7 +51,7 @@ public:
      * @brief getActivePlugins currently loaded plugins are returned
      * @return plugins are returned as a QList od NoobaPlugin pointers.
      */
-    QList<NoobaPlugin* > getActivePlugins() const { return _loadedPlugins; }
+    QList<NoobaPlugin *> getActivePlugins() const;
     const QList<NoobaPlugin* > getOutputPluginList(const QString& inPlugAlias) const;
     const QList<NoobaPlugin* > getInputPluginList(const QString& outPlugAlias) const;
 
@@ -68,13 +68,15 @@ public slots:
      */
     int loadPluginInfo();
 
+    void loadPlugins(QStringList filenameList);
+
     /**
      * @brief loadPlugin Load the plugin in the plugins directory with the file name fileName
      * @param fileName
      * @param isBase
      * @return
      */
-    NoobaPlugin* loadPlugin(const QString& fileName, bool isBase = false);
+    NoobaPlugin* loadPlugin(QString fileName, bool isBase = false);
 
     /**
      * @brief unloadActivePlugin    unloads the actvie plugin.
@@ -89,7 +91,7 @@ public slots:
      * @param alias         alias of the plugin.
      * @return              return true if the unloading was successful.
      */
-    bool unloadPlugin(const QString& alias);
+    bool unloadPlugin(QString alias);
 
     /**
      * @brief connectPlugins    All previous connections are disconnected before connecting the
@@ -100,7 +102,8 @@ public slots:
     bool connectAllPlugins(QList<PluginConnData*> configList);
     void connectPlugins(PluginConnData *pcd);
 
-    void connectPlugins(const QString& outPlugAlias, const QString& inPlugAlias);
+    void connectPlugins(QStringList outPlugList, QStringList inPlugList);
+    void connectPlugins(QString outPlugAlias, QString inPlugAlias);
 
     /**
      * @brief disconnectPlugin  disconnect a single connection according to the plugin connection

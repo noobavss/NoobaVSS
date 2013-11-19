@@ -1,5 +1,6 @@
 #include <QMessageBox>
 #include <QDebug>
+#include <QApplication>
 
 #include "PluginsConfigUI.h"
 #include "NoobaPlugin.h"
@@ -12,14 +13,17 @@ PluginsConfigUI::PluginsConfigUI(PluginLoader& pluginLoader, QWidget *parent)
       DISABLED(tr("Disabled"))
 {
     _pluginConnDelegate = new PluginConnDelegate(this);
-    _applyConfig = false;
     FILENAME_ROLE = Qt::UserRole;
     ALIAS_ROLE = Qt::UserRole +2;
     ui.setupUi(this);
     updateUI();
+    ui.pluginConfigTree->setColumnWidth(0, 307);
 
-    connect(this, SIGNAL(loadPlugin(QString,bool)), &_pluginLoader, SLOT(loadPlugin(QString,bool)));
-//    connect(this)
+    connect(this, SIGNAL(loadPlugins(QStringList)), &_pluginLoader, SLOT(loadPlugins(QStringList)), Qt::BlockingQueuedConnection);
+    connect(this, SIGNAL(loadPluginInfo()), &_pluginLoader, SLOT(loadPluginInfo()), Qt::BlockingQueuedConnection);
+    connect(this, SIGNAL(saveCurrentConfig()), &_pluginLoader, SLOT(saveCurrentConfig()), Qt::BlockingQueuedConnection);
+    connect(this, SIGNAL(unloadAllPlugins()), &_pluginLoader, SLOT(unloadPlugins()), Qt::BlockingQueuedConnection);
+    connect(this, SIGNAL(connectPlugins(QStringList,QStringList)), &_pluginLoader, SLOT(connectPlugins(QStringList,QStringList)), Qt::BlockingQueuedConnection);
 }
 
 PluginsConfigUI::~PluginsConfigUI()
@@ -30,14 +34,27 @@ QStringList PluginsConfigUI::getOutputPluginList(const QString &inPlugAlias)
 {
     Q_UNUSED(inPlugAlias)
     // TODO update the list according to inPlug
-    return _toBeLoadedPlugins;
+
+    QStringList lst;
+    for(int i = 0; i < ui.loadedPluginsTree->topLevelItemCount(); i++)
+    {
+        lst << ui.loadedPluginsTree->topLevelItem(i)->text(0);
+    }
+
+    return lst;
 }
 
 QStringList PluginsConfigUI::getInputPluginList(const QString &outPlugAlias)
 {
     Q_UNUSED(outPlugAlias)
     // TODO update the list according to outplug
-    return _toBeLoadedPlugins;
+    QStringList lst;
+    for(int i = 0; i < ui.loadedPluginsTree->topLevelItemCount(); i++)
+    {
+        lst << ui.loadedPluginsTree->topLevelItem(i)->text(0);
+    }
+
+    return lst;
 }
 
 void PluginsConfigUI::onReloadButtonClicked()
@@ -74,6 +91,7 @@ void PluginsConfigUI::onSetDefaultButtonClicked()
 void PluginsConfigUI::updateUI()
 {
     ui.pluginListTree->clear();
+    ui.availablePluginsTree->clear();
     ui.pluginListTree->setColumnCount(2);
     ui.pluginListTree->setHeaderLabels(QStringList() << tr("Property") << tr("Value"));
 
@@ -145,19 +163,15 @@ void PluginsConfigUI::updateUI()
 
     // update connection table
     QList<PluginConnData* > lst = _pluginLoader.getPCDList();
+
     foreach(PluginConnData* pcd, lst)
     {
         QTreeWidgetItem* itm = new QTreeWidgetItem(ui.pluginConfigTree);
         itm->setFlags(itm->flags()| Qt::ItemIsEditable);
-        itm->setBackgroundColor(0, QColor(240, 240,240));
-        itm->setBackground(1, QColor(240, 240,240));
+        QColor c(190, 190,240);
+        itm->setBackgroundColor(0, c);
+        itm->setBackground(1, c);
         itm->setText(0, pcd->_outPlugAlias);
-        QVariant v;
-        v.setValue(pcd->_outPlug);
-        itm->setData(0, Qt::UserRole, v);
-        itm->setText(1, pcd->_inPlugAlias);
-        v.setValue(pcd->_inPlug);
-        itm->setData(1, Qt::UserRole, v);
     }
     ui.pluginConfigTree->setItemDelegate(_pluginConnDelegate);
 }
@@ -186,40 +200,38 @@ void PluginsConfigUI::on_removeButton_clicked()
 
 void PluginsConfigUI::on_applyButton_clicked()
 {
+    emit unloadAllPlugins();
     if(ui.loadedPluginsTree->topLevelItemCount() == 0)
     {
         emit saveCurrentConfig();
         return;
     }
 
-    emit loadPlugin(ui.loadedPluginsTree->topLevelItem(0)->text(0), false);
-    for(int i = 1; i < ui.loadedPluginsTree->topLevelItemCount();  i++)
+    QStringList fNameList;
+    for(int i = 0; i < ui.loadedPluginsTree->topLevelItemCount();  i++)
     {
-        emit loadPlugin(ui.loadedPluginsTree->topLevelItem(i)->text(0), false);
+        fNameList.append(ui.loadedPluginsTree->topLevelItem(i)->data(0,FILENAME_ROLE).toString());
     }
 
-//    QList<PluginConnData* > lst;
-//    for(int r=0; r < ui.pluginConfigTree->topLevelItemCount(); r++)
-//    {
-//        QTreeWidgetItem* itm = ui.pluginConfigTree->topLevelItem(r);
-//        if(!itm)
-//            continue;
-//        if(itm->text(0).isEmpty() || itm->text(1).isEmpty())    // empty line
-//            continue;
-//        PluginConnData* connData = new PluginConnData;
-//        QVariant v = itm->data(0, Qt::UserRole);
-//        NoobaPlugin* p = v.value<NoobaPlugin* >();
-//        connData->_outPlug = p;
-//        connData->_outPlugAlias = p->alias();
-//        v = itm->data(1, Qt::UserRole);
-//        p = v.value<NoobaPlugin* >();
-//        connData->_inPlug = p;
-//        connData->_inPlugAlias = p->alias();
-//        lst.append(connData);
-//    }
-//    _pluginLoader.connectAllPlugins(lst);
-//    _pluginLoader.saveCurrentConfig();
-    _applyConfig = true;
+    if(!fNameList.isEmpty())
+    {
+        emit loadPlugins(fNameList);
+
+        QStringList in, out;
+        for(int r=0; r < ui.pluginConfigTree->topLevelItemCount(); r++)
+        {
+            QTreeWidgetItem* itm = ui.pluginConfigTree->topLevelItem(r);
+
+            if(itm->text(0).isEmpty() || itm->text(1).isEmpty())    // empty line
+                continue;
+
+            out << itm->text(0);
+            in << itm->text(1);
+        }
+        emit connectPlugins(out, in);
+    }
+    emit saveCurrentConfig();
+//    QThread::msleep(200);
 }
 
 void PluginsConfigUI::on_loadPluginButton_clicked()
@@ -268,11 +280,11 @@ void PluginsConfigUI::on_unloadPluginButton_clicked()
         return;
     }
     MoveTreeWidgetItem(ui.loadedPluginsTree, ui.availablePluginsTree, l.first());
+    removeConnections(l.first()->text(0));
 }
 
 void PluginsConfigUI::on_cancelButton_clicked()
 {
-    _applyConfig = false;
     close();
 }
 
@@ -290,17 +302,26 @@ void PluginsConfigUI::on_cancelButton_clicked()
 
 void PluginsConfigUI::closeEvent(QCloseEvent *)
 {
-    if(_applyConfig)
-        return;
-
-    _pluginLoader.loadPrevConfig(); // this is not reverting back :/ this may lead to loosing the states of plugins
+   // _pluginLoader.loadPrevConfig(); // this is not reverting back :/ this may lead to loosing the states of plugins
                                     // this reloads the plugins to its previous state.
     return;
 }
 
 void PluginsConfigUI::on_doneButton_clicked()
 {
-    on_applyButton_clicked();
-    _applyConfig = true;
+ //   on_applyButton_clicked();
     close();
+}
+
+void PluginsConfigUI::removeConnections(const QString &pluginAlias)
+{
+    int i = ui.pluginConfigTree->topLevelItemCount() - 1;
+    for(; i >= 0; i--)
+    {
+        QTreeWidgetItem* itm = ui.pluginConfigTree->topLevelItem(i);
+        if(itm->text(0).compare(pluginAlias) == 0 || itm->text(1).compare(pluginAlias) == 0 )
+        {
+            delete itm;
+        }
+    }
 }

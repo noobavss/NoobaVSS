@@ -57,11 +57,12 @@ void ProcessingThread::run()
     connect(&frameProc, SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)), this, SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)));
 
     qRegisterMetaType< NoobaPlugin* >("NoobaPlugin");
-    connect(_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SIGNAL(pluginLoaded(NoobaPlugin*)), Qt::DirectConnection);
-    connect(_pluginLoader, SIGNAL(pluginInitialised(NoobaPlugin*)), this, SIGNAL(pluginInitialised(NoobaPlugin*)), Qt::DirectConnection);
-    connect(_pluginLoader, SIGNAL(pluginAboutToUnloaded(NoobaPlugin*)), this, SIGNAL(pluginAboutToUnload(NoobaPlugin*)), Qt::DirectConnection);
-    connect(_pluginLoader, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), this, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), Qt::DirectConnection);
-    connect(_pluginLoader, SIGNAL(basePluginChanged(NoobaPlugin*)), this, SIGNAL(basePluginChanged(NoobaPlugin*)), Qt::DirectConnection);
+    connect(_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SIGNAL(pluginLoaded(NoobaPlugin*)));
+    connect(_pluginLoader, SIGNAL(pluginInitialised(NoobaPlugin*)), this, SIGNAL(pluginInitialised(NoobaPlugin*)));
+    connect(_pluginLoader, SIGNAL(pluginAboutToUnloaded(NoobaPlugin*)), this, SIGNAL(pluginAboutToUnload(NoobaPlugin*)));
+    connect(_pluginLoader, SIGNAL(pluginAboutToRelease(NoobaPlugin*)), this, SIGNAL(pluginAboutToRelease(NoobaPlugin*)));
+    connect(_pluginLoader, SIGNAL(basePluginChanged(NoobaPlugin*)), this, SIGNAL(basePluginChanged(NoobaPlugin*)));
+    connect(_pluginLoader, SIGNAL(pluginLoaded(NoobaPlugin*)), this, SLOT(onPluginLoaded(NoobaPlugin*)), Qt::DirectConnection);
 
     qRegisterMetaType< struct PluginConnData* >("PluginConnData");
     connect(_pluginLoader, SIGNAL(pluginsConnected(PluginConnData*)), this, SIGNAL(pluginsConnected(PluginConnData*)));
@@ -95,9 +96,30 @@ PluginLoader *ProcessingThread::getPluginLoader()
     return _pluginLoader;
 }
 
+void ProcessingThread::onPluginLoaded(NoobaPlugin *plugin)
+{
+    // NOTE: WHY THIS SLOT?
+    // Plugin loading and initialisation done in Processing thread. GUI thread waiting for this signal to
+    // connect signals emited at plugin initialisation will miss the signals since signals emitted on
+    // initialisation will be emitted before the connection is made in the GUI thread.
+    // To overcome this issue the signal passing is transfered to the processing thread itself using this
+    // directly connected slot.
+    connect(plugin, SIGNAL(createFrameViewer(QString)), this, SLOT(onCreateFrameRequest(QString)));
+    connect(plugin, SIGNAL(debugMsg(QString)), this, SIGNAL(debugMsg(QString)));
+}
+
+void ProcessingThread::onCreateFrameRequest(const QString &title)
+{
+    NoobaPlugin* p = qobject_cast<NoobaPlugin* >(sender());
+    if(!p)
+        return;
+
+    emit createFrameViewer(title, p);
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Class ProcessInput
+// Class FrameProcessor
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
