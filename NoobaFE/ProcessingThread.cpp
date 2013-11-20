@@ -106,17 +106,17 @@ void ProcessingThread::onPluginLoaded(NoobaPlugin *plugin)
     // initialisation will be emitted before the connection is made in the GUI thread.
     // To overcome this issue the signal passing is transfered to the processing thread itself using this
     // directly connected slot.
-    connect(plugin, SIGNAL(createFrameViewer(QString)), this, SLOT(onCreateFrameRequest(QString)));
+    connect(plugin, SIGNAL(createFrameViewer(QString, bool)), this, SLOT(onCreateFrameRequest(QString, bool)));
     connect(plugin, SIGNAL(debugMsg(QString)), this, SIGNAL(debugMsg(QString)));
 }
 
-void ProcessingThread::onCreateFrameRequest(const QString &title)
+void ProcessingThread::onCreateFrameRequest(const QString &title, bool isVisible)
 {
     NoobaPlugin* p = qobject_cast<NoobaPlugin* >(sender());
     if(!p)
         return;
 
-    emit createFrameViewer(title, p);
+    emit createFrameViewer(title, isVisible, p);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,10 +153,8 @@ void FrameProcessor::processFrame()
 {
     QMutexLocker locker(&processingMutex);
 
-    int processingTime = t.elapsed();
     // Start timer (used to calculate processing rate)
     t.start();
-
 
     Buffer<Mat> *buffer = _sharedImageBuffer->getByDeviceNumber(_deviceNumber);
     if(buffer->isEmpty())
@@ -183,6 +181,7 @@ void FrameProcessor::processFrame()
     ProcParams params;
     p->procFrame(currentFrame, out, params);
 
+    int processingTime = t.elapsed();
      // Update statistics
     updateFPS(processingTime);
     statsData.nFramesProcessed++;

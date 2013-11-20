@@ -38,7 +38,7 @@
 #define CAPTURE_FPS_STAT_QUEUE_LENGTH       32
 
 // Image buffer size
-#define DEFAULT_IMAGE_BUFFER_SIZE           1
+#define DEFAULT_IMAGE_BUFFER_SIZE           8
 // Drop frame if image/frame buffer is full
 #define DEFAULT_DROP_FRAMES                 false
 // Thread priorities

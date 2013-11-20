@@ -198,7 +198,7 @@ public:
     // once created user can see the variables and change them.
 
     /**
-     * @brief createIntParam    integer parameter created
+     * @brief createIntParam integer parameter created
      * @param varName
      * @param val
      * @param max
@@ -262,8 +262,8 @@ public:
      * @brief createOutputWind creates MDI SubWindow to show the frame outputs
      * @param title title of the subWindow
      */
-    void createFrameViewer(const QString& title)
-    {   emit createFrameViewerRequest(title); }
+    void createFrameViewer(const QString& title, bool isVisible = true)
+    {   emit createFrameViewerRequest(title, isVisible); }
 
     /**
      * @brief updateFrameViewer
@@ -272,6 +272,13 @@ public:
      */
     void updateFrameViewer(const QString& title, const QImage& frame)
     {   emit updateFrameViewerRequest(title, frame); }
+
+    /**
+     * @brief setFrameViewerVisibility
+     * @param isVisible seting this to true will make the viewer visible and vice versa
+     */
+    void setFrameViewerVisibility(const QString& title, bool isVisible)
+    {   emit updateFrameViewerVisibilityRequest(title, isVisible); }
 
 signals:
 
@@ -284,8 +291,9 @@ signals:
     void debugMsgRequest(const QString& msg);
     void outputDataRequest(const PluginPassData& data);
     void outputDataRequest(const QStringList& strList, QList<QImage> imageList);
-    void createFrameViewerRequest(const QString& title);
+    void createFrameViewerRequest(const QString& title, bool isVisible = true); // added isVisible argument after ver 0.9
     void updateFrameViewerRequest(const QString& title, const QImage& frame);
+    void updateFrameViewerVisibilityRequest(const QString& title, bool isVisible); // after ver 0.9
     void anomalyDetected();
 
 public slots:
@@ -333,7 +341,7 @@ public slots:
 
 protected:
 
-    /**
+   /**
      * private constructor so that this class could never be instantiated. Only be casted to this
      * interface type to get the API version details.
      */

@@ -115,6 +115,18 @@ struct RectData {
 
 Q_DECLARE_METATYPE(RectData*)
 
+struct FrameViewerData {
+
+    FrameViewerData(const QString& title, bool isVisible):
+        _title(title), _isVisible(isVisible) {}
+
+    QString _title;
+    QImage  _img;
+    bool    _isVisible;
+};
+
+Q_DECLARE_METATYPE(FrameViewerData*)
+
 /**
  * @brief The NoobaPlugin class this is a wrapper class for the Loaded plugins
  */
@@ -166,8 +178,8 @@ signals:
     void outputData(const QStringList& strList, QList<QImage> imageList);
     void onInit(NoobaPlugin* plugin);
     void onAboutToRelease(QString alias);
-    void createFrameViewer(const QString& title);
-    void updateFrameViewer(const QString& title, const QImage& frame, NoobaPlugin* plugin);
+    void createFrameViewer(const QString& title, bool isVisible);
+    void updateFrameViewer(const QString& pluginAlias, const QString& title, const QImage& frame);
 
     void intParamUpdate(const QString& varName, int val);
     void doubleParamUpdate(const QString& varName, double val);
@@ -175,6 +187,7 @@ signals:
     void multiValParamUpdate(const QString& varName, const QString& val);
     void pointParamUpdate(const QString& varName, const QPointF& val);
     void rectParamUpdate(const QString& varName, const QRectF& val);
+    void setFrameViewerVisibility(const QString& alias, const QString& title, bool isVisible);
 
 public slots:
 
@@ -193,6 +206,7 @@ public slots:
 private slots:
 
     // on create request of plugins call this function
+    void onCreateFrameViewer(const QString& title, bool isVisible);
     void onCreateIntParam(const QString& varName, int val, int max, int min);
     void onCreateDoubleParam(const QString& varName, double val, double max, double min);
     void onCreateStringParam(const QString& varName, const QString& val, bool isFilePath);
@@ -201,6 +215,7 @@ private slots:
     void onCreateRectParam(const QString& varName, const QRectF& val);
     void onDebugMsg(const QString& msg);
     void onUpdateFrameViewerRequest(const QString& title, const QImage& frame);
+    void onSetFrameViewerVisibility(const QString& title, bool isVisible);
 
 private:
 
@@ -214,13 +229,14 @@ private:
     QPluginLoader*                  _pluginLoader;
     QString                         _fileName;
     QString                         _alias;
-    QMap<QString, QImage>           _frameViewerImageMap;
+    // internal data maps
     QMap<QString, IntData* >        _intMap;
     QMap<QString, DoubleData* >     _doubleMap;
     QMap<QString, StringData* >     _stringMap;
     QMap<QString, StringListData* > _stringListMap;
     QMap<QString, PointData* >      _pointMap;
     QMap<QString, RectData* >       _rectMap;
+    QMap<QString, FrameViewerData*> _frameViewerDataMap;
 
 };
 

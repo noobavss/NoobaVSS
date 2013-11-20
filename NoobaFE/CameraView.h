@@ -55,8 +55,9 @@ private slots:
     void onPluginAboutToUnload(QString alias);
     void onPluginInitialised(NoobaPlugin* plugin);
     void onPluginAboutToRelease(QString alias);
-    void onCreateFrameViewerRequest(const QString& title, NoobaPlugin *plugin);
-    void onFrameViewerUpdate(const QString& title, const QImage& frame, NoobaPlugin *plugin);
+    void onCreateFrameViewerRequest(const QString& title, bool isVisible, NoobaPlugin *plugin);
+    void onFrameViewerUpdate(const QString& pluginAlias, const QString& title, const QImage& frame);
+    void onFrameSetVisibiliy(const QString& alias, const QString &title, bool isVisible);
     void updateCaptureThreadStats(struct ThreadStatisticsData statData);
     void updateProcessingThreadStats(struct ThreadStatisticsData statData);
 
@@ -64,10 +65,10 @@ private:
 
     struct MdiSubWindData
     {
-        MdiSubWindData(NoobaPlugin* plugin, QMdiSubWindow* subWind, FrameViewer* frameViewer)
-            :_plugin(plugin), _mdiSubWind(subWind), _frameViewer(frameViewer) {}
+        MdiSubWindData(const QString& pluginAlias, QMdiSubWindow* subWind, FrameViewer* frameViewer)
+            :_pluginAlias(pluginAlias), _mdiSubWind(subWind), _frameViewer(frameViewer) {}
 
-        NoobaPlugin*    _plugin;
+        QString         _pluginAlias;
         QMdiSubWindow*  _mdiSubWind;
         FrameViewer*    _frameViewer;
     };
@@ -86,9 +87,8 @@ private:
     void stopCaptureThread();
     void stopProcessingThread();
     void connectThreadSignalSlots();
-    void initializeMdiArea();
     inline void setupSharedBufferForNewDevice();
-    QMdiSubWindow *addMDISubWindow(FrameViewer* frameViewer);
+    QMdiSubWindow *addMDISubWindow(FrameViewer* frameViewer, bool isVisible);
 
     bool                                _isWebCam;
     Ui::CameraView                      *ui;

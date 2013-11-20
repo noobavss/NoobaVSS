@@ -30,7 +30,7 @@ CameraView::CameraView(SharedImageBuffer *sharedImageBuffer, QWidget *parent) :
     _sharedImageBuffer(sharedImageBuffer),
     _captureThread(NULL),
     _deviceNumber(-1),
-    _imageBufferSize(1),
+    _imageBufferSize(DEFAULT_IMAGE_BUFFER_SIZE),
     _inputWind(tr("Video Input")),
     _debugOutWind(new OutputWind()),
     _paramConfigUI(new ParamConfigWind()),
@@ -102,7 +102,7 @@ bool CameraView::connectToCamera()
     }
 
     _statPanel->setDeviceName(QString::number(_deviceNumber));
-    addMDISubWindow(&_inputWind);
+    addMDISubWindow(&_inputWind, true);
     connectThreadSignalSlots();
     _isWebCam = true;
     ui->prevButton->setDisabled(true); // disable on web cam mode, irrelavant
@@ -132,7 +132,7 @@ bool CameraView::connectToVideoFileStream()
     _processingThread.reset(new ProcessingThread(_sharedImageBuffer, _deviceNumber));
     if(_captureThread->connectToFileStream(path))
     {
-        addMDISubWindow(&_inputWind);
+        addMDISubWindow(&_inputWind, true);
         connectThreadSignalSlots();
         _processingThread->start(QThread::HighPriority);
 
@@ -179,7 +179,7 @@ void CameraView::connectThreadSignalSlots()
     connect(_processingThread.data(), SIGNAL(pluginInitialised(NoobaPlugin*)), this, SLOT(onPluginInitialised(NoobaPlugin*)));
     connect(_processingThread.data(), SIGNAL(pluginAboutToRelease(QString)), this, SLOT(onPluginAboutToRelease(QString)));
     connect(_processingThread.data(), SIGNAL(pluginAboutToUnload(QString)), this, SLOT(onPluginAboutToUnload(QString)));
-    connect(_processingThread.data(), SIGNAL(createFrameViewer(QString,NoobaPlugin*)), this, SLOT(onCreateFrameViewerRequest(QString,NoobaPlugin*)));
+    connect(_processingThread.data(), SIGNAL(createFrameViewer(QString, bool, NoobaPlugin*)), this, SLOT(onCreateFrameViewerRequest(QString, bool, NoobaPlugin*)));
     connect(_processingThread.data(), SIGNAL(debugMsg(QString)), _debugOutWind, SLOT(onDebugMsg(QString)));
 
 //    connect(_processingThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
@@ -189,11 +189,6 @@ void CameraView::connectThreadSignalSlots()
     connect(_captureThread.data(), SIGNAL(endFileOfStream()), this, SLOT(onFileStreamEOF()));
     connect(_captureThread.data(), SIGNAL(frameAddedToImageBuffer()), _processingThread.data(), SIGNAL(FrameAddedToImageBuffer()));
     return;
-}
-
-void CameraView::initializeMdiArea()
-{
-    addMDISubWindow(&_inputWind);
 }
 
 void CameraView::setupSharedBufferForNewDevice()
@@ -210,11 +205,12 @@ void CameraView::setupSharedBufferForNewDevice()
     return;
 }
 
-QMdiSubWindow *CameraView::addMDISubWindow(FrameViewer *frameViewer)
+QMdiSubWindow *CameraView::addMDISubWindow(FrameViewer *frameViewer, bool isVisible)
 {
     QMdiSubWindow *mdiWind = ui->mdiArea->addSubWindow(frameViewer);
     mdiWind->setContentsMargins(0,0,0,0);
-    mdiWind->setVisible(true);
+    mdiWind->setVisible(isVisible);
+    frameViewer->setMdiSubWindow(mdiWind);
     return mdiWind;
 }
 
@@ -255,6 +251,7 @@ void CameraView::configurePlugins()
 
 void CameraView::closeEvent(QCloseEvent *event)
 {
+    Q_UNUSED(event)
     setVideoState(nooba::PausedState);
 }
 
@@ -262,7 +259,6 @@ void CameraView::onInputFrameUpdate(const QImage &in)
 {
     _inputWind.updateFrame(in);
 }
-
 void CameraView::onFileStreamEOF()
 {
     setVideoState(nooba::StoppedState);
@@ -303,22 +299,23 @@ void CameraView::onPluginAboutToRelease(QString alias)
     return;
 }
 
-void CameraView::onCreateFrameViewerRequest(const QString &title, NoobaPlugin* plugin)
+void CameraView::onCreateFrameViewerRequest(const QString &title, bool isVisible, NoobaPlugin* plugin)
 {
     FrameViewer *fv = new FrameViewer(title, this);
-    QMdiSubWindow* sw = addMDISubWindow(fv);
-    MdiSubWindData* data = new MdiSubWindData(plugin, sw, fv);
-    connect(plugin, SIGNAL(updateFrameViewer(QString,QImage, NoobaPlugin*)), this, SLOT(onFrameViewerUpdate(QString,QImage, NoobaPlugin*)));
+    QMdiSubWindow* sw = addMDISubWindow(fv, isVisible);
+    MdiSubWindData* data = new MdiSubWindData(plugin->alias(), sw, fv);
+    connect(plugin, SIGNAL(updateFrameViewer(QString, QString,QImage)), this, SLOT(onFrameViewerUpdate(QString, QString,QImage)));
+    connect(plugin, SIGNAL(setFrameViewerVisibility(QString,QString,bool)), this, SLOT(onFrameSetVisibiliy(QString, QString, bool)));
 
     QMutexLocker locker(&_pluginUpdateMutex);
     _frameViewerMap[plugin->alias()].insert(title, data);
     return;
 }
 
-void CameraView::onFrameViewerUpdate(const QString &title, const QImage &frame, NoobaPlugin* plugin)
+void CameraView::onFrameViewerUpdate(const QString &pluginAlias ,const QString &title, const QImage &frame)
 {
     _pluginUpdateMutex.lock();
-    MdiSubWindData* d = _frameViewerMap.value(plugin->alias()).value(title);
+    MdiSubWindData* d = _frameViewerMap.value(pluginAlias).value(title);
     _pluginUpdateMutex.unlock();
     if(d)
     {
@@ -327,7 +324,24 @@ void CameraView::onFrameViewerUpdate(const QString &title, const QImage &frame, 
     else
     {
         qDebug() << tr("frame viewer with title \'%1\' is not registered. use \"createFrameViewer()\" function"
-                       " to register a frame viewer for the %2 plugin").arg(title).arg(plugin->alias()) << Q_FUNC_INFO;
+                       " to register a frame viewer for the %2 plugin").arg(title).arg(pluginAlias) << Q_FUNC_INFO;
+    }
+    return;
+}
+
+void CameraView::onFrameSetVisibiliy(const QString &alias, const QString &title, bool isVisible)
+{
+    _pluginUpdateMutex.lock();
+    MdiSubWindData* d = _frameViewerMap.value(alias).value(title);
+    _pluginUpdateMutex.unlock();
+    if(d)
+    {
+        d->_frameViewer->setVisibility(isVisible);
+    }
+    else
+    {
+        qDebug() << tr("frame viewer with title \'%1\' is not registered. use \"createFrameViewer()\" function"
+                       " to register a frame viewer for the %2 plugin").arg(title).arg(alias) << Q_FUNC_INFO;
     }
     return;
 }

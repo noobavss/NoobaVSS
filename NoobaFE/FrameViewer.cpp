@@ -1,7 +1,8 @@
 #include "FrameViewer.h"
 #include "ui_FrameViewer.h"
-
+// Qt
 #include <QCloseEvent>
+#include <QMdiSubWindow>
 
 FrameViewer::FrameViewer(const QString &title, QWidget *parent) :
     QWidget(parent),
@@ -30,6 +31,7 @@ bool FrameViewer::updateFrame(QImage in)
 {
     if(in.isNull())
         return false;
+
     _pixmap = QPixmap::fromImage(in);
     ui->canvas->setPixmap(_pixmap.scaled(ui->canvas->size() - QSize(5,5), Qt::KeepAspectRatio));
     return true;
@@ -41,6 +43,12 @@ void FrameViewer::resizeEvent(QResizeEvent *event)
         return;
 
     ui->canvas->setPixmap(_pixmap.scaled(event->size() - QSize(5,5), Qt::KeepAspectRatio));
+}
+
+void FrameViewer::setVisibility(bool isVisible)
+{
+    _mdiSubWindow->setVisible(isVisible);
+    return;
 }
 
 
