@@ -13,7 +13,11 @@
 // Qt
 #include  <QMessageBox>
 #include <QFileDialog>
+#if QT_VERSION >= 0x050000
 #include <QStandardPaths>
+#else
+#include <QDesktopServices>
+#endif
 #include <QMdiSubWindow>
 #include <QMetaType>
 #include <QDebug>
