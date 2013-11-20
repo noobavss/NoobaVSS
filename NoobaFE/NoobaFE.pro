@@ -38,14 +38,16 @@ HEADERS += \
     CameraView.h \
     ProcessingThread.h \
     MatToQImage.h \
-    StatPanel.h
+    StatPanel.h \
+    PathLineEdit.h
 
 FORMS += Forms/MainWindow.ui Forms/PluginsConfigUI.ui \
     Forms/OutputWind.ui \
     Forms/ParamConfigWind.ui \
     Forms/FrameViewer.ui \
     Forms/CameraView.ui \
-    Forms/StatPanel.ui
+    Forms/StatPanel.ui \
+    Forms/PathLineEdit.ui
 
 SOURCES += \
            main.cpp \
@@ -63,7 +65,8 @@ SOURCES += \
     CameraView.cpp \
     ProcessingThread.cpp \
     MatToQImage.cpp \
-    StatPanel.cpp
+    StatPanel.cpp \
+    PathLineEdit.cpp
 
 RESOURCES += Resources/mainwind.qrc
 

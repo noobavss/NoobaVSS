@@ -2,6 +2,7 @@
 #include "noobapluginapi.h"
 #include "NoobaPlugin.h"
 #include "NoobaEye.h"
+#include "PathLineEdit.h"
 
 #include <QDoubleSpinBox>
 #include <QSpinBox>
@@ -40,6 +41,13 @@ QWidget* ParamDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem
     }
     case nooba::StringParam:
     {
+        StringData* strData = index.data(nooba::ParamDataRole).value<StringData* >();
+        if(strData->_isFilePath)
+        {
+            PathLineEdit* e = new PathLineEdit(parent);     // file browser edit
+            e->setText(strData->_val);
+            return e;
+        }
         return new QLineEdit(parent);
     }
     case nooba::MultiValueParam:
@@ -65,5 +73,26 @@ void ParamDelegate::setEditorData(QWidget *editor, const QModelIndex &index) con
 
 void ParamDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
-    QStyledItemDelegate::setModelData(editor, model, index);
+    nooba::ParamType type = index.data(nooba::ParamTypeRole).value<nooba::ParamType>();
+
+    switch(type)
+    {
+    case nooba::StringParam:
+    {
+        StringData* strData = index.data(nooba::ParamDataRole).value<StringData* >();
+        if(strData->_isFilePath)
+        {
+            PathLineEdit* e = qobject_cast<PathLineEdit* >(editor);
+            if(!e)
+                QStyledItemDelegate::setModelData(editor, model, index);
+
+            model->setData(index, e->getText());
+            break;
+        }
+    }
+    default:
+        QStyledItemDelegate::setModelData(editor, model, index);
+    }
+
+
 }

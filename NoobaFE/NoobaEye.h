@@ -45,7 +45,8 @@ namespace nooba
     enum DataRoles         // user roles for data models
     {
         ParamTypeRole   = Qt::UserRole + 1,
-        ParamDataRole   = Qt::UserRole + 2
+        ParamDataRole   = Qt::UserRole + 2,
+
     };
 }
 

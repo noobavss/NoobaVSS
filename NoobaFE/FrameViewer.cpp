@@ -33,7 +33,7 @@ bool FrameViewer::updateFrame(QImage in)
         return false;
 
     _pixmap = QPixmap::fromImage(in);
-    ui->canvas->setPixmap(_pixmap.scaled(ui->canvas->size() - QSize(5,5), Qt::KeepAspectRatio));
+    ui->canvas->setPixmap(_pixmap.scaled(ui->canvas->size(), Qt::KeepAspectRatio));
     return true;
 }
 
@@ -42,7 +42,7 @@ void FrameViewer::resizeEvent(QResizeEvent *event)
     if(_pixmap.isNull())
         return;
 
-    ui->canvas->setPixmap(_pixmap.scaled(event->size() - QSize(5,5), Qt::KeepAspectRatio));
+    ui->canvas->setPixmap(_pixmap.scaled(event->size(), Qt::KeepAspectRatio));
 }
 
 void FrameViewer::setVisibility(bool isVisible)
