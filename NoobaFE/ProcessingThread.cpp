@@ -181,7 +181,6 @@ void FrameProcessor::processFrame()
         return;
     cv::Mat out;
     ProcParams params;
-    cvtColor(currentFrame, currentFrame, CV_BGR2RGB);
     p->procFrame(currentFrame, out, params);
 
      // Update statistics

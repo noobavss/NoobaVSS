@@ -57,7 +57,7 @@ QImage MatToQImage(const Mat& mat)
         const uchar *qImageBuffer = (const uchar*)mat.data;
         // Create QImage with same dimensions as input Mat
         QImage img(qImageBuffer, mat.cols, mat.rows, mat.step, QImage::Format_RGB888);
-        return img.rgbSwapped();
+        return img;
     }
     else
     {

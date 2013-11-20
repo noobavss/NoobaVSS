@@ -31,6 +31,7 @@
 /************************************************************************/
 
 #include "CaptureThread.h"
+#include "MatToQImage.h"
 
 CaptureThread::CaptureThread(SharedImageBuffer *sharedImageBuffer, int deviceNumber, bool dropFrameIfBufferFull, int width, int height) : QThread(), sharedImageBuffer(sharedImageBuffer)
 {
@@ -174,9 +175,11 @@ void CaptureThread::captureFrame()
     // Retrieve frame
     cap.retrieve(grabbedFrame);
     // Add frame to buffer
+    cvtColor(grabbedFrame, grabbedFrame, CV_BGR2RGB);
     sharedImageBuffer->getByDeviceNumber(deviceNumber)->add(grabbedFrame, dropFrameIfBufferFull);
     emit frameAddedToImageBuffer();
-//    emit inputFrame(MatToQImage(grabbedFrame)); // crashes at slower processing rates
+
+    emit inputFrame(MatToQImage(grabbedFrame)); // crashes at slower processing rates
 }
 
 void CaptureThread::stop()

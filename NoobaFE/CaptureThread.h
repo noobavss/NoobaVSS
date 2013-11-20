@@ -37,6 +37,7 @@
 #include <QtCore/QTime>
 #include <QtCore/QThread>
 #include <QTimer>
+#include <QImage>
 // OpenCV
 #include "opencv/highgui.h"
 // Local
@@ -75,7 +76,7 @@ signals:
 
     void updateStatisticsInGUI(struct ThreadStatisticsData);
     void endFileOfStream();
-//    void inputFrame(QImage image);
+    void inputFrame(QImage image);
     void frameAddedToImageBuffer();
 
 private:

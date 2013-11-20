@@ -178,8 +178,8 @@ void CameraView::connectThreadSignalSlots()
     connect(_processingThread.data(), SIGNAL(createFrameViewer(QString,NoobaPlugin*)), this, SLOT(onCreateFrameViewerRequest(QString,NoobaPlugin*)));
     connect(_processingThread.data(), SIGNAL(debugMsg(QString)), _debugOutWind, SLOT(onDebugMsg(QString)));
 
-    connect(_processingThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
-//    connect(_captureThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
+//    connect(_processingThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
+    connect(_captureThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
     connect(_processingThread.data(), SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)), this, SLOT(updateProcessingThreadStats(ThreadStatisticsData)));
     connect(_captureThread.data(), SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)), this, SLOT(updateCaptureThreadStats(ThreadStatisticsData)));
     connect(_captureThread.data(), SIGNAL(endFileOfStream()), this, SLOT(onFileStreamEOF()));
