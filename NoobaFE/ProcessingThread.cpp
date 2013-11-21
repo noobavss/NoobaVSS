@@ -153,13 +153,21 @@ void FrameProcessor::processFrame()
 {
     QMutexLocker locker(&processingMutex);
 
+    int processingTime = t.elapsed();
     // Start timer (used to calculate processing rate)
     t.start();
 
     Buffer<Mat> *buffer = _sharedImageBuffer->getByDeviceNumber(_deviceNumber);
-    if(buffer->isEmpty())
+    if(!buffer)
+    {
+        qDebug() << tr("Buffer is null.") << Q_FUNC_INFO;
         return;
+    }
 
+    if( buffer->isEmpty())
+    {
+        return;
+    }
     // Get frame from queue, store in currentFrame
     currentFrame = buffer->get().clone();
     emit inputFrame(MatToQImage(currentFrame));
@@ -181,7 +189,6 @@ void FrameProcessor::processFrame()
     ProcParams params;
     p->procFrame(currentFrame, out, params);
 
-    int processingTime = t.elapsed();
      // Update statistics
     updateFPS(processingTime);
     statsData.nFramesProcessed++;

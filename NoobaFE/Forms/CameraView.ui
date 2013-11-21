@@ -178,6 +178,12 @@
           <height>32</height>
          </size>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
         <property name="autoRaise">
          <bool>true</bool>
         </property>
@@ -194,7 +200,7 @@
  <connections>
   <connection>
    <sender>TileviewButton</sender>
-   <signal>clicked()</signal>
+   <signal>pressed()</signal>
    <receiver>mdiArea</receiver>
    <slot>tileSubWindows()</slot>
    <hints>

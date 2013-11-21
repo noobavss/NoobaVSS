@@ -61,6 +61,7 @@ private slots:
     void updateCaptureThreadStats(struct ThreadStatisticsData statData);
     void updateProcessingThreadStats(struct ThreadStatisticsData statData);
 
+    void resizeEvent(QResizeEvent *event);
 private:
 
     struct MdiSubWindData

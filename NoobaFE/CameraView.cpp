@@ -38,6 +38,7 @@ CameraView::CameraView(SharedImageBuffer *sharedImageBuffer, QWidget *parent) :
 {
     _vidState = nooba::StoppedState;
     ui->setupUi(this);
+    ui->TileviewButton->setCheckable(true);
     setWindowTitle(tr("Camera View"));
     qDebug() << QThread::currentThreadId() << Q_FUNC_INFO;
     return;
@@ -211,6 +212,8 @@ QMdiSubWindow *CameraView::addMDISubWindow(FrameViewer *frameViewer, bool isVisi
     mdiWind->setContentsMargins(0,0,0,0);
     mdiWind->setVisible(isVisible);
     frameViewer->setMdiSubWindow(mdiWind);
+    if(ui->TileviewButton->isChecked())
+        ui->mdiArea->tileSubWindows();
     return mdiWind;
 }
 
@@ -337,6 +340,8 @@ void CameraView::onFrameSetVisibiliy(const QString &alias, const QString &title,
     if(d)
     {
         d->_frameViewer->setVisibility(isVisible);
+        if(ui->TileviewButton->isChecked())
+            ui->mdiArea->tileSubWindows();
     }
     else
     {
@@ -368,6 +373,13 @@ void CameraView::updateProcessingThreadStats(ThreadStatisticsData statData)
     // Show number of frames processed in nFramesProcessedLabel
     _statPanel->setnFramesProcessedLabel(QString("[") + QString::number(statData.nFramesProcessed) + QString("]"));
     return;
+}
+
+void CameraView::resizeEvent(QResizeEvent *event)
+{
+    Q_UNUSED(event)
+    if(ui->TileviewButton->isChecked())
+        ui->mdiArea->tileSubWindows();
 }
 
 QImage CameraView::cvt2QImage(const Mat &cvImg)

@@ -39,7 +39,8 @@ HEADERS += \
     ProcessingThread.h \
     MatToQImage.h \
     StatPanel.h \
-    PathLineEdit.h
+    PathLineEdit.h \
+    FrameLabel.h
 
 FORMS += Forms/MainWindow.ui Forms/PluginsConfigUI.ui \
     Forms/OutputWind.ui \
@@ -66,7 +67,8 @@ SOURCES += \
     ProcessingThread.cpp \
     MatToQImage.cpp \
     StatPanel.cpp \
-    PathLineEdit.cpp
+    PathLineEdit.cpp \
+    FrameLabel.cpp
 
 RESOURCES += Resources/mainwind.qrc
 

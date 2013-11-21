@@ -12,7 +12,14 @@ QFrame#toolbar
 
 QFrame#toolbar > QToolButton
 {
+    border: none;
+    padding: 2px;
     background-color: transparent;
+}
+
+QFrame#toolbar > QToolButton:checked {
+
+    background-color: rgba(90,90,90, 150);
 }
 
 QFrame#toolbar > QToolButton:hover
