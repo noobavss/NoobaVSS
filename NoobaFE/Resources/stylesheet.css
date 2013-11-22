@@ -3,11 +3,16 @@
 
 * { outline: none; }
 
+QFrame#viewerToolBar {
+    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                        stop:0 #a0a0a0, stop:1 #808080);
+}
+
 QFrame#toolbar
 {
     border-top: 1px solid black;
     background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-    stop:0 #fcfcfc, stop:1 #f1f1f1);
+                        stop:0 #fcfcfc, stop:1 #f1f1f1);
 }
 
 QFrame#toolbar > QToolButton

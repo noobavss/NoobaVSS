@@ -12,6 +12,7 @@ FrameViewer::FrameViewer(const QString &title, QWidget *parent) :
     ui->canvas->setProperty("canvas", true);    // for use with style sheet styling
     setWindowTitle(title);
     // show video in center
+    ui->drawLineToolButton->setDisabled(true);
     ui->canvas->setAlignment(Qt::AlignCenter);
     ui->canvas->setAlignment(Qt::AlignCenter);
     ui->canvas->setMinimumSize(1,1);

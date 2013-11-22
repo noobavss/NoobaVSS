@@ -101,11 +101,13 @@ void ParamDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, con
             PathLineEdit* e = qobject_cast<PathLineEdit* >(editor);
             if(!e)
                 QStyledItemDelegate::setModelData(editor, model, index);
-
             model->setData(index, e->getText());
-            model->setData(index, e->getText(), Qt::ToolTipRole);
-            break;
         }
+        else
+        {
+            QStyledItemDelegate::setModelData(editor, model, index);
+        }
+        break;
     }
     case nooba::FilePathParam:
     {
@@ -116,12 +118,9 @@ void ParamDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, con
             break;
         }
         model->setData(index, e->getText());
-        model->setData(index, e->getText(), Qt::ToolTipRole);
         break;
     }
     default:
         QStyledItemDelegate::setModelData(editor, model, index);
     }
-
-
 }

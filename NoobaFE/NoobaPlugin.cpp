@@ -104,6 +104,11 @@ void NoobaPlugin::onCreatePointParam(const QString &varName, const QPointF &val)
     Q_UNUSED(val)
 }
 
+void NoobaPlugin::onCreateLineParam(const QString &varName, const QString &frameViewerTitle)
+{
+
+}
+
 void NoobaPlugin::onCreateRectParam(const QString &varName, const QRectF &val)
 {
     Q_UNUSED(varName)
@@ -211,6 +216,11 @@ void NoobaPlugin::onRectParamUpdate(const QString &varName, const QRectF &val)
 {
     _rectMap.value(varName)->_val.setRect(val.x(), val.y(),val.width(), val.height());
     emit rectParamUpdate(varName, val);
+}
+
+void NoobaPlugin::onLineParamUpdate(const QString &varName, const QString &frameViewerTitle, const QPoint &p1, const QPoint &p2)
+{
+
 }
 
 void NoobaPlugin::inputData(const PluginPassData& data)

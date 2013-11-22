@@ -191,6 +191,7 @@ signals:
     void onInit(NoobaPlugin* plugin);
     void onAboutToRelease(QString alias);
     void createFrameViewer(const QString& title, bool isVisible);
+    void createLineParam(const QString& title, const QString& frameViewerTitle);
     void updateFrameViewer(const QString& pluginAlias, const QString& title, const QImage& frame);
 
     void intParamUpdate(const QString& varName, int val);
@@ -212,6 +213,7 @@ public slots:
     void onMultiValParamUpdate(const QString& varName, const QString& val);
     void onPointParamUpdate(const QString& varName, const QPointF& val);
     void onRectParamUpdate(const QString& varName, const QRectF& val);
+    void onLineParamUpdate(const QString& varName, const QString& frameViewerTitle, const QPoint& p1, const QPoint& p2);
     void inputData(const PluginPassData& data);
     void inputData(const QStringList& strList, QList<QImage> imageList);
     void saveConfig(const QString& filename);
@@ -227,6 +229,7 @@ private slots:
     void onCreateFilePathParam(const QString& varName, QString path, nooba::PathType pathType, const QString& filter);
     void onCreateMultiValParam(const QString& varName, const QStringList& varList);
     void onCreatePointParam(const QString& varName, const QPointF& val);
+    void onCreateLineParam(const QString& varName, const QString& frameViewerTitle);
     void onCreateRectParam(const QString& varName, const QRectF& val);
     void onDebugMsg(const QString& msg);
     void onUpdateFrameViewerRequest(const QString& title, const QImage& frame);

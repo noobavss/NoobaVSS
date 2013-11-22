@@ -13,5 +13,6 @@
         <file>super-mono-iconset/web-cam.png</file>
         <file>super-mono-iconset/information-balloon.png</file>
         <file>logo.png</file>
+        <file>drawLine.png</file>
     </qresource>
 </RCC>

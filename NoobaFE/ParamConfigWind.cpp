@@ -84,6 +84,11 @@ void ParamConfigWind::onItemChanged(QTreeWidgetItem* item, int  column)
     nooba::ParamType type = item->data(column, nooba::ParamTypeRole).value<nooba::ParamType>();
     QString varName = item->data(0, Qt::DisplayRole).toString();
 
+    // update without trigerring another item change event
+    ui->paramTree->blockSignals(true);
+    item->setToolTip(1, item->text(1));
+    ui->paramTree->blockSignals(ui->paramTree->signalsBlocked());
+
     QVariant v = item->parent()->data(0, PluginPtrRole);
     if(!v.isValid())
         return;

@@ -255,11 +255,20 @@ public:
     void createMultiValParam(const QString& varName, const QStringList& varList)
     {   emit createMultiValParamRequest(varName, varList);   }
 
-    void createPointParam(const QString& varName, const QPointF& val)
-    {   emit createPointParamRequest(varName, val); }
+//    void createPointParam(const QString& varName, const QPointF& val)
+//    {   emit createPointParamRequest(varName, val); }
 
-    void createRectParam(const QString& varName, const QRectF& val)
-    {   emit createRectParam(varName, val); }
+//    void createRectParam(const QString& varName, const QRectF& val)
+//    {   emit createRectParam(varName, val); }
+
+    /**
+     * @brief createLineParam
+     * @param varName
+     * @param frameViewerTitle  title of the frameViewer that this line drawing tool
+     *                          should be shown on.
+     */
+    void createLineParam(const QString& varName, const QString& frameViewerTitle)
+    {   emit createLineParam(varName, frameViewerTitle); }
 
     /**
      * debug output messages can be sent using this
@@ -305,8 +314,9 @@ signals:
     void createDoubleParamRequest(const QString& varName, double val, double max = 100.0, double min = 0.0);
     void createStringParamRequest(const QString& varName, QString val, bool isFilePath = false);
     void createMultiValParamRequest(const QString& varName, const QStringList& varList);
-    void createPointParamRequest(const QString& varName, const QPointF& val);
-    void createRectParamRequest(const QString& varName, const QRectF& val);
+//    void createPointParamRequest(const QString& varName, const QPointF& val);
+//    void createRectParamRequest(const QString& varName, const QRectF& val);
+    void createLineParamRequest(const QString& varName, const QString& frameViewerTitle);   // after version 0.10
     void debugMsgRequest(const QString& msg);
     void outputDataRequest(const PluginPassData& data);
     void outputDataRequest(const QStringList& strList, QList<QImage> imageList);
@@ -338,13 +348,13 @@ public slots:
         Q_UNUSED(varName) Q_UNUSED(val)
     }
 
-    virtual void onPointParamChanged(const QString& varName, const QPointF& val){
-        Q_UNUSED(varName) Q_UNUSED(val)
-    }
+//    virtual void onPointParamChanged(const QString& varName, const QPointF& val){
+//        Q_UNUSED(varName) Q_UNUSED(val)
+//    }
 
-    virtual void onRectParamChanged(const QString& varName, const QRectF& val){
-        Q_UNUSED(varName) Q_UNUSED(val)
-    }
+//    virtual void onRectParamChanged(const QString& varName, const QRectF& val){
+//        Q_UNUSED(varName) Q_UNUSED(val)
+//    }
 
     virtual void onFilePathParamChanged(const QString& varName, const QString& path) {
         Q_UNUSED(varName) Q_UNUSED(path)
@@ -363,6 +373,8 @@ public slots:
         Q_UNUSED(strList) Q_UNUSED(imageList)
     }
 
+    virtual void onLineParamUpdated(const QString& varName, const QString frameViewerTitle, QPoint p1, QPoint p2)
+    {   Q_UNUSED(varName) Q_UNUSED(frameViewerTitle) Q_UNUSED(p1) Q_UNUSED(p2) }
 
 protected:
 
