@@ -24,7 +24,7 @@ PathLineEdit::~PathLineEdit()
 
 void PathLineEdit::setText(const QString &path)
 {
-	this->path = path;
+    this->_path = path;
 	ui->lineEdit->setText(path);
 	ui->lineEdit->selectAll();	
 	ui->lineEdit->setFocus();
@@ -35,19 +35,41 @@ QString PathLineEdit::getText() const
     return ui->lineEdit->text();
 }
 
+void PathLineEdit::setFileMode(nooba::PathType pathType)
+{
+    _pathType = pathType;
+}
+
+void PathLineEdit::setFilter(const QString &filter)
+{
+    _filter = filter;
+}
+
 void PathLineEdit::on_browseButtonClicked()
 {
+    QString startDir;
 #if QT_VERSION >= 0x050000
-    QString path = QFileDialog::getOpenFileName(this, tr("Open file"),
-                                                QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
+    startDir = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
 #else
-    QString path = QFileDialog::getOpenFileName(this, tr("Open file"),
-                                                QDesktopServices::storageLocation(QDesktopServices::DesktopLocation));
+    startDir = QDesktopServices::storageLocation(QDesktopServices::DesktopLocation);
 #endif
+
+    QString path;
+    switch (_pathType)
+    {
+    case nooba::DirPath:
+        path = QFileDialog::getExistingDirectory(this, tr("Select a Directory"), startDir);
+        break;
+    case nooba::FilePath:
+    default:
+        path = QFileDialog::getOpenFileName(this, tr("Select a File"), startDir, _filter);
+        break;
+    }
     if(path.isEmpty())
         return;
 
     setText(path);
+    return;
 }
 
  void PathLineEdit::focusInEvent ( QFocusEvent * event )

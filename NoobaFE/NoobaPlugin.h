@@ -10,12 +10,10 @@
 #include <QPointF>
 #include <QImage>
 
+#include "noobapluginapi.h"
+
 // forward declerations
-class NoobaPluginAPI;
-class ProcParams;
-class PluginPassData;
 class QPluginLoader;
-class PluginInfo;
 
 namespace cv { class Mat; }
 
@@ -127,6 +125,19 @@ struct FrameViewerData {
 
 Q_DECLARE_METATYPE(FrameViewerData*)
 
+struct FilePathData {
+
+    FilePathData(const QString& varName, const QString& path, const QString& filter, nooba::PathType pathType):
+        _varName(varName), _val(path), _filter(filter), _pathType(pathType) {}
+
+    QString             _varName;
+    QString             _val;
+    QString             _filter;
+    nooba::PathType     _pathType;
+};
+
+Q_DECLARE_METATYPE(FilePathData*)
+
 /**
  * @brief The NoobaPlugin class this is a wrapper class for the Loaded plugins
  */
@@ -170,6 +181,7 @@ public:
     const QMap<QString, DoubleData* >& getDoubleParamMap() const { return _doubleMap; }
     const QMap<QString, StringData* >& getStringMap() const { return _stringMap; }
     const QMap<QString, StringListData* >& getStringListMap() const { return _stringListMap; }
+    const QMap<QString, FilePathData* >& getFilePathDataMap() const { return _filePathDataMap; }
     
 signals:
     
@@ -184,6 +196,7 @@ signals:
     void intParamUpdate(const QString& varName, int val);
     void doubleParamUpdate(const QString& varName, double val);
     void stringParamUpdate(const QString& varName, const QString& val);
+    void filePathParamUpdate(const QString& varName, const QString& path);
     void multiValParamUpdate(const QString& varName, const QString& val);
     void pointParamUpdate(const QString& varName, const QPointF& val);
     void rectParamUpdate(const QString& varName, const QRectF& val);
@@ -195,6 +208,7 @@ public slots:
     void onIntParamUpdate(const QString& varName, int val);
     void onDoubleParamUpdate(const QString& varName, double val);
     void onStringParamUpdate(const QString& varName, const QString& val);
+    void onFilePathParamUpdate(const QString& varName, const QString& path);
     void onMultiValParamUpdate(const QString& varName, const QString& val);
     void onPointParamUpdate(const QString& varName, const QPointF& val);
     void onRectParamUpdate(const QString& varName, const QRectF& val);
@@ -210,6 +224,7 @@ private slots:
     void onCreateIntParam(const QString& varName, int val, int max, int min);
     void onCreateDoubleParam(const QString& varName, double val, double max, double min);
     void onCreateStringParam(const QString& varName, const QString& val, bool isFilePath);
+    void onCreateFilePathParam(const QString& varName, QString path, nooba::PathType pathType, const QString& filter);
     void onCreateMultiValParam(const QString& varName, const QStringList& varList);
     void onCreatePointParam(const QString& varName, const QPointF& val);
     void onCreateRectParam(const QString& varName, const QRectF& val);
@@ -237,6 +252,7 @@ private:
     QMap<QString, PointData* >      _pointMap;
     QMap<QString, RectData* >       _rectMap;
     QMap<QString, FrameViewerData*> _frameViewerDataMap;
+    QMap<QString, FilePathData* >   _filePathDataMap;
 
 };
 

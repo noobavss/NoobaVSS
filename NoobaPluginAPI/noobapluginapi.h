@@ -34,7 +34,8 @@ namespace nooba {
         StringParam     = 2,
         RangeParam      = 3,
         RegionParam     = 4,
-        MultiValueParam = 5
+        MultiValueParam = 5,
+        FilePathParam   = 6
     };
 
     /* Enum to define the current state of the video
@@ -48,6 +49,11 @@ namespace nooba {
     enum NoobaAlert {
         RedAlert    = 0,
         AmberAlert  = 1
+    };
+
+    enum PathType {
+        FilePath    = 0,
+        DirPath     = 1
     };
 }
 
@@ -227,6 +233,19 @@ public:
     void createStringParam(const QString& varName, QString val, bool isFilePath = false)
     {   emit createStringParamRequest(varName, val, isFilePath);}
 
+//
+
+    /**
+     * @brief createFilePathParam
+     * @param varName
+     * @param path      default path
+     * @param pathType  Type of selection
+     * @param filter    filter the selectable paths. following example shows including multiple filters
+     *                  eg: "Images (*.png *.xpm *.jpg);;Text files (*.txt);;XML files (*.xml)"
+     */
+    void createFilePathParam(const QString& varName, QString path = QString(), nooba::PathType pathType = nooba::FilePath, const QString& filter = QString() )
+    {   emit createFilePathParamRequest(varName, path, pathType, filter); }
+
     /**
      * @brief createMultiValParam Parameter that can be used to create a defined set of strings.
      *  User will be able to select one from this strings.
@@ -294,7 +313,8 @@ signals:
     void createFrameViewerRequest(const QString& title, bool isVisible = true); // added isVisible argument after ver 0.9
     void updateFrameViewerRequest(const QString& title, const QImage& frame);
     void updateFrameViewerVisibilityRequest(const QString& title, bool isVisible); // after ver 0.9
-    void anomalyDetected();
+    void createFilePathParamRequest(const QString& varName, QString path,
+                                    nooba::PathType pathType, const QString& filter);   // added in version 0.10
 
 public slots:
 
@@ -326,6 +346,10 @@ public slots:
         Q_UNUSED(varName) Q_UNUSED(val)
     }
 
+    virtual void onFilePathParamChanged(const QString& varName, const QString& path) {
+        Q_UNUSED(varName) Q_UNUSED(path)
+    }
+
     /**
      * @brief inputData data received from other plugin thru thid function. This is used to interconnect plugins.
      *                  Another plugins outputData(PluginPassData* data) can be connected to this slot.
@@ -338,6 +362,7 @@ public slots:
     virtual void inputData(const QStringList& strList, QList<QImage> imageList){
         Q_UNUSED(strList) Q_UNUSED(imageList)
     }
+
 
 protected:
 

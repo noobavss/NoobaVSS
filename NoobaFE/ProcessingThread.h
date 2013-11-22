@@ -5,6 +5,8 @@
 /* ProcessingThead.h                                                    */
 /*                                                                      */
 /* Nick D'Ademo <nickdademo@gmail.com>                                  */
+/* Modified to fit NoobaVSS by                                          */
+/*      D.A.U.Nanayakkara <daun07@gmail.com>                            */
 /*                                                                      */
 /* Copyright (c) 2012-2013 Nick D'Ademo                                 */
 /*                                                                      */

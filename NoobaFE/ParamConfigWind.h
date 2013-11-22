@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QScopedPointer>
 
+#include "noobapluginapi.h"
+
 namespace Ui { class ParamConfigWind; }
 //namespace nooba { enum ParamType; }
 
@@ -39,7 +41,7 @@ private:
      * NOTE:    Type is given as template type to avoid the
      *          inclusion of the NoobaPluginAPI header to this file :)
      */
-    template<typename Map, typename Type> void addToTree( Map& map, Type type, QTreeWidgetItem* topLevel);
+    template<typename value> void addToTree( const QMap<QString, value >& map, nooba::ParamType type, QTreeWidgetItem* topLevel);
 
     Ui::ParamConfigWind             *ui;
     int                             PluginPtrRole;

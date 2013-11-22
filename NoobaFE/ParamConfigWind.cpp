@@ -45,10 +45,11 @@ void ParamConfigWind::addPlugin(NoobaPlugin *plugin)
     QVariant v;
     v.setValue(plugin);
     l1->setData(0, PluginPtrRole, v);
-    addToTree<const QMap<QString, IntData* >, nooba::ParamType>(plugin->getIntParamMap(), nooba::IntParam, l1);
-    addToTree<const QMap<QString, DoubleData* >, nooba::ParamType>(plugin->getDoubleParamMap(), nooba::DoubleParam, l1);
-    addToTree<const QMap<QString, StringData* >, nooba::ParamType>(plugin->getStringMap(), nooba::StringParam, l1);
-    addToTree<const QMap<QString, StringListData* >, nooba::ParamType>(plugin->getStringListMap(), nooba::MultiValueParam, l1);
+    addToTree<IntData* >(plugin->getIntParamMap(), nooba::IntParam, l1);
+    addToTree<DoubleData* >(plugin->getDoubleParamMap(), nooba::DoubleParam, l1);
+    addToTree<StringData* >(plugin->getStringMap(), nooba::StringParam, l1);
+    addToTree<StringListData* >(plugin->getStringListMap(), nooba::MultiValueParam, l1);
+    addToTree<FilePathData* >(plugin->getFilePathDataMap(), nooba::FilePathParam, l1);
 
     l1->setBackground(0, QBrush(QColor(150,150,150)));
     l1->setForeground(0, QBrush(QColor(255,255,255)));
@@ -58,7 +59,7 @@ void ParamConfigWind::addPlugin(NoobaPlugin *plugin)
     ui->paramTree->addTopLevelItem(l1);
     l1->setFirstColumnSpanned(true);
     l1->setExpanded(true);
-
+    l1->sortChildren(0, Qt::AscendingOrder);
     return;
 }
 
@@ -111,16 +112,21 @@ void ParamConfigWind::onItemChanged(QTreeWidgetItem* item, int  column)
         p->onMultiValParamUpdate(varName, item->text(column));
         break;
     }
+    case nooba::FilePathParam:
+    {
+        p->onFilePathParamUpdate(varName, item->text(column));
+        break;
+    }
     default:
         return;
     }
     return;
 }
 
-template<typename Map, typename Type>
-void ParamConfigWind::addToTree(Map& map, Type type, QTreeWidgetItem* topLevel)
+template<typename value>
+void ParamConfigWind::addToTree(const QMap<QString, value >& map, nooba::ParamType type, QTreeWidgetItem* topLevel)
 {
-    typename Map::ConstIterator itr;           // typename needed for nested types
+    typename QMap<QString, value>::ConstIterator itr;           // typename needed for nested types
     for(itr = map.constBegin(); itr != map.constEnd(); itr++)
     {
         QTreeWidgetItem *item = new QTreeWidgetItem(topLevel);

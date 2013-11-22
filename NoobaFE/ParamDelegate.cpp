@@ -60,6 +60,18 @@ QWidget* ParamDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem
         editor->addItems(d->_varList);
         return editor;
     }
+    case nooba::FilePathParam:
+    {
+        FilePathData* d = index.data(nooba::ParamDataRole).value<FilePathData* >();
+        if(!d)
+            return NULL;
+
+        PathLineEdit* editor = new PathLineEdit(parent);
+        editor->setText(d->_val);
+        editor->setFilter(d->_filter);
+        editor->setFileMode(d->_pathType);
+        return editor;
+    }
     default:
         return NULL;
     }
@@ -80,6 +92,10 @@ void ParamDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, con
     case nooba::StringParam:
     {
         StringData* strData = index.data(nooba::ParamDataRole).value<StringData* >();
+        if(!strData)
+        {
+            break;
+        }
         if(strData->_isFilePath)
         {
             PathLineEdit* e = qobject_cast<PathLineEdit* >(editor);
@@ -89,6 +105,22 @@ void ParamDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, con
             model->setData(index, e->getText());
             break;
         }
+    }
+    case nooba::FilePathParam:
+    {
+        PathLineEdit* fpd = qobject_cast<PathLineEdit* >(editor);
+        if(!fpd)
+        {
+            break;
+        }
+        PathLineEdit* e = qobject_cast<PathLineEdit* >(editor);
+        if(!e)
+        {
+            QStyledItemDelegate::setModelData(editor, model, index);
+            break;
+        }
+        model->setData(index, e->getText());
+
     }
     default:
         QStyledItemDelegate::setModelData(editor, model, index);

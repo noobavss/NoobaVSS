@@ -53,6 +53,7 @@ bool NoobaPlugin::release()
     deleteMapItems<PointData* >(_pointMap);
     deleteMapItems<RectData* >(_rectMap);
     deleteMapItems<FrameViewerData* >(_frameViewerDataMap);
+    deleteMapItems<FilePathData* >(_filePathDataMap);
 
     bool ok = _api->release();
 
@@ -85,6 +86,11 @@ void NoobaPlugin::onCreateDoubleParam(const QString &varName, double val, double
 void NoobaPlugin::onCreateStringParam(const QString &varName, const QString &val, bool isFilePath)
 {
     _stringMap.insert(varName,new StringData(varName, val, isFilePath));
+}
+
+void NoobaPlugin::onCreateFilePathParam(const QString &varName, QString path, nooba::PathType pathType, const QString &filter)
+{
+    _filePathDataMap.insert(varName, new FilePathData(varName, path, filter, pathType));
 }
 
 void NoobaPlugin::onCreateMultiValParam(const QString &varName, const QStringList &varList)
@@ -134,6 +140,8 @@ void NoobaPlugin::initSignalSlots()
     connect(_api, SIGNAL(createPointParamRequest(QString,QPointF)), this, SLOT(onCreatePointParam(QString,QPointF)));
     connect(_api, SIGNAL(createRectParamRequest(QString,QRectF)), this, SLOT(onCreateRectParam(QString,QRectF)));
     connect(_api, SIGNAL(createFrameViewerRequest(QString,bool)), this, SLOT(onCreateFrameViewer(QString,bool)));
+    connect(_api, SIGNAL(createFilePathParamRequest(QString,QString,nooba::PathType,QString)),
+            this, SLOT(onCreateFilePathParam(QString,QString,nooba::PathType,QString)));
 
     qRegisterMetaType<PluginPassData>("PluginPassData");
     connect(_api, SIGNAL(outputDataRequest(PluginPassData)), this, SIGNAL(outputData(PluginPassData)));
@@ -145,6 +153,7 @@ void NoobaPlugin::initSignalSlots()
     connect(this, SIGNAL(intParamUpdate(QString,int)), _api, SLOT(onIntParamChanged(QString,int)));
     connect(this, SIGNAL(doubleParamUpdate(QString,double)), _api, SLOT(onDoubleParamChanged(QString,double)));
     connect(this, SIGNAL(stringParamUpdate(QString,QString)), _api, SLOT(onStringParamChanged(QString,QString)));
+    connect(this, SIGNAL(filePathParamUpdate(QString,QString)), _api, SLOT(onFilePathParamChanged(QString,QString)));
     connect(this, SIGNAL(multiValParamUpdate(QString,QString)), _api, SLOT(onMultiValParamChanged(QString,QString)));
     connect(this, SIGNAL(pointParamUpdate(QString,QPointF)), _api, SLOT(onPointParamChanged(QString,QPointF)));
     connect(this, SIGNAL(rectParamUpdate(QString,QRectF)), _api, SLOT(onRectParamChanged(QString,QRectF)));
@@ -167,6 +176,18 @@ void NoobaPlugin::onStringParamUpdate(const QString &varName, const QString &val
 {
     _stringMap.value(varName)->_val = val;
     emit stringParamUpdate(varName, val);
+}
+
+void NoobaPlugin::onFilePathParamUpdate(const QString &varName, const QString &path)
+{
+    FilePathData* fpd = _filePathDataMap.value(varName);
+    if(!fpd)
+    {
+        qDebug() << tr("File path param '%1' not created").arg(varName) << Q_FUNC_INFO;
+        return;
+    }
+    fpd->_val = path;
+    emit filePathParamUpdate(varName, path);
 }
 
 void NoobaPlugin::onMultiValParamUpdate(const QString &varName, const QString &val)
