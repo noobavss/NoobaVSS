@@ -24,7 +24,7 @@ PathLineEdit::~PathLineEdit()
 
 void PathLineEdit::setText(const QString &path)
 {
-    this->_path = path;
+    _path = path;
 	ui->lineEdit->setText(path);
 	ui->lineEdit->selectAll();	
 	ui->lineEdit->setFocus();

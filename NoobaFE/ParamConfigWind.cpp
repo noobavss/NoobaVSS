@@ -132,6 +132,7 @@ void ParamConfigWind::addToTree(const QMap<QString, value >& map, nooba::ParamTy
         QTreeWidgetItem *item = new QTreeWidgetItem(topLevel);
         item->setText(0, itr.key());
         item->setText(1, QString("%1").arg(itr.value()->_val));
+        item->setToolTip(1, QString("%1").arg(itr.value()->_val));
 
         QVariant var = qVariantFromValue(type);
         item->setData(1, nooba::ParamTypeRole, var);
