@@ -57,14 +57,14 @@ int PluginLoader::loadPluginInfo()
                                                                      // plugins to retrieve information and unloading doesn't affect the currently loaded plugin
         QObject *plugin = qPluginLoader.instance();
         if (!plugin)
-            break;
+            continue;
 
         NoobaPluginAPIBase* apiBase = qobject_cast<NoobaPluginAPIBase *>(plugin);
         if (!apiBase)
-            break;
+            continue;
 
         if(!versionCheckOk(apiBase, fileName,  errStr))
-            break;
+            continue;
 
         // add the plugin details to the list
         NoobaPluginAPI* api = qobject_cast<NoobaPluginAPI* >(plugin);
