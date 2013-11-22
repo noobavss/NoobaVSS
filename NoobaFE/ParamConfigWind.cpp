@@ -87,7 +87,7 @@ void ParamConfigWind::onItemChanged(QTreeWidgetItem* item, int  column)
     // update without trigerring another item change event
     ui->paramTree->blockSignals(true);
     item->setToolTip(1, item->text(1));
-    ui->paramTree->blockSignals(ui->paramTree->signalsBlocked());
+    ui->paramTree->blockSignals(false);
 
     QVariant v = item->parent()->data(0, PluginPtrRole);
     if(!v.isValid())

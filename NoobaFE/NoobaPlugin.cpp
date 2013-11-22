@@ -142,11 +142,13 @@ void NoobaPlugin::initSignalSlots()
     connect(_api, SIGNAL(createDoubleParamRequest(QString,double, double, double)), this, SLOT(onCreateDoubleParam(QString,double, double, double)));
     connect(_api, SIGNAL(createStringParamRequest(QString,QString, bool)), this, SLOT(onCreateStringParam(QString,QString, bool)));
     connect(_api, SIGNAL(createMultiValParamRequest(QString,QStringList)), this, SLOT(onCreateMultiValParam(QString,QStringList)));
-    connect(_api, SIGNAL(createPointParamRequest(QString,QPointF)), this, SLOT(onCreatePointParam(QString,QPointF)));
-    connect(_api, SIGNAL(createRectParamRequest(QString,QRectF)), this, SLOT(onCreateRectParam(QString,QRectF)));
+//    connect(_api, SIGNAL(createPointParamRequest(QString,QPointF)), this, SLOT(onCreatePointParam(QString,QPointF)));
+//    connect(_api, SIGNAL(createRectParamRequest(QString,QRectF)), this, SLOT(onCreateRectParam(QString,QRectF)));
     connect(_api, SIGNAL(createFrameViewerRequest(QString,bool)), this, SLOT(onCreateFrameViewer(QString,bool)));
     connect(_api, SIGNAL(createFilePathParamRequest(QString,QString,nooba::PathType,QString)),
             this, SLOT(onCreateFilePathParam(QString,QString,nooba::PathType,QString)));
+    // after version 0.10
+    connect(_api, SIGNAL(createLineParamRequest(QString,QString)), this, SLOT(onCreateLineParam(QString,QString)));
 
     qRegisterMetaType<PluginPassData>("PluginPassData");
     connect(_api, SIGNAL(outputDataRequest(PluginPassData)), this, SIGNAL(outputData(PluginPassData)));
@@ -160,9 +162,9 @@ void NoobaPlugin::initSignalSlots()
     connect(this, SIGNAL(stringParamUpdate(QString,QString)), _api, SLOT(onStringParamChanged(QString,QString)));
     connect(this, SIGNAL(filePathParamUpdate(QString,QString)), _api, SLOT(onFilePathParamChanged(QString,QString)));
     connect(this, SIGNAL(multiValParamUpdate(QString,QString)), _api, SLOT(onMultiValParamChanged(QString,QString)));
-    connect(this, SIGNAL(pointParamUpdate(QString,QPointF)), _api, SLOT(onPointParamChanged(QString,QPointF)));
-    connect(this, SIGNAL(rectParamUpdate(QString,QRectF)), _api, SLOT(onRectParamChanged(QString,QRectF)));
-
+//    connect(this, SIGNAL(pointParamUpdate(QString,QPointF)), _api, SLOT(onPointParamChanged(QString,QPointF)));
+//    connect(this, SIGNAL(rectParamUpdate(QString,QRectF)), _api, SLOT(onRectParamChanged(QString,QRectF)));
+    connect(this, SIGNAL(lineParamUpdate(QString,QString,QPoint,QPoint)), _api, SLOT(onLineParamUpdated(QString,QString,QPoint,QPoint)));
 }
 
 void NoobaPlugin::onIntParamUpdate(const QString &varName, int val)

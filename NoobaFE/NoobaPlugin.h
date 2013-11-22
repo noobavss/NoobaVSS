@@ -199,6 +199,7 @@ signals:
     void stringParamUpdate(const QString& varName, const QString& val);
     void filePathParamUpdate(const QString& varName, const QString& path);
     void multiValParamUpdate(const QString& varName, const QString& val);
+    void lineParamUpdate(const QString& varName, const QString& frameViewerTitle, const QPoint& p1, const QPoint& p2);
     void pointParamUpdate(const QString& varName, const QPointF& val);
     void rectParamUpdate(const QString& varName, const QRectF& val);
     void setFrameViewerVisibility(const QString& alias, const QString& title, bool isVisible);
