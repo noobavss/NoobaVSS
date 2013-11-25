@@ -1,6 +1,8 @@
 
 *[canvas="true"] { background-color: rgb(91, 91, 91); }
 
+QWidget#canvasBorder { background-color: rgb(91, 91, 91); }
+
 * { outline: none; }
 
 QFrame#viewerToolBar {

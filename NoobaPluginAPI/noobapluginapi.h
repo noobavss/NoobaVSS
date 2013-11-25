@@ -268,7 +268,7 @@ public:
      *                          should be shown on.
      */
     void createLineParam(const QString& varName, const QString& frameViewerTitle)
-    {   emit createLineParam(varName, frameViewerTitle); }
+    {   emit createLineParamRequest(varName, frameViewerTitle); }
 
     /**
      * debug output messages can be sent using this
@@ -373,8 +373,8 @@ public slots:
         Q_UNUSED(strList) Q_UNUSED(imageList)
     }
 
-    virtual void onLineParamUpdated(const QString& varName, const QString frameViewerTitle, QPoint p1, QPoint p2)
-    {   Q_UNUSED(varName) Q_UNUSED(frameViewerTitle) Q_UNUSED(p1) Q_UNUSED(p2) }
+    virtual void onLineParamUpdated(const QString& varName, const QString frameViewerTitle, QLine line)
+    {   Q_UNUSED(varName) Q_UNUSED(frameViewerTitle) Q_UNUSED(line) }
 
 protected:
 

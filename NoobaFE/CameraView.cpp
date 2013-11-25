@@ -114,13 +114,13 @@ bool CameraView::connectToCamera()
 
 bool CameraView::connectToVideoFileStream()
 {
+    QString startLocation;
 #if QT_VERSION >= 0x050000
-    QString path = QFileDialog::getOpenFileName(this, tr("Open file"),
-                                                QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
+    startLocation = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
 #else
-    QString path = QFileDialog::getOpenFileName(this, tr("Open file"),
-                                                QDesktopServices::storageLocation(QDesktopServices::DesktopLocation));
+    startLocation = QDesktopServices::storageLocation(QDesktopServices::DesktopLocation);
 #endif
+    QString path = QFileDialog::getOpenFileName(this, tr("Open file"), startLocation);
     if(path.isEmpty())
         return false;
 
@@ -162,15 +162,9 @@ void CameraView::stopProcessingThread()
 {
     if(!_processingThread)
         return;
-//    qDebug() << "[" << _deviceNumber << "] About to stop processing thread...";
-//    _processingThread->stop();
-//    qDebug() << "[" << _deviceNumber << "] This allows the thread to be stopped if it is in a wait-state";
     _sharedImageBuffer->wakeAll(); // This allows the thread to be stopped if it is in a wait-state
-
-     //    qDebug() << "[" << _deviceNumber << "] waiting..." ;
     _processingThread->wait(200);
     _processingThread->quit();  // exit event loop
-//    qDebug() << "[" << _deviceNumber << "] Processing thread successfully stopped.";
     return;
 }
 
@@ -182,7 +176,8 @@ void CameraView::connectThreadSignalSlots()
     connect(_processingThread.data(), SIGNAL(pluginAboutToUnload(QString)), this, SLOT(onPluginAboutToUnload(QString)));
     connect(_processingThread.data(), SIGNAL(createFrameViewer(QString, bool, NoobaPlugin*)), this, SLOT(onCreateFrameViewerRequest(QString, bool, NoobaPlugin*)));
     connect(_processingThread.data(), SIGNAL(debugMsg(QString)), _debugOutWind, SLOT(onDebugMsg(QString)));
-
+    connect(_processingThread.data(), SIGNAL(createLineParamRequest(QString,QString,NoobaPlugin*)), this, SLOT(onCreateLineParamRequest(QString,QString,NoobaPlugin*)));
+    
 //    connect(_processingThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
     connect(_captureThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
     connect(_processingThread.data(), SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)), this, SLOT(updateProcessingThreadStats(ThreadStatisticsData)));
@@ -373,6 +368,21 @@ void CameraView::updateProcessingThreadStats(ThreadStatisticsData statData)
     // Show number of frames processed in nFramesProcessedLabel
     _statPanel->setnFramesProcessedLabel(QString("[") + QString::number(statData.nFramesProcessed) + QString("]"));
     return;
+}
+
+void CameraView::onCreateLineParamRequest(const QString &varName, const QString &frameViewerTitle, NoobaPlugin* plugin)
+{
+    MdiSubWindData *d =  _frameViewerMap.value(plugin->alias()).value(frameViewerTitle, NULL);
+    if(!d)
+    {
+        qDebug() << tr("Line Parameter not created. frame viewer [ %1 ] is not registered.").arg(frameViewerTitle) << Q_FUNC_INFO;
+        return;
+    }
+
+    d->_frameViewer->createLineParam(varName);
+
+    connect(d->_frameViewer, SIGNAL(lineParamChanged(QString,QString,QLine)),
+            plugin, SLOT(onLineParamUpdate(QString,QString,QLine)), Qt::UniqueConnection);  // same plugin and frame viewer will be connected multiple times
 }
 
 void CameraView::resizeEvent(QResizeEvent *event)

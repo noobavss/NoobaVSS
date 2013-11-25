@@ -60,6 +60,7 @@ private slots:
     void onFrameSetVisibiliy(const QString& alias, const QString &title, bool isVisible);
     void updateCaptureThreadStats(struct ThreadStatisticsData statData);
     void updateProcessingThreadStats(struct ThreadStatisticsData statData);
+    void onCreateLineParamRequest(const QString& varName, const QString& frameViewerTitle, NoobaPlugin* plugin);
 
     void resizeEvent(QResizeEvent *event);
 private:

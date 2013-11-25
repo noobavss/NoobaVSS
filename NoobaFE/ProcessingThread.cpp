@@ -106,17 +106,9 @@ void ProcessingThread::onPluginLoaded(NoobaPlugin *plugin)
     // initialisation will be emitted before the connection is made in the GUI thread.
     // To overcome this issue the signal passing is transfered to the processing thread itself using this
     // directly connected slot.
-    connect(plugin, SIGNAL(createFrameViewer(QString, bool)), this, SLOT(onCreateFrameRequest(QString, bool)));
+    connect(plugin, SIGNAL(createFrameViewer(QString,bool,NoobaPlugin*)), this, SIGNAL(createFrameViewer(QString,bool,NoobaPlugin*)));
+    connect(plugin, SIGNAL(createLineParam(QString,QString,NoobaPlugin*)), this, SIGNAL(createLineParamRequest(QString,QString,NoobaPlugin*)));
     connect(plugin, SIGNAL(debugMsg(QString)), this, SIGNAL(debugMsg(QString)));
-}
-
-void ProcessingThread::onCreateFrameRequest(const QString &title, bool isVisible)
-{
-    NoobaPlugin* p = qobject_cast<NoobaPlugin* >(sender());
-    if(!p)
-        return;
-
-    emit createFrameViewer(title, isVisible, p);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

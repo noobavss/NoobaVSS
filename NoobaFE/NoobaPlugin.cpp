@@ -52,6 +52,7 @@ bool NoobaPlugin::release()
     deleteMapItems<StringListData* >(_stringListMap);
     deleteMapItems<PointData* >(_pointMap);
     deleteMapItems<RectData* >(_rectMap);
+    deleteMapItems<LineData* >(_lineMap);
     deleteMapItems<FrameViewerData* >(_frameViewerDataMap);
     deleteMapItems<FilePathData* >(_filePathDataMap);
 
@@ -106,7 +107,8 @@ void NoobaPlugin::onCreatePointParam(const QString &varName, const QPointF &val)
 
 void NoobaPlugin::onCreateLineParam(const QString &varName, const QString &frameViewerTitle)
 {
-
+    _lineMap.insert(varName + frameViewerTitle, new LineData(varName, frameViewerTitle));
+    emit createLineParam(varName, frameViewerTitle, this);
 }
 
 void NoobaPlugin::onCreateRectParam(const QString &varName, const QRectF &val)
@@ -147,14 +149,13 @@ void NoobaPlugin::initSignalSlots()
     connect(_api, SIGNAL(createFrameViewerRequest(QString,bool)), this, SLOT(onCreateFrameViewer(QString,bool)));
     connect(_api, SIGNAL(createFilePathParamRequest(QString,QString,nooba::PathType,QString)),
             this, SLOT(onCreateFilePathParam(QString,QString,nooba::PathType,QString)));
-    // after version 0.10
-    connect(_api, SIGNAL(createLineParamRequest(QString,QString)), this, SLOT(onCreateLineParam(QString,QString)));
+
+    connect(_api, SIGNAL(createLineParamRequest(QString,QString)), this, SLOT(onCreateLineParam(QString,QString))); // after version 0.10
 
     qRegisterMetaType<PluginPassData>("PluginPassData");
     connect(_api, SIGNAL(outputDataRequest(PluginPassData)), this, SIGNAL(outputData(PluginPassData)));
     qRegisterMetaType< QList<QImage> >("QList<QImage>");
     connect(_api, SIGNAL(outputDataRequest(QStringList,QList<QImage>)), this, SIGNAL(outputData(QStringList,QList<QImage>)));
-    connect(_api, SIGNAL(createFrameViewerRequest(QString, bool)), this, SIGNAL(createFrameViewer(QString, bool)));
     connect(_api, SIGNAL(updateFrameViewerRequest(QString,QImage)), this, SLOT(onUpdateFrameViewerRequest(QString,QImage)));
     connect(_api, SIGNAL(updateFrameViewerVisibilityRequest(QString,bool)), this, SLOT(onSetFrameViewerVisibility(QString, bool)));
     connect(this, SIGNAL(intParamUpdate(QString,int)), _api, SLOT(onIntParamChanged(QString,int)));
@@ -164,7 +165,7 @@ void NoobaPlugin::initSignalSlots()
     connect(this, SIGNAL(multiValParamUpdate(QString,QString)), _api, SLOT(onMultiValParamChanged(QString,QString)));
 //    connect(this, SIGNAL(pointParamUpdate(QString,QPointF)), _api, SLOT(onPointParamChanged(QString,QPointF)));
 //    connect(this, SIGNAL(rectParamUpdate(QString,QRectF)), _api, SLOT(onRectParamChanged(QString,QRectF)));
-    connect(this, SIGNAL(lineParamUpdate(QString,QString,QPoint,QPoint)), _api, SLOT(onLineParamUpdated(QString,QString,QPoint,QPoint)));
+    connect(this, SIGNAL(lineParamUpdate(QString,QString,QLine)), _api, SLOT(onLineParamUpdated(QString,QString,QLine)));
 }
 
 void NoobaPlugin::onIntParamUpdate(const QString &varName, int val)
@@ -220,9 +221,15 @@ void NoobaPlugin::onRectParamUpdate(const QString &varName, const QRectF &val)
     emit rectParamUpdate(varName, val);
 }
 
-void NoobaPlugin::onLineParamUpdate(const QString &varName, const QString &frameViewerTitle, const QPoint &p1, const QPoint &p2)
+void NoobaPlugin::onLineParamUpdate(const QString &varName, const QString &frameViewerTitle, const QLine &line)
 {
+    qDebug() << sender()->objectName() << Q_FUNC_INFO;
+    LineData *lineData = _lineMap.value(varName + frameViewerTitle);
+    if(!lineData)
+        return;
 
+    lineData->_val = line;
+    emit lineParamUpdate(varName, frameViewerTitle, line);
 }
 
 void NoobaPlugin::inputData(const PluginPassData& data)
@@ -256,6 +263,7 @@ void NoobaPlugin::onCreateFrameViewer(const QString &title, bool isVisible)
 {
     FrameViewerData* fvd = new FrameViewerData(title, isVisible);
     _frameViewerDataMap.insert(title, fvd);
+    emit createFrameViewer(title, isVisible, this);
 }
 
 void NoobaPlugin::releaseSignalSlots()

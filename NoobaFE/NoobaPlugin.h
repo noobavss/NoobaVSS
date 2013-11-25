@@ -138,6 +138,18 @@ struct FilePathData {
 
 Q_DECLARE_METATYPE(FilePathData*)
 
+struct LineData {
+
+    LineData(const QString& varName, const QString& frameViewerTitle):
+        _varName(varName), _frameViewerTitle(frameViewerTitle) {}
+
+    QString        _varName;
+    QString        _frameViewerTitle;
+    QLine          _val;
+};
+
+Q_DECLARE_METATYPE(LineData*)
+
 /**
  * @brief The NoobaPlugin class this is a wrapper class for the Loaded plugins
  */
@@ -176,7 +188,6 @@ public:
      * @return
      */
     PluginInfo getPluginInfo() const;
-
     const QMap<QString, IntData* >& getIntParamMap() const { return _intMap; }
     const QMap<QString, DoubleData* >& getDoubleParamMap() const { return _doubleMap; }
     const QMap<QString, StringData* >& getStringMap() const { return _stringMap; }
@@ -190,8 +201,8 @@ signals:
     void outputData(const QStringList& strList, QList<QImage> imageList);
     void onInit(NoobaPlugin* plugin);
     void onAboutToRelease(QString alias);
-    void createFrameViewer(const QString& title, bool isVisible);
-    void createLineParam(const QString& title, const QString& frameViewerTitle);
+    void createFrameViewer(const QString& title, bool isVisible, NoobaPlugin* plugin);
+    void createLineParam(const QString& varName, const QString& frameViewerTitle, NoobaPlugin* plugin);
     void updateFrameViewer(const QString& pluginAlias, const QString& title, const QImage& frame);
 
     void intParamUpdate(const QString& varName, int val);
@@ -199,7 +210,7 @@ signals:
     void stringParamUpdate(const QString& varName, const QString& val);
     void filePathParamUpdate(const QString& varName, const QString& path);
     void multiValParamUpdate(const QString& varName, const QString& val);
-    void lineParamUpdate(const QString& varName, const QString& frameViewerTitle, const QPoint& p1, const QPoint& p2);
+    void lineParamUpdate(const QString& varName, const QString& frameViewerTitle, QLine line);
     void pointParamUpdate(const QString& varName, const QPointF& val);
     void rectParamUpdate(const QString& varName, const QRectF& val);
     void setFrameViewerVisibility(const QString& alias, const QString& title, bool isVisible);
@@ -214,7 +225,7 @@ public slots:
     void onMultiValParamUpdate(const QString& varName, const QString& val);
     void onPointParamUpdate(const QString& varName, const QPointF& val);
     void onRectParamUpdate(const QString& varName, const QRectF& val);
-    void onLineParamUpdate(const QString& varName, const QString& frameViewerTitle, const QPoint& p1, const QPoint& p2);
+    void onLineParamUpdate(const QString& varName, const QString& frameViewerTitle, const QLine& line);
     void inputData(const PluginPassData& data);
     void inputData(const QStringList& strList, QList<QImage> imageList);
     void saveConfig(const QString& filename);
@@ -222,7 +233,8 @@ public slots:
 
 private slots:
 
-    // on create request of plugins call this function
+    // on create request from the plugins (through API) call this function slots
+    // and updates the internal state of the plugin and emit a signal if needed.
     void onCreateFrameViewer(const QString& title, bool isVisible);
     void onCreateIntParam(const QString& varName, int val, int max, int min);
     void onCreateDoubleParam(const QString& varName, double val, double max, double min);
@@ -255,6 +267,7 @@ private:
     QMap<QString, StringListData* > _stringListMap;
     QMap<QString, PointData* >      _pointMap;
     QMap<QString, RectData* >       _rectMap;
+    QMap<QString, LineData* >       _lineMap;
     QMap<QString, FrameViewerData*> _frameViewerDataMap;
     QMap<QString, FilePathData* >   _filePathDataMap;
 

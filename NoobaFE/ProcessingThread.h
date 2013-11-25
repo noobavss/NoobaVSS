@@ -119,7 +119,6 @@ private:
 private slots:
 
         void onPluginLoaded(NoobaPlugin* plugin);
-        void onCreateFrameRequest(const QString& title, bool isVisible);
 
 protected:
         void run();
@@ -129,6 +128,7 @@ signals:
         void updateStatisticsInGUI(struct ThreadStatisticsData);
         void inputFrame(const QImage& inputFrame);
         void createFrameViewer(const QString& title, bool isVisible, NoobaPlugin* plugin);
+        void createLineParamRequest(const QString& title, const QString& frameViewerTitle, NoobaPlugin* plugin);
         void debugMsg(const QString& msg);
         void pluginLoaded(NoobaPlugin* plugin);
         void pluginInitialised(NoobaPlugin* plugin);

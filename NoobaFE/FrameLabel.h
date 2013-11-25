@@ -45,6 +45,17 @@
 // Local
 #include "Structures.h"
 
+namespace nooba
+{
+    enum DrawMode {
+        noDraw      = 0,
+        lineDraw    = 1,
+        boxDraw     = 2
+    };
+}
+
+Q_DECLARE_METATYPE(nooba::DrawMode)
+
 class FrameLabel : public QLabel
 {
     Q_OBJECT
@@ -53,26 +64,34 @@ class FrameLabel : public QLabel
         FrameLabel(QWidget *parent = 0);
         void setMouseCursorPos(QPoint);
         QPoint getMouseCursorPos();
+        void setDrawMode(const QString& varName, nooba::DrawMode drawMode);
+        nooba::DrawMode getDrawMode() const { return _drawMode; }
         QMenu *menu;
 
     private:
         void createContextMenu();
-        MouseData mouseData;
-        QPoint startPoint;
-        QPoint mouseCursorPos;
-        bool drawBox;
-        QRect *box;
-        QLine *line;
+
+        MouseData               mouseData;
+        QPoint                  startPoint;
+        QPoint                  mouseCursorPos;
+        bool                    _draw;
+        QRect                   *box;
+        QLine                   drawingLine;
+        nooba::DrawMode         _drawMode;
+        QString                 _varName;
+        QMap<QString, QLine>   _lineMap;
 
     protected:
         void mouseMoveEvent(QMouseEvent *ev);
         void mousePressEvent(QMouseEvent *ev);
         void mouseReleaseEvent(QMouseEvent *ev);
         void paintEvent(QPaintEvent *ev);
+        void keyReleaseEvent(QKeyEvent *event);
 
     signals:
         void newMouseData(struct MouseData mouseData);
         void onMouseMoveEvent();
+        void lineUpdated(const QLine& line);
 };
 
 #endif // FRAMELABEL_H
