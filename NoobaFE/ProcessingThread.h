@@ -49,6 +49,7 @@
 #include "Config.h"
 #include "Buffer.h"
 #include "SharedImageBuffer.h"
+#include "noobapluginapi.h"
 
 using namespace cv;
 
@@ -140,6 +141,7 @@ signals:
         void pluginsDisconnected(PluginConnData* pcd);
         void pluginsConnected(PluginConnData* pcd);
         void FrameAddedToImageBuffer();
+
 };
 
 #endif // PROCESSINGTHREAD_H

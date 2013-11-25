@@ -4,7 +4,7 @@
 #include <QObject>
 
 #define API_MAJOR_VERSION   0
-#define API_MINOR_VERSION   11
+#define API_MINOR_VERSION   12
 
 class NoobaPluginAPIBasePrivate;
 

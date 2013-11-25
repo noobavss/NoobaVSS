@@ -23,11 +23,29 @@ FrameViewer::FrameViewer(const QString &title, QWidget *parent) :
     ui->canvas->setMinimumSize(1,1);
     ui->drawLineToolButton->setMenu(_menu);
     connect(ui->canvas, SIGNAL(lineUpdated(QLine)), this, SLOT(onLineParamChanged(QLine)));
+    _propertyAnimation.setTargetObject(this);
+    _propertyAnimation.setPropertyName("bgColor");
+    _propertyAnimation.setDuration(1500);
+    _propertyAnimation.setStartValue(QColor(91, 91, 91));
+    _propertyAnimation.setEndValue(QColor(91,91,91));
+//    _propertyAnimation.setEasingCurve(QEasingCurve::OutCubic);
 }
 
 FrameViewer::~FrameViewer()
 {
     delete ui;
+}
+
+void FrameViewer::setCanvasBGColor(const QColor &color)
+{
+    QRgb rgb = color.rgb();
+    QString str(QString("background-color: rgb(%1, %2, %3);").arg(qRed(rgb)).arg(qGreen(rgb)).arg(qBlue(rgb)));
+    ui->canvasBorder->setStyleSheet(str);
+}
+
+QColor FrameViewer::canvasBGColor() const
+{
+    return ui->canvasBorder->palette().color(QWidget::backgroundRole());
 }
 
 void FrameViewer::createLineParam(const QString &varName, const QColor& color)
@@ -71,6 +89,22 @@ void FrameViewer::setVisibility(bool isVisible)
     return;
 }
 
+void FrameViewer::triggerAlert(nooba::AlertType alert)
+{
+    switch (alert) {
+    case nooba::RedAlert:
+        _propertyAnimation.setKeyValueAt(0.4, QColor(Qt::red));
+        break;
+    case nooba::AmberAlert:
+        _propertyAnimation.setKeyValueAt(0.4, QColor(240,75, 10));
+        break;
+    default:
+        break;
+    }
+    _propertyAnimation.setLoopCount(-1);
+    _propertyAnimation.start();
+}
+
 void FrameViewer::onToolMenuItemSelected()
 {
     QAction* act = qobject_cast<QAction* >(sender());
@@ -84,11 +118,11 @@ void FrameViewer::onToolMenuItemSelected()
             c = _lineColorMap.value(act->text());
             break;
         }
-    default:
-    {
-        c = QColor();
-        break;
-    }
+        default:
+        {
+            c = QColor();
+            break;
+        }
     }
 
     _activeVarName = act->text();
@@ -98,6 +132,13 @@ void FrameViewer::onToolMenuItemSelected()
 void FrameViewer::onLineParamChanged(const QLine &line)
 {
     emit lineParamChanged(_activeVarName, _title, line);
+}
+
+void FrameViewer::mousePressEvent(QMouseEvent *event)
+{
+//    _propertyAnimation.
+    _propertyAnimation.stop();
+    setCanvasBGColor(QColor(91,91,91));
 }
 
 

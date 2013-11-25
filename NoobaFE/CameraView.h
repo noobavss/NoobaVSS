@@ -61,7 +61,7 @@ private slots:
     void updateCaptureThreadStats(struct ThreadStatisticsData statData);
     void updateProcessingThreadStats(struct ThreadStatisticsData statData);
     void onCreateLineParamRequest(const QString& varName, const QString& frameViewerTitle, QColor lineColor, NoobaPlugin* plugin);
-
+    void onGenerateAlert(const QString& frameViewerTitle, const QString& msg, nooba::AlertType type, NoobaPlugin* plugin);
     void resizeEvent(QResizeEvent *event);
 private:
 

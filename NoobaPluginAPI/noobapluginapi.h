@@ -47,7 +47,7 @@ namespace nooba {
         StoppedState    = 2
     };
 
-    enum NoobaAlert {
+    enum AlertType {
         RedAlert    = 0,
         AmberAlert  = 1
     };
@@ -59,6 +59,9 @@ namespace nooba {
 }
 
 Q_DECLARE_METATYPE(nooba::ParamType)   // now ParamTypes can be used with QVariants
+Q_DECLARE_METATYPE(nooba::VideoState)
+Q_DECLARE_METATYPE(nooba::AlertType)
+Q_DECLARE_METATYPE(nooba::PathType)
 
 struct ProcParamsPrivate;
 struct PluginInfoPrivate;
@@ -309,6 +312,13 @@ public:
     void setFrameViewerVisibility(const QString& title, bool isVisible)
     {   emit updateFrameViewerVisibilityRequest(title, isVisible); }
 
+    /**
+     * @brief generateAlert generate an alert.
+     * @param alert
+     */
+    void generateAlert(const QString& frameViewerTitle, const QString& msg,  nooba::AlertType alert)  // after version 0.11
+    {   emit generateAlertRequest(frameViewerTitle, msg, alert); }
+
 signals:
 
     void createIntParamRequest(const QString& varName, int val, int max = 100, int min = 0);
@@ -326,6 +336,7 @@ signals:
     void updateFrameViewerVisibilityRequest(const QString& title, bool isVisible); // after ver 0.9
     void createFilePathParamRequest(const QString& varName, QString path,
                                     nooba::PathType pathType, const QString& filter);   // added in version 0.10
+    void generateAlertRequest(const QString& frameViewerTitle, const QString& msg, nooba::AlertType alert);  // after version 0.11
 
 public slots:
 
@@ -390,7 +401,7 @@ private:
     NoobaPluginAPI(const NoobaPluginAPI& rhs);                // private copy constructor
     NoobaPluginAPI& operator=(const NoobaPluginAPI& rhs);     // private assignment operator
 
-    NoobaPluginAPIPrivate*      d;                            // d pointer
+    NoobaPluginAPIPrivate*      d;                            // d pointer (opaque pointer)
 };
 
 Q_DECLARE_INTERFACE(NoobaPluginAPI, "NoobaVSS.NoobaPluginAPI/" )

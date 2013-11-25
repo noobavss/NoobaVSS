@@ -215,6 +215,7 @@ signals:
     void pointParamUpdate(const QString& varName, const QPointF& val);
     void rectParamUpdate(const QString& varName, const QRectF& val);
     void setFrameViewerVisibility(const QString& alias, const QString& title, bool isVisible);
+    void generateAlert(const QString& frameViewerTitle, const QString& msg, nooba::AlertType alert, NoobaPlugin* plugin);
 
 public slots:
 
@@ -248,6 +249,7 @@ private slots:
     void onDebugMsg(const QString& msg);
     void onUpdateFrameViewerRequest(const QString& title, const QImage& frame);
     void onSetFrameViewerVisibility(const QString& title, bool isVisible);
+    void onGenerateAlert(const QString& frameViewerTitle, const QString& msg, nooba::AlertType alert);
 
 private:
 

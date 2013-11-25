@@ -16,7 +16,7 @@ namespace nooba
     const QString ProgramName   = "Nooba_VSS";
     const QString Organisation  = "Nooba";
     const int  MajorVersion     = 0;
-    const int MinorVersion      = 7;
+    const int MinorVersion      = 8;
 
     // QSettings related consts
     const QString Settings_PluginConfig_block   = "Plugin_info";
@@ -45,7 +45,7 @@ namespace nooba
     enum DataRoles         // user roles for data models
     {
         ParamTypeRole   = Qt::UserRole + 1,
-        ParamDataRole   = Qt::UserRole + 2,
+        ParamDataRole   = Qt::UserRole + 2
 
     };
 }

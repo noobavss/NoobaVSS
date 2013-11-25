@@ -136,6 +136,11 @@ void NoobaPlugin::onSetFrameViewerVisibility(const QString &title, bool isVisibl
     emit setFrameViewerVisibility(_alias, title, isVisible);
 }
 
+void NoobaPlugin::onGenerateAlert(const QString &frameViewerTitle, const QString& msg, nooba::AlertType alert)
+{
+    emit generateAlert(frameViewerTitle, msg, alert, this);
+}
+
 void NoobaPlugin::initSignalSlots()
 {
     connect(_api, SIGNAL(debugMsgRequest(QString)), this, SIGNAL(debugMsg(QString)));
@@ -166,6 +171,8 @@ void NoobaPlugin::initSignalSlots()
 //    connect(this, SIGNAL(pointParamUpdate(QString,QPointF)), _api, SLOT(onPointParamChanged(QString,QPointF)));
 //    connect(this, SIGNAL(rectParamUpdate(QString,QRectF)), _api, SLOT(onRectParamChanged(QString,QRectF)));
     connect(this, SIGNAL(lineParamUpdate(QString,QString,QLine)), _api, SLOT(onLineParamUpdated(QString,QString,QLine)));
+    qRegisterMetaType<nooba::AlertType>("nooba::AlertType");
+    connect(_api, SIGNAL(generateAlertRequest(QString,QString,nooba::AlertType)), this, SLOT(onGenerateAlert(QString,QString,nooba::AlertType)));
 }
 
 void NoobaPlugin::onIntParamUpdate(const QString &varName, int val)

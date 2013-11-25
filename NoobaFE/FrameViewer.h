@@ -3,8 +3,10 @@
 // Qt
 #include <QWidget>
 #include <QPixmap>
+#include <QPropertyAnimation>
 
 #include "FrameLabel.h"
+#include "noobapluginapi.h"
 
 // forward declaration VidOutputSubWind
 namespace Ui { class FrameViewer; }
@@ -16,12 +18,16 @@ class QMenu;
 class FrameViewer : public QWidget
 {
     Q_OBJECT
-    
+
+    Q_PROPERTY(QColor bgColor READ canvasBGColor WRITE setCanvasBGColor)
 public:
 
     explicit FrameViewer(const QString& title, QWidget *parent = 0);
     ~FrameViewer();
     void setMdiSubWindow(QMdiSubWindow* subWindow) { _mdiSubWindow = subWindow; }
+
+    void setCanvasBGColor(const QColor& color);
+    QColor canvasBGColor() const;
 
 signals:
 
@@ -34,12 +40,14 @@ public slots:
     bool updateFrame(QImage in);
     void resizeEvent(QResizeEvent *event);
     void setVisibility(bool isVisible);
+    void triggerAlert(nooba::AlertType alert);
 
 private slots:
 
     void onToolMenuItemSelected();
     void onLineParamChanged(const QLine& line);
 
+    void mousePressEvent(QMouseEvent *event);
 private:
 
     Ui::FrameViewer         *ui;
@@ -50,6 +58,7 @@ private:
     QPixmap                 _pixmap;
     QColor                  _color;
     QMap<QString, QColor>   _lineColorMap;
+    QPropertyAnimation      _propertyAnimation;
 };
 
 #endif // VIDOUTPUTSUBWIND_H

@@ -40,7 +40,6 @@ private slots:
 	void onOpenWebCam();	
 //    void onNextButton_clicked();
 //    void onPrevButton_clicked();
-	void updateFrame();
     void onPluginAct_triggerred();
     
     void on_actionAbout_NoobaVSS_triggered();
@@ -49,6 +48,7 @@ private slots:
 
 private:
 
+    bool tabCheck();
     void updateDockWidgets(ParamConfigWind *paramConfig, OutputWind *debugMsgWind, StatPanel* statPanel);
     QMdiSubWindow *addNewSourceTab(CameraView *camView);
     void initMDIArea();

@@ -210,49 +210,5 @@ void FrameLabel::keyReleaseEvent(QKeyEvent *event)
 
 void FrameLabel::createContextMenu()
 {
-//    // Create top-level menu object
-//    menu = new QMenu(this);
-//    // Add actions
-//    QAction *action;
-//    action = new QAction(this);
-//    action->setText(tr("Reset ROI"));
-//    menu->addAction(action);
-//    action = new QAction(this);
-//    action->setText(tr("Scale to Fit Frame"));
-//    action->setCheckable(true);
-//    menu->addAction(action);
-//    menu->addSeparator();
-//    // Create image processing menu object
-//    QMenu* menu_imgProc = new QMenu(this);
-//    menu_imgProc->setTitle("Image Processing");
-//    menu->addMenu(menu_imgProc);
-//    // Add actions
-//    action = new QAction(this);
-//    action->setText(tr("Grayscale"));
-//    action->setCheckable(true);
-//    menu_imgProc->addAction(action);
-//    action = new QAction(this);
-//    action->setText(tr("Smooth"));
-//    action->setCheckable(true);
-//    menu_imgProc->addAction(action);
-//    action = new QAction(this);
-//    action->setText(tr("Dilate"));
-//    action->setCheckable(true);
-//    menu_imgProc->addAction(action);
-//    action = new QAction(this);
-//    action->setText(tr("Erode"));
-//    action->setCheckable(true);
-//    menu_imgProc->addAction(action);
-//    action = new QAction(this);
-//    action->setText(tr("Flip"));
-//    action->setCheckable(true);
-//    menu_imgProc->addAction(action);
-//    action = new QAction(this);
-//    action->setText(tr("Canny"));
-//    action->setCheckable(true);
-//    menu_imgProc->addAction(action);
-//    menu_imgProc->addSeparator();
-//    action = new QAction(this);
-//    action->setText(tr("Settings..."));
-//    menu_imgProc->addAction(action);
+
 }

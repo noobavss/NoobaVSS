@@ -59,6 +59,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::onOpenFile()
 {
+    if(!tabCheck())
+        return;
+
     CameraView* camView = new CameraView(_sharedImageBuffer);
     if(camView->connectToVideoFileStream())
     {
@@ -70,30 +73,13 @@ void MainWindow::onOpenFile()
         delete camView;
     }
 
-//    _vidCapture.release();  // release any currently loaded capture device if any
-//    setVideoState(nooba::StoppedState);
-
-//	// load new video capture device
-//    if(!_vidCapture.open(path.toStdString()))
-//    {
-//        QMessageBox errMsg;
-//        errMsg.setText(tr("File open failed from path \"%1\"").arg(path));
-//        errMsg.exec();
-//        return;
-//    }
-//    _isWebCam = false;
-////    ui->prevButton->setEnabled(true);   // enable the previous button on this mode.
-//    _params.setFrameId(0);
-
-//    if(!_firstRun)
-//        _pluginLoader.refreshPlugins();
-
-//    _firstRun = false;
-//    ui->statusBar->showMessage(tr("file opened: %1").arg(path), 6000);
 }
 
 void MainWindow::onOpenWebCam()
 {
+    if(!tabCheck())
+        return;
+
     CameraView* camView = new CameraView(_sharedImageBuffer);
     if(camView->connectToCamera())
     {
@@ -143,41 +129,22 @@ void MainWindow::onMdiSubWindowActivated(QMdiSubWindow *subWindow)
     return;
 }
 
-void MainWindow::updateFrame()
+bool MainWindow::tabCheck()
 {
-//    if(!_pluginLoader.getBasePlugin()) //  if active plugin not set
-//    {
-//        setVideoState(nooba::StoppedState);
-//        QMessageBox msgBox;
-//        msgBox.setText(tr("No video processing plugin is set. Set a plugin before playing the video stream."));
-//        msgBox.setIcon(QMessageBox::Warning);
-//        msgBox.exec();
-//        onPluginAct_triggerred(); // pop plugin config window
-//    }
+    if( ui->mdiArea->subWindowList().count() == 1)
+    {
+        QMessageBox msg;
+        msg.setText(tr("Multiple tabs are not supported in this version." \
+                       " Close the current tab and open a new tab"));
+        msg.exec();
 
-//    if (!_vidCapture.read(_frame))
-//	{
-//        setVideoState(nooba::StoppedState);
-//        _vidCapture.set(CV_CAP_PROP_POS_FRAMES, 0);
-//		return;
-//	}
-
-//    if(!_isWebCam)
-//        _params.setFrameId(_vidCapture.get(CV_CAP_PROP_POS_FRAMES) - 1);
-
-//    cv::cvtColor(_frame, _frame, CV_BGR2RGB); // convert layout from BGR to RGB.
-//    _inputWind.updateFrame(cvt2QImage(_frame));
-//	cv::Mat editedFrame;
-
-//    if(_pluginLoader.getBasePlugin()->procFrame(_frame, editedFrame, _params))
-//	{
-//        _outputWind.updateFrame(cvt2QImage(editedFrame));
-//	}
+        return false;
+    }
+    return true;
 }
 
 void MainWindow::updateDockWidgets(ParamConfigWind* paramConfig, OutputWind* debugMsgWind, StatPanel* statPanel)
 {
-
     QVBoxLayout *layout = qobject_cast<QVBoxLayout*>(ui->paramConfigDock->widget()->layout());
     if(layout)
     {
@@ -221,13 +188,6 @@ void MainWindow::updateDockWidgets(ParamConfigWind* paramConfig, OutputWind* deb
 
 QMdiSubWindow* MainWindow::addNewSourceTab(CameraView* camView)
 {
-    if( ui->mdiArea->subWindowList().count() == 1)
-    {
-        QMessageBox msg;
-        msg.setText(tr("Waaaaaat? You want another tab? Nice try broheim... No more tabs for you.."));
-        msg.exec();
-        return NULL;
-    }
     QMdiSubWindow* subWind = ui->mdiArea->addSubWindow(camView);
     subWind->showMaximized();
     ui->mdiArea->setActiveSubWindow(subWind);

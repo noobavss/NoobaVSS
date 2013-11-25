@@ -22,6 +22,7 @@
 #include <QMetaType>
 #include <QDebug>
 #include <QMutexLocker>
+#include <QFile>
 
 CameraView::CameraView(SharedImageBuffer *sharedImageBuffer, QWidget *parent) :
     QWidget(parent),
@@ -128,7 +129,7 @@ bool CameraView::connectToVideoFileStream()
     setWindowTitle(tr("File Stream"));
     _isWebCam = false;
     setupSharedBufferForNewDevice();
-    _statPanel->setDeviceName(path);
+    _statPanel->setDeviceName(tr("File mode"));
     _captureThread.reset(new CaptureThread(_sharedImageBuffer, _deviceNumber,true));
     _processingThread.reset(new ProcessingThread(_sharedImageBuffer, _deviceNumber));
     if(_captureThread->connectToFileStream(path))
@@ -263,14 +264,13 @@ void CameraView::onFileStreamEOF()
 
 void CameraView::onPluginLoad(NoobaPlugin *plugin)
 {
-    QMutexLocker locker(&_pluginUpdateMutex);
+    connect(plugin, SIGNAL(generateAlert(QString,QString,nooba::AlertType,NoobaPlugin*)), this, SLOT(onGenerateAlert(QString,QString,nooba::AlertType,NoobaPlugin*)));
     _frameViewerMap.insert(plugin->alias(), QMap<QString, MdiSubWindData* >());
     return;
 }
 
 void CameraView::onPluginAboutToUnload(QString alias)
 {
-    QMutexLocker locker(&_pluginUpdateMutex);
     QMap<QString, MdiSubWindData*> subWindMap = _frameViewerMap.value(alias);
 
     foreach (MdiSubWindData* d, subWindMap)
@@ -284,14 +284,12 @@ void CameraView::onPluginAboutToUnload(QString alias)
 
 void CameraView::onPluginInitialised(NoobaPlugin *plugin)
 {
-    QMutexLocker locker(&_pluginUpdateMutex);
     _paramConfigUI->addPlugin(plugin);
     return;
 }
 
 void CameraView::onPluginAboutToRelease(QString alias)
 {
-    QMutexLocker locker(&_pluginUpdateMutex);
     _paramConfigUI->removePlugin(alias);
     return;
 }
@@ -304,7 +302,6 @@ void CameraView::onCreateFrameViewerRequest(const QString &title, bool isVisible
     connect(plugin, SIGNAL(updateFrameViewer(QString, QString,QImage)), this, SLOT(onFrameViewerUpdate(QString, QString,QImage)));
     connect(plugin, SIGNAL(setFrameViewerVisibility(QString,QString,bool)), this, SLOT(onFrameSetVisibiliy(QString, QString, bool)));
 
-    QMutexLocker locker(&_pluginUpdateMutex);
     _frameViewerMap[plugin->alias()].insert(title, data);
     return;
 }
@@ -382,6 +379,15 @@ void CameraView::onCreateLineParamRequest(const QString &varName, const QString 
 
     connect(d->_frameViewer, SIGNAL(lineParamChanged(QString,QString,QLine)),
             plugin, SLOT(onLineParamUpdate(QString,QString,QLine)), Qt::UniqueConnection);  // same plugin and frame viewer will be connected multiple times
+}
+
+void CameraView::onGenerateAlert(const QString &frameViewerTitle, const QString& msg, nooba::AlertType type, NoobaPlugin* plugin)
+{
+    MdiSubWindData* d = _frameViewerMap.value(plugin->alias()).value(frameViewerTitle, NULL);
+    if(!d)
+        return;
+
+    d->_frameViewer->triggerAlert(type);
 }
 
 void CameraView::resizeEvent(QResizeEvent *event)
