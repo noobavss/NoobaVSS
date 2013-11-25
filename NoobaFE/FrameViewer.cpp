@@ -32,10 +32,13 @@ FrameViewer::~FrameViewer()
 
 void FrameViewer::createLineParam(const QString &varName, const QColor& color)
 {
-    qDebug() << color;
     ui->drawLineToolButton->setEnabled(true);
+    QPixmap p(15,15);
+    p.fill(color);
     QAction* act = _menu->addAction(varName,  this, SLOT(onToolMenuItemSelected()));
+    act->setIcon(p);
     QVariant v;
+    _lineColorMap.insert(varName, color);
     v.setValue< nooba::DrawMode >(nooba::lineDraw);
     act->setData(v);
 }
@@ -71,8 +74,25 @@ void FrameViewer::setVisibility(bool isVisible)
 void FrameViewer::onToolMenuItemSelected()
 {
     QAction* act = qobject_cast<QAction* >(sender());
-    ui->canvas->setDrawMode(act->text(), act->data().value<nooba::DrawMode>());
+
+    QColor c;
+    nooba::DrawMode dm =  act->data().value<nooba::DrawMode>();
+    switch(dm)
+    {
+        case nooba::lineDraw:
+        {
+            c = _lineColorMap.value(act->text());
+            break;
+        }
+    default:
+    {
+        c = QColor();
+        break;
+    }
+    }
+
     _activeVarName = act->text();
+    ui->canvas->setDrawMode(_activeVarName, c, dm);
 }
 
 void FrameViewer::onLineParamChanged(const QLine &line)

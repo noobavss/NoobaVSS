@@ -38,7 +38,8 @@
 #include <QtGui/QMouseEvent>
 
 FrameLabel::FrameLabel(QWidget *parent) :
-    QLabel(parent)
+    QLabel(parent),
+    _color(Qt::transparent)
 {
     setMouseTracking(true);
     startPoint.setX(0);
@@ -84,10 +85,11 @@ QPoint FrameLabel::getMouseCursorPos()
     return mouseCursorPos;
 }
 
-void FrameLabel::setDrawMode(const QString &varName, nooba::DrawMode drawMode)
+void FrameLabel::setDrawMode(const QString &varName, const QColor &color, nooba::DrawMode drawMode)
 {
     _varName = varName;
     _drawMode = drawMode;
+    _color  = color;
 }
 
 void FrameLabel::mouseReleaseEvent(QMouseEvent *ev)
@@ -109,18 +111,17 @@ void FrameLabel::mouseReleaseEvent(QMouseEvent *ev)
     else if(ev->button()==Qt::RightButton)
     {
         // If user presses (and then releases) the right mouse button while drawing box, stop drawing box
-        if(_draw)
-        {
-            _draw=false;
-            _varName.clear();
-            _drawMode = nooba::noDraw;
-            drawingLine = QLine();
-        }
-        else
-        {
-            // Show context menu
-            menu->exec(ev->globalPos());
-        }
+
+        _draw=false;
+        _varName.clear();
+        _drawMode = nooba::noDraw;
+        drawingLine = QLine();
+        _color = QColor(Qt::transparent);
+        //        else
+        //        {
+//            // Show context menu
+//            menu->exec(ev->globalPos());
+//        }
     }
 }
 
@@ -138,8 +139,8 @@ void FrameLabel::mousePressEvent(QMouseEvent *ev)
         {
         case nooba::lineDraw:
         {
-            QLine l = _lineMap.take(_varName);
-            if(l.isNull())
+            _S_Line s_l = _lineMap.take(_varName);
+            if(s_l._line.isNull())
             {
                 if(drawingLine.isNull())
                 {
@@ -148,7 +149,7 @@ void FrameLabel::mousePressEvent(QMouseEvent *ev)
               }
             else
             {
-                drawingLine = l;
+                drawingLine =s_l._line;
             }
             drawingLine.setPoints(startPoint, startPoint);
             _draw=true;
@@ -171,11 +172,12 @@ void FrameLabel::paintEvent(QPaintEvent *ev)
     QLabel::paintEvent(ev);
     QPainter painter(this);
 
-    QPen p(Qt::white, 1);
-    painter.setPen(p);
-    foreach(QLine l, _lineMap)
-        painter.drawLine(l);
-
+    foreach(_S_Line s_l, _lineMap)
+    {
+        painter.setPen(s_l._color);
+        painter.drawLine(s_l._line);
+    }
+    painter.setPen(_color);
     painter.drawLine(drawingLine);
 }
 
@@ -189,7 +191,7 @@ void FrameLabel::keyReleaseEvent(QKeyEvent *event)
         {
         case nooba::lineDraw:
         {
-            _lineMap.insert(_varName, drawingLine);
+            _lineMap.insert(_varName, _S_Line(drawingLine, _color));
             _varName.clear();
             emit lineUpdated(drawingLine);
             drawingLine = QLine();

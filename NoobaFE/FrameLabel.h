@@ -64,11 +64,22 @@ class FrameLabel : public QLabel
         FrameLabel(QWidget *parent = 0);
         void setMouseCursorPos(QPoint);
         QPoint getMouseCursorPos();
-        void setDrawMode(const QString& varName, nooba::DrawMode drawMode);
+        void setDrawMode(const QString& varName, const QColor& color, nooba::DrawMode drawMode);
         nooba::DrawMode getDrawMode() const { return _drawMode; }
         QMenu *menu;
 
     private:
+        struct _S_Line
+        {
+            _S_Line() {}
+
+            _S_Line(const QLine& line, const QColor& color):
+                _line(line), _color(color) {}
+
+            QLine   _line;
+            QColor  _color;
+        };
+
         void createContextMenu();
 
         MouseData               mouseData;
@@ -79,7 +90,8 @@ class FrameLabel : public QLabel
         QLine                   drawingLine;
         nooba::DrawMode         _drawMode;
         QString                 _varName;
-        QMap<QString, QLine>   _lineMap;
+        QColor                  _color;
+        QMap<QString, _S_Line>  _lineMap;
 
     protected:
         void mouseMoveEvent(QMouseEvent *ev);

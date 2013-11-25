@@ -42,13 +42,14 @@ private slots:
 
 private:
 
-    Ui::FrameViewer     *ui;
-    QMdiSubWindow       *_mdiSubWindow;
-    QMenu               *_menu;
-    const QString       _title;
-    QString             _activeVarName;
-    QPixmap             _pixmap;
-    QColor              _color;
+    Ui::FrameViewer         *ui;
+    QMdiSubWindow           *_mdiSubWindow;
+    QMenu                   *_menu;
+    const QString           _title;
+    QString                 _activeVarName;
+    QPixmap                 _pixmap;
+    QColor                  _color;
+    QMap<QString, QColor>   _lineColorMap;
 };
 
 #endif // VIDOUTPUTSUBWIND_H
