@@ -40,6 +40,7 @@
 #include <QtCore/QTime>
 #include <QtCore/QQueue>
 #include <QImage>
+
 // OpenCV
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
@@ -54,6 +55,7 @@ using namespace cv;
 struct PluginConnData;
 class PluginLoader;
 class NoobaPlugin;
+class QColor;
 
 class FrameProcessor: public QObject
 {
@@ -128,7 +130,7 @@ signals:
         void updateStatisticsInGUI(struct ThreadStatisticsData);
         void inputFrame(const QImage& inputFrame);
         void createFrameViewer(const QString& title, bool isVisible, NoobaPlugin* plugin);
-        void createLineParamRequest(const QString& title, const QString& frameViewerTitle, NoobaPlugin* plugin);
+        void createLineParamRequest(const QString& title, const QString& frameViewerTitle, const QColor& lineColor, NoobaPlugin* plugin);
         void debugMsg(const QString& msg);
         void pluginLoaded(NoobaPlugin* plugin);
         void pluginInitialised(NoobaPlugin* plugin);

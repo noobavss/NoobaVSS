@@ -29,7 +29,7 @@ signals:
 
 public slots:
 
-    void createLineParam(const QString& varName);
+    void createLineParam(const QString& varName, const QColor &color);
     void closeEvent(QCloseEvent *event);
     bool updateFrame(QImage in);
     void resizeEvent(QResizeEvent *event);
@@ -48,6 +48,7 @@ private:
     const QString       _title;
     QString             _activeVarName;
     QPixmap             _pixmap;
+    QColor              _color;
 };
 
 #endif // VIDOUTPUTSUBWIND_H

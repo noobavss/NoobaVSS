@@ -176,8 +176,7 @@ void CameraView::connectThreadSignalSlots()
     connect(_processingThread.data(), SIGNAL(pluginAboutToUnload(QString)), this, SLOT(onPluginAboutToUnload(QString)));
     connect(_processingThread.data(), SIGNAL(createFrameViewer(QString, bool, NoobaPlugin*)), this, SLOT(onCreateFrameViewerRequest(QString, bool, NoobaPlugin*)));
     connect(_processingThread.data(), SIGNAL(debugMsg(QString)), _debugOutWind, SLOT(onDebugMsg(QString)));
-    connect(_processingThread.data(), SIGNAL(createLineParamRequest(QString,QString,NoobaPlugin*)), this, SLOT(onCreateLineParamRequest(QString,QString,NoobaPlugin*)));
-    
+    connect(_processingThread.data(), SIGNAL(createLineParamRequest(QString,QString,QColor,NoobaPlugin*)), this, SLOT(onCreateLineParamRequest(QString,QString,QColor,NoobaPlugin*)));
 //    connect(_processingThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
     connect(_captureThread.data(), SIGNAL(inputFrame(QImage)), this, SLOT(onInputFrameUpdate(QImage)));
     connect(_processingThread.data(), SIGNAL(updateStatisticsInGUI(ThreadStatisticsData)), this, SLOT(updateProcessingThreadStats(ThreadStatisticsData)));
@@ -370,7 +369,7 @@ void CameraView::updateProcessingThreadStats(ThreadStatisticsData statData)
     return;
 }
 
-void CameraView::onCreateLineParamRequest(const QString &varName, const QString &frameViewerTitle, NoobaPlugin* plugin)
+void CameraView::onCreateLineParamRequest(const QString &varName, const QString &frameViewerTitle, QColor lineColor, NoobaPlugin* plugin)
 {
     MdiSubWindData *d =  _frameViewerMap.value(plugin->alias()).value(frameViewerTitle, NULL);
     if(!d)
@@ -379,7 +378,7 @@ void CameraView::onCreateLineParamRequest(const QString &varName, const QString 
         return;
     }
 
-    d->_frameViewer->createLineParam(varName);
+    d->_frameViewer->createLineParam(varName, lineColor);
 
     connect(d->_frameViewer, SIGNAL(lineParamChanged(QString,QString,QLine)),
             plugin, SLOT(onLineParamUpdate(QString,QString,QLine)), Qt::UniqueConnection);  // same plugin and frame viewer will be connected multiple times

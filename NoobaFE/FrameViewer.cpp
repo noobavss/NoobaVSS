@@ -5,6 +5,7 @@
 #include <QMdiSubWindow>
 #include <QMenu>
 #include <QAction>
+#include <QDebug>
 
 FrameViewer::FrameViewer(const QString &title, QWidget *parent) :
     QWidget(parent),
@@ -29,8 +30,9 @@ FrameViewer::~FrameViewer()
     delete ui;
 }
 
-void FrameViewer::createLineParam(const QString &varName)
+void FrameViewer::createLineParam(const QString &varName, const QColor& color)
 {
+    qDebug() << color;
     ui->drawLineToolButton->setEnabled(true);
     QAction* act = _menu->addAction(varName,  this, SLOT(onToolMenuItemSelected()));
     QVariant v;

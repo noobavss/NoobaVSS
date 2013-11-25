@@ -107,7 +107,7 @@ void ProcessingThread::onPluginLoaded(NoobaPlugin *plugin)
     // To overcome this issue the signal passing is transfered to the processing thread itself using this
     // directly connected slot.
     connect(plugin, SIGNAL(createFrameViewer(QString,bool,NoobaPlugin*)), this, SIGNAL(createFrameViewer(QString,bool,NoobaPlugin*)));
-    connect(plugin, SIGNAL(createLineParam(QString,QString,NoobaPlugin*)), this, SIGNAL(createLineParamRequest(QString,QString,NoobaPlugin*)));
+    connect(plugin, SIGNAL(createLineParam(QString,QString,QColor,NoobaPlugin*)), this, SIGNAL(createLineParamRequest(QString,QString,QColor,NoobaPlugin*)));
     connect(plugin, SIGNAL(debugMsg(QString)), this, SIGNAL(debugMsg(QString)));
 }
 

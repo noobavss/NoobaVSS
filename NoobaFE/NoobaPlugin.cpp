@@ -105,10 +105,10 @@ void NoobaPlugin::onCreatePointParam(const QString &varName, const QPointF &val)
     Q_UNUSED(val)
 }
 
-void NoobaPlugin::onCreateLineParam(const QString &varName, const QString &frameViewerTitle)
+void NoobaPlugin::onCreateLineParam(const QString &varName, const QString &frameViewerTitle, QColor lineColor)
 {
-    _lineMap.insert(varName + frameViewerTitle, new LineData(varName, frameViewerTitle));
-    emit createLineParam(varName, frameViewerTitle, this);
+    _lineMap.insert(varName + frameViewerTitle, new LineData(varName, frameViewerTitle, lineColor));
+    emit createLineParam(varName, frameViewerTitle, lineColor, this);
 }
 
 void NoobaPlugin::onCreateRectParam(const QString &varName, const QRectF &val)
@@ -150,7 +150,7 @@ void NoobaPlugin::initSignalSlots()
     connect(_api, SIGNAL(createFilePathParamRequest(QString,QString,nooba::PathType,QString)),
             this, SLOT(onCreateFilePathParam(QString,QString,nooba::PathType,QString)));
 
-    connect(_api, SIGNAL(createLineParamRequest(QString,QString)), this, SLOT(onCreateLineParam(QString,QString))); // after version 0.10
+    connect(_api, SIGNAL(createLineParamRequest(QString,QString,QColor)), this, SLOT(onCreateLineParam(QString,QString,QColor))); // after version 0.10
 
     qRegisterMetaType<PluginPassData>("PluginPassData");
     connect(_api, SIGNAL(outputDataRequest(PluginPassData)), this, SIGNAL(outputData(PluginPassData)));

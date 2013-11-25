@@ -140,12 +140,13 @@ Q_DECLARE_METATYPE(FilePathData*)
 
 struct LineData {
 
-    LineData(const QString& varName, const QString& frameViewerTitle):
-        _varName(varName), _frameViewerTitle(frameViewerTitle) {}
+    LineData(const QString& varName, const QString& frameViewerTitle, const QColor& lineColor):
+        _varName(varName), _frameViewerTitle(frameViewerTitle), _lineColor(lineColor) {}
 
     QString        _varName;
     QString        _frameViewerTitle;
     QLine          _val;
+    QColor         _lineColor;
 };
 
 Q_DECLARE_METATYPE(LineData*)
@@ -202,7 +203,7 @@ signals:
     void onInit(NoobaPlugin* plugin);
     void onAboutToRelease(QString alias);
     void createFrameViewer(const QString& title, bool isVisible, NoobaPlugin* plugin);
-    void createLineParam(const QString& varName, const QString& frameViewerTitle, NoobaPlugin* plugin);
+    void createLineParam(const QString& varName, const QString& frameViewerTitle, const QColor& lineColor, NoobaPlugin* plugin);
     void updateFrameViewer(const QString& pluginAlias, const QString& title, const QImage& frame);
 
     void intParamUpdate(const QString& varName, int val);
@@ -242,7 +243,7 @@ private slots:
     void onCreateFilePathParam(const QString& varName, QString path, nooba::PathType pathType, const QString& filter);
     void onCreateMultiValParam(const QString& varName, const QStringList& varList);
     void onCreatePointParam(const QString& varName, const QPointF& val);
-    void onCreateLineParam(const QString& varName, const QString& frameViewerTitle);
+    void onCreateLineParam(const QString& varName, const QString& frameViewerTitle, QColor lineColor);
     void onCreateRectParam(const QString& varName, const QRectF& val);
     void onDebugMsg(const QString& msg);
     void onUpdateFrameViewerRequest(const QString& title, const QImage& frame);

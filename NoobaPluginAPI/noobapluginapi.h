@@ -11,6 +11,7 @@
 #include <QtPlugin>
 #include <QMetaType>
 #include <QImage>
+#include <QColor>
 
 /************************************************************************/
 /* IMPORTANT: ANY CHANGE TO THE API CORRESPOND TO A CHANGE IN THE       */
@@ -267,8 +268,8 @@ public:
      * @param frameViewerTitle  title of the frameViewer that this line drawing tool
      *                          should be shown on.
      */
-    void createLineParam(const QString& varName, const QString& frameViewerTitle)
-    {   emit createLineParamRequest(varName, frameViewerTitle); }
+    void createLineParam(const QString& varName, const QString& frameViewerTitle, QColor lineColor)
+    {   emit createLineParamRequest(varName, frameViewerTitle, lineColor); }
 
     /**
      * debug output messages can be sent using this
@@ -316,7 +317,7 @@ signals:
     void createMultiValParamRequest(const QString& varName, const QStringList& varList);
 //    void createPointParamRequest(const QString& varName, const QPointF& val);
 //    void createRectParamRequest(const QString& varName, const QRectF& val);
-    void createLineParamRequest(const QString& varName, const QString& frameViewerTitle);   // after version 0.10
+    void createLineParamRequest(const QString& varName, const QString& frameViewerTitle, QColor lineColor);   // after version 0.10
     void debugMsgRequest(const QString& msg);
     void outputDataRequest(const PluginPassData& data);
     void outputDataRequest(const QStringList& strList, QList<QImage> imageList);
