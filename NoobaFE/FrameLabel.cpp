@@ -36,14 +36,16 @@
 // Qt
 #include <QtGui/QPainter>
 #include <QtGui/QMouseEvent>
+#include <QDebug>
 
 FrameLabel::FrameLabel(QWidget *parent) :
     QLabel(parent),
+    _showSketches(true),
     _color(Qt::transparent)
 {
     setMouseTracking(true);
-    startPoint.setX(0);
-    startPoint.setY(0);
+    startPointOrg.setX(0);
+    startPointOrg.setY(0);
     mouseCursorPos.setX(0);
     mouseCursorPos.setY(0);
     _draw=false;
@@ -51,12 +53,17 @@ FrameLabel::FrameLabel(QWidget *parent) :
     mouseData.rightButtonRelease=false;
     createContextMenu();
     setFocusPolicy(Qt::StrongFocus);
+    _color = QColor(Qt::transparent);
 }
 
 void FrameLabel::mouseMoveEvent(QMouseEvent *ev)
 {
+    if(_image.isNull())
+        return;
     // Save mouse cursor position
-    setMouseCursorPos(ev->pos());
+    QPoint tmpPoint = ev->pos();
+    setMouseCursorPos(tmpPoint);
+
     // Update box width and height if box drawing is in progress
     if(_draw)
     {
@@ -64,7 +71,7 @@ void FrameLabel::mouseMoveEvent(QMouseEvent *ev)
         {
         case nooba::lineDraw:
         {
-            drawingLine.setP2(getMouseCursorPos());
+            drawingLine.setP2(toOriginalImage(tmpPoint));
             break;
         }
         default:
@@ -92,8 +99,15 @@ void FrameLabel::setDrawMode(const QString &varName, const QColor &color, nooba:
     _color  = color;
 }
 
+void FrameLabel::setImage(const QImage &image)
+{
+    _image = image;
+}
+
 void FrameLabel::mouseReleaseEvent(QMouseEvent *ev)
 {
+    if(_image.isNull())
+        return;
     // Update cursor position
     setMouseCursorPos(ev->pos());
     // On left mouse button release
@@ -127,6 +141,8 @@ void FrameLabel::mouseReleaseEvent(QMouseEvent *ev)
 
 void FrameLabel::mousePressEvent(QMouseEvent *ev)
 {
+    if(_image.isNull())
+        return;
     // Update cursor position
     setMouseCursorPos(ev->pos());;
     if(ev->button()==Qt::LeftButton)
@@ -134,7 +150,10 @@ void FrameLabel::mousePressEvent(QMouseEvent *ev)
         // Start drawing box
         if(_varName.isEmpty())
             return;
-        startPoint=ev->pos();
+        QPoint p1 = ev->pos();
+
+        // start point relative to original image.
+        startPointOrg= toOriginalImage(p1);
         switch(_drawMode)
         {
         case nooba::lineDraw:
@@ -144,20 +163,20 @@ void FrameLabel::mousePressEvent(QMouseEvent *ev)
             {
                 if(drawingLine.isNull())
                 {
-                    drawingLine = QLine(startPoint, startPoint);
+                    drawingLine = QLine(startPointOrg, startPointOrg);
                 }
               }
             else
             {
                 drawingLine =s_l._line;
             }
-            drawingLine.setPoints(startPoint, startPoint);
+            drawingLine.setPoints(startPointOrg, startPointOrg);
             _draw=true;
             break;
         }
         case nooba::boxDraw:
         {
-            box = new QRect(startPoint.x(),startPoint.y(),0,0);
+            box = new QRect(startPointOrg.x(),startPointOrg.y(),0,0);
             _draw = true;
             break;
         }
@@ -170,23 +189,26 @@ void FrameLabel::mousePressEvent(QMouseEvent *ev)
 void FrameLabel::paintEvent(QPaintEvent *ev)
 {
     QLabel::paintEvent(ev);
+    if(_image.isNull())
+        return;
     QPainter painter(this);
 
-    foreach(_S_Line s_l, _lineMap)
+    if(_showSketches)
     {
-        painter.setPen(s_l._color);
-        painter.drawLine(s_l._line);
+        foreach(_S_Line s_l, _lineMap)
+        {
+            painter.setPen(s_l._color);
+            painter.drawLine(toCurrentImage(s_l._line));
+        }
     }
     painter.setPen(_color);
-    painter.drawLine(drawingLine);
+    painter.drawLine(toCurrentImage(drawingLine));
 }
 
 void FrameLabel::keyReleaseEvent(QKeyEvent *event)
 {
-    qDebug("key release event");
     if(event->key() == Qt::Key_Return)
     {
-        qDebug("enter event");
         switch(_drawMode)
         {
         case nooba::lineDraw:
@@ -208,7 +230,31 @@ void FrameLabel::keyReleaseEvent(QKeyEvent *event)
     }
 }
 
+void FrameLabel::resizeEvent(QResizeEvent *event)
+{
+    if(drawingLine.isNull())
+        return;
+
+    qDebug() << drawingLine.dx();
+}
+
 void FrameLabel::createContextMenu()
 {
 
+}
+
+QPoint FrameLabel::toOriginalImage(const QPoint &c_p)
+{
+    return QPoint((c_p.x() * _image.width())/ width(), (c_p.y() * _image.height())/height());
+
+}
+
+QPoint FrameLabel::toCurrentImage(const QPoint &o_p)
+{
+    return QPoint((o_p.x() * width()) / _image.width(), (o_p.y() * height()) / _image.height());
+}
+
+QLine FrameLabel::toCurrentImage(const QLine &o_l)
+{
+    return QLine(toCurrentImage(o_l.p1()), toCurrentImage(o_l.p2()));
 }

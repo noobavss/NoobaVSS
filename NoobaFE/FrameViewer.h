@@ -46,6 +46,7 @@ private slots:
 
     void onToolMenuItemSelected();
     void onLineParamChanged(const QLine& line);
+    void onShowHideButtonChecked(bool isChecked);
 
     void mousePressEvent(QMouseEvent *event);
 private:
@@ -59,6 +60,7 @@ private:
     QColor                  _color;
     QMap<QString, QColor>   _lineColorMap;
     QPropertyAnimation      _propertyAnimation;
+
 };
 
 #endif // VIDOUTPUTSUBWIND_H

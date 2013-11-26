@@ -16,6 +16,8 @@ FrameViewer::FrameViewer(const QString &title, QWidget *parent) :
     ui->setupUi(this);    
     ui->canvas->setProperty("canvas", true);    // for use with style sheet styling
     setWindowTitle(_title);
+    onShowHideButtonChecked(ui->showHideButton->isChecked());
+
     // show video in center
     ui->drawLineToolButton->setDisabled(true);
     ui->canvas->setAlignment(Qt::AlignCenter);
@@ -73,6 +75,7 @@ bool FrameViewer::updateFrame(QImage in)
 
     _pixmap = QPixmap::fromImage(in);
     ui->canvas->setPixmap(_pixmap.scaled(ui->canvasBorder->size(), Qt::KeepAspectRatio));
+    ui->canvas->setImage(in);
     return true;
 }
 
@@ -132,6 +135,19 @@ void FrameViewer::onToolMenuItemSelected()
 void FrameViewer::onLineParamChanged(const QLine &line)
 {
     emit lineParamChanged(_activeVarName, _title, line);
+}
+
+void FrameViewer::onShowHideButtonChecked(bool isChecked)
+{
+    ui->canvas->setShowSketches(isChecked);
+    if(ui->showHideButton->isChecked())
+    {
+        ui->showHideButton->setToolTip(tr("hide sketches"));
+    }
+    else
+    {
+        ui->showHideButton->setToolTip((tr("show sketches")));
+    }
 }
 
 void FrameViewer::mousePressEvent(QMouseEvent *event)

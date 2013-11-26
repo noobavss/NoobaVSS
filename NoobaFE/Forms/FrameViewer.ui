@@ -107,6 +107,23 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QToolButton" name="showHideButton">
+        <property name="toolTip">
+         <string>show/hide sketches</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../Resources/mainwind.qrc">
+          <normaloff>:/Resources/show_hide.png</normaloff>:/Resources/show_hide.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -212,5 +229,25 @@
  <resources>
   <include location="../Resources/mainwind.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>showHideButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>FrameViewer</receiver>
+   <slot>onShowHideButtonChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>340</x>
+     <y>12</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>449</x>
+     <y>21</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onShowHideButtonChecked(bool)</slot>
+ </slots>
 </ui>

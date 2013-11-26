@@ -66,7 +66,9 @@ class FrameLabel : public QLabel
         QPoint getMouseCursorPos();
         void setDrawMode(const QString& varName, const QColor& color, nooba::DrawMode drawMode);
         nooba::DrawMode getDrawMode() const { return _drawMode; }
+        void setImage(const QImage& image);
         QMenu *menu;
+        void setShowSketches(bool showSketches) { _showSketches = showSketches; }
 
     private:
         struct _S_Line
@@ -81,17 +83,22 @@ class FrameLabel : public QLabel
         };
 
         void createContextMenu();
+        inline QPoint toOriginalImage(const QPoint& c_p);
+        inline QPoint toCurrentImage(const QPoint& o_p);
+        inline QLine toCurrentImage(const QLine& o_l);
 
         MouseData               mouseData;
-        QPoint                  startPoint;
+        QPoint                  startPointOrg;
         QPoint                  mouseCursorPos;
         bool                    _draw;
+        bool                    _showSketches;
         QRect                   *box;
         QLine                   drawingLine;
         nooba::DrawMode         _drawMode;
         QString                 _varName;
         QColor                  _color;
         QMap<QString, _S_Line>  _lineMap;
+        QImage                  _image;
 
     protected:
         void mouseMoveEvent(QMouseEvent *ev);
@@ -99,6 +106,7 @@ class FrameLabel : public QLabel
         void mouseReleaseEvent(QMouseEvent *ev);
         void paintEvent(QPaintEvent *ev);
         void keyReleaseEvent(QKeyEvent *event);
+        void resizeEvent(QResizeEvent *event);
 
     signals:
         void newMouseData(struct MouseData mouseData);
