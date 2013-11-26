@@ -28,8 +28,8 @@ FrameViewer::FrameViewer(const QString &title, QWidget *parent) :
     _propertyAnimation.setTargetObject(this);
     _propertyAnimation.setPropertyName("bgColor");
     _propertyAnimation.setDuration(1500);
-    _propertyAnimation.setStartValue(QColor(91, 91, 91));
-    _propertyAnimation.setEndValue(QColor(91,91,91));
+    _propertyAnimation.setStartValue(QColor(0,0,0));
+    _propertyAnimation.setEndValue(QColor(0,0,0));
 //    _propertyAnimation.setEasingCurve(QEasingCurve::OutCubic);
 }
 
@@ -74,7 +74,7 @@ bool FrameViewer::updateFrame(QImage in)
         return false;
 
     _pixmap = QPixmap::fromImage(in);
-    ui->canvas->setPixmap(_pixmap.scaled(ui->canvasBorder->size(), Qt::KeepAspectRatio));
+    ui->canvas->setPixmap(_pixmap.scaled(ui->canvas->size(), Qt::KeepAspectRatio));
     ui->canvas->setImage(in);
     return true;
 }

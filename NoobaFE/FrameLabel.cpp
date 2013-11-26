@@ -61,7 +61,7 @@ void FrameLabel::mouseMoveEvent(QMouseEvent *ev)
     if(_image.isNull())
         return;
     // Save mouse cursor position
-    QPoint tmpPoint = ev->pos();
+    QPointF tmpPoint = ev->pos();
     setMouseCursorPos(tmpPoint);
 
     // Update box width and height if box drawing is in progress
@@ -82,12 +82,12 @@ void FrameLabel::mouseMoveEvent(QMouseEvent *ev)
     emit onMouseMoveEvent();
 }
 
-void FrameLabel::setMouseCursorPos(QPoint input)
+void FrameLabel::setMouseCursorPos(QPointF input)
 {
     mouseCursorPos=input;
 }
 
-QPoint FrameLabel::getMouseCursorPos()
+QPointF FrameLabel::getMouseCursorPos()
 {
     return mouseCursorPos;
 }
@@ -110,6 +110,7 @@ void FrameLabel::mouseReleaseEvent(QMouseEvent *ev)
         return;
     // Update cursor position
     setMouseCursorPos(ev->pos());
+    qDebug() << getMouseCursorPos() << Q_FUNC_INFO;
     // On left mouse button release
     if(ev->button()==Qt::LeftButton)
     {
@@ -129,7 +130,7 @@ void FrameLabel::mouseReleaseEvent(QMouseEvent *ev)
         _draw=false;
         _varName.clear();
         _drawMode = nooba::noDraw;
-        drawingLine = QLine();
+        drawingLine = QLineF();
         _color = QColor(Qt::transparent);
         //        else
         //        {
@@ -145,15 +146,18 @@ void FrameLabel::mousePressEvent(QMouseEvent *ev)
         return;
     // Update cursor position
     setMouseCursorPos(ev->pos());;
+
     if(ev->button()==Qt::LeftButton)
     {
         // Start drawing box
         if(_varName.isEmpty())
             return;
-        QPoint p1 = ev->pos();
+        QPointF p1 = ev->pos();
 
         // start point relative to original image.
         startPointOrg= toOriginalImage(p1);
+        qDebug() << p1 << Q_FUNC_INFO;
+        qDebug() << "org" << startPointOrg << Q_FUNC_INFO;
         switch(_drawMode)
         {
         case nooba::lineDraw:
@@ -163,7 +167,7 @@ void FrameLabel::mousePressEvent(QMouseEvent *ev)
             {
                 if(drawingLine.isNull())
                 {
-                    drawingLine = QLine(startPointOrg, startPointOrg);
+                    drawingLine = QLineF(startPointOrg, startPointOrg);
                 }
               }
             else
@@ -215,8 +219,8 @@ void FrameLabel::keyReleaseEvent(QKeyEvent *event)
         {
             _lineMap.insert(_varName, _S_Line(drawingLine, _color));
             _varName.clear();
-            emit lineUpdated(drawingLine);
-            drawingLine = QLine();
+            emit lineUpdated(drawingLine.toLine());
+            drawingLine = QLineF();
         }
         default:
             break;
@@ -243,18 +247,18 @@ void FrameLabel::createContextMenu()
 
 }
 
-QPoint FrameLabel::toOriginalImage(const QPoint &c_p)
+QPointF FrameLabel::toOriginalImage(const QPointF &c_p)
 {
-    return QPoint((c_p.x() * _image.width())/ width(), (c_p.y() * _image.height())/height());
+    return QPointF((c_p.x() * _image.width())/ width(), (c_p.y() * _image.height())/height());
 
 }
 
-QPoint FrameLabel::toCurrentImage(const QPoint &o_p)
+QPointF FrameLabel::toCurrentImage(const QPointF& o_p)
 {
-    return QPoint((o_p.x() * width()) / _image.width(), (o_p.y() * height()) / _image.height());
+    return QPointF((o_p.x() * width()) / _image.width(), (o_p.y() * height()) / _image.height());
 }
 
-QLine FrameLabel::toCurrentImage(const QLine &o_l)
+QLineF FrameLabel::toCurrentImage(const QLineF &o_l)
 {
-    return QLine(toCurrentImage(o_l.p1()), toCurrentImage(o_l.p2()));
+    return QLineF(toCurrentImage(o_l.p1()), toCurrentImage(o_l.p2()));
 }

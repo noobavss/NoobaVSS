@@ -146,7 +146,7 @@
        <number>0</number>
       </property>
       <item>
-       <layout class="QGridLayout" name="gridLayout">
+       <layout class="QGridLayout" name="gridLayout" rowstretch="0,1,0" columnstretch="0,1,0">
         <item row="1" column="0">
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
