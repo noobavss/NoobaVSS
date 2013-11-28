@@ -241,7 +241,7 @@ void CameraView::configurePlugins()
     if(_vidState == nooba::PlayingState)
         setVideoState(nooba::PausedState);
 
-    PluginsConfigUI pluginConfUi(*pl);
+    PluginsConfigUI pluginConfUi(*pl, this);
     pluginConfUi.exec();
 
     //    setVideoState(state);

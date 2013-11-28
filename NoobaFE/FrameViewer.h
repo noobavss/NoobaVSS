@@ -56,7 +56,6 @@ private:
     QMenu                   *_menu;
     const QString           _title;
     QString                 _activeVarName;
-    QPixmap                 _pixmap;
     QColor                  _color;
     QMap<QString, QColor>   _lineColorMap;
     QPropertyAnimation      _propertyAnimation;

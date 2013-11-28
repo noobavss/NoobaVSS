@@ -100,9 +100,12 @@ void FrameLabel::setDrawMode(const QString &varName, const QColor &color, nooba:
     _color  = color;
 }
 
-void FrameLabel::setImage(const QImage &image)
+void FrameLabel::setImage(const QImage& image)
 {
     _image = image;
+    _pixmap = QPixmap::fromImage(_image);
+    setPixmap(_pixmap.scaled(size(), Qt::KeepAspectRatio));
+    update();
 }
 
 QSize FrameLabel::sizeHint()
@@ -134,18 +137,11 @@ void FrameLabel::mouseReleaseEvent(QMouseEvent *ev)
     // On right mouse button release
     else if(ev->button()==Qt::RightButton)
     {
-        // If user presses (and then releases) the right mouse button while drawing box, stop drawing box
-
         _draw=false;
         _varName.clear();
         _drawMode = nooba::noDraw;
         drawingLine = QLineF();
         _color = QColor(Qt::transparent);
-        //        else
-        //        {
-//            // Show context menu
-//            menu->exec(ev->globalPos());
-//        }
     }
 }
 
@@ -230,6 +226,7 @@ void FrameLabel::keyReleaseEvent(QKeyEvent *event)
             _varName.clear();
             emit lineUpdated(drawingLine.toLine());
             drawingLine = QLineF();
+            _color = QColor(Qt::transparent);
         }
         default:
             break;
@@ -245,10 +242,11 @@ void FrameLabel::keyReleaseEvent(QKeyEvent *event)
 
 void FrameLabel::resizeEvent(QResizeEvent *event)
 {
-    if(drawingLine.isNull())
+    if(_pixmap.isNull())
         return;
 
-    qDebug() << drawingLine.dx();
+    setPixmap(_pixmap.scaled(event->size(), Qt::KeepAspectRatio));
+    update();
 }
 
 void FrameLabel::createContextMenu()

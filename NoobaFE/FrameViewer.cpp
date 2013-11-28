@@ -71,21 +71,13 @@ bool FrameViewer::updateFrame(QImage in)
 {
     if(in.isNull())
         return false;
-
-    _pixmap = QPixmap::fromImage(in);
-    ui->canvas->setPixmap(_pixmap.scaled(ui->canvas->size(), Qt::KeepAspectRatio));
     ui->canvas->setImage(in);
-    update();
     return true;
 }
 
 void FrameViewer::resizeEvent(QResizeEvent *event)
 {
-    if(_pixmap.isNull())
-        return;
-
-    ui->canvas->setPixmap(_pixmap.scaled(event->size(), Qt::KeepAspectRatio));
-    update();
+    ui->canvas->resize(event->size() - QSize(9,9));
 }
 
 void FrameViewer::setVisibility(bool isVisible)
@@ -169,7 +161,3 @@ void FrameViewer::mousePressEvent(QMouseEvent *event)
     stopAlert();
     return;
 }
-
-
-
-

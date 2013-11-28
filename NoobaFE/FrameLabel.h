@@ -100,6 +100,7 @@ class FrameLabel : public QLabel
         QColor                  _color;
         QMap<QString, _S_Line>  _lineMap;
         QImage                  _image;
+        QPixmap                 _pixmap;
 
     protected:
         void mouseMoveEvent(QMouseEvent *ev);
