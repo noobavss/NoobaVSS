@@ -44,6 +44,7 @@ FrameLabel::FrameLabel(QWidget *parent) :
     _color(Qt::transparent)
 {
     setMouseTracking(true);
+//    setScaledContents(true);
     startPointOrg.setX(0);
     startPointOrg.setY(0);
     mouseCursorPos.setX(0);
@@ -102,6 +103,14 @@ void FrameLabel::setDrawMode(const QString &varName, const QColor &color, nooba:
 void FrameLabel::setImage(const QImage &image)
 {
     _image = image;
+}
+
+QSize FrameLabel::sizeHint()
+{
+    if(_image.isNull())
+        return QSize();
+
+    return QSize(_image.width(), _image.height());
 }
 
 void FrameLabel::mouseReleaseEvent(QMouseEvent *ev)
@@ -249,7 +258,7 @@ void FrameLabel::createContextMenu()
 
 QPointF FrameLabel::toOriginalImage(const QPointF &c_p)
 {
-    return QPointF((c_p.x() * _image.width())/ width(), (c_p.y() * _image.height())/height());
+    return QPointF((c_p.x() * _image.width())/ width(), (c_p.y() * _image.height())/ height());
 
 }
 

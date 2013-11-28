@@ -17,7 +17,6 @@ FrameViewer::FrameViewer(const QString &title, QWidget *parent) :
     ui->canvas->setProperty("canvas", true);    // for use with style sheet styling
     setWindowTitle(_title);
     onShowHideButtonChecked(ui->showHideButton->isChecked());
-
     // show video in center
     ui->drawLineToolButton->setDisabled(true);
     ui->canvas->setAlignment(Qt::AlignCenter);
@@ -76,6 +75,7 @@ bool FrameViewer::updateFrame(QImage in)
     _pixmap = QPixmap::fromImage(in);
     ui->canvas->setPixmap(_pixmap.scaled(ui->canvas->size(), Qt::KeepAspectRatio));
     ui->canvas->setImage(in);
+    update();
     return true;
 }
 
@@ -83,7 +83,9 @@ void FrameViewer::resizeEvent(QResizeEvent *event)
 {
     if(_pixmap.isNull())
         return;
+
     ui->canvas->setPixmap(_pixmap.scaled(event->size(), Qt::KeepAspectRatio));
+    update();
 }
 
 void FrameViewer::setVisibility(bool isVisible)
@@ -94,6 +96,7 @@ void FrameViewer::setVisibility(bool isVisible)
 
 void FrameViewer::triggerAlert(nooba::AlertType alert)
 {
+    stopAlert();    // stop any previous alert
     switch (alert) {
     case nooba::RedAlert:
         _propertyAnimation.setKeyValueAt(0.4, QColor(Qt::red));
@@ -150,11 +153,21 @@ void FrameViewer::onShowHideButtonChecked(bool isChecked)
     }
 }
 
+void FrameViewer::stopAlert()
+{
+    setCanvasBGColor(QColor(91,91,91));
+    if(_propertyAnimation.state() == QAbstractAnimation::Stopped)
+        return;
+
+    _propertyAnimation.stop();
+    return;
+}
+
 void FrameViewer::mousePressEvent(QMouseEvent *event)
 {
-//    _propertyAnimation.
-    _propertyAnimation.stop();
-    setCanvasBGColor(QColor(91,91,91));
+    Q_UNUSED(event)
+    stopAlert();
+    return;
 }
 
 

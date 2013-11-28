@@ -47,7 +47,7 @@ private slots:
     void onToolMenuItemSelected();
     void onLineParamChanged(const QLine& line);
     void onShowHideButtonChecked(bool isChecked);
-
+    void stopAlert();
     void mousePressEvent(QMouseEvent *event);
 private:
 

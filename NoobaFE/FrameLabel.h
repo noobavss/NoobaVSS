@@ -69,6 +69,7 @@ class FrameLabel : public QLabel
         void setImage(const QImage& image);
         QMenu *menu;
         void setShowSketches(bool showSketches) { _showSketches = showSketches; }
+        QSize sizeHint();
 
     private:
         struct _S_Line
