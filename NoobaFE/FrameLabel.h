@@ -62,43 +62,45 @@ class FrameLabel : public QLabel
 
     public:
         FrameLabel(QWidget *parent = 0);
-        void setMouseCursorPos(QPoint);
-        QPoint getMouseCursorPos();
+        void setMouseCursorPos(QPointF);
+        QPointF getMouseCursorPos();
         void setDrawMode(const QString& varName, const QColor& color, nooba::DrawMode drawMode);
         nooba::DrawMode getDrawMode() const { return _drawMode; }
         void setImage(const QImage& image);
         QMenu *menu;
         void setShowSketches(bool showSketches) { _showSketches = showSketches; }
+        QSize sizeHint();
 
     private:
         struct _S_Line
         {
             _S_Line() {}
 
-            _S_Line(const QLine& line, const QColor& color):
+            _S_Line(const QLineF& line, const QColor& color):
                 _line(line), _color(color) {}
 
-            QLine   _line;
+            QLineF   _line;
             QColor  _color;
         };
 
         void createContextMenu();
-        inline QPoint toOriginalImage(const QPoint& c_p);
-        inline QPoint toCurrentImage(const QPoint& o_p);
-        inline QLine toCurrentImage(const QLine& o_l);
+        inline QPointF toOriginalImage(const QPointF& c_p);
+        inline QPointF toCurrentImage(const QPointF& o_p);
+        inline QLineF toCurrentImage(const QLineF& o_l);
 
         MouseData               mouseData;
-        QPoint                  startPointOrg;
-        QPoint                  mouseCursorPos;
+        QPointF                 startPointOrg;
+        QPointF                 mouseCursorPos;
         bool                    _draw;
         bool                    _showSketches;
         QRect                   *box;
-        QLine                   drawingLine;
+        QLineF                  drawingLine;
         nooba::DrawMode         _drawMode;
         QString                 _varName;
         QColor                  _color;
         QMap<QString, _S_Line>  _lineMap;
         QImage                  _image;
+        QPixmap                 _pixmap;
 
     protected:
         void mouseMoveEvent(QMouseEvent *ev);

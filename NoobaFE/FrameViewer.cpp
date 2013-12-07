@@ -1,3 +1,24 @@
+/**
+    @author  Asitha Nanayakkara <daun07@gmail.com>
+
+    @section LICENSE
+    Nooba Plugin API source file
+    Copyright (C) 2013 Developed by Team Nooba
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "FrameViewer.h"
 #include "ui_FrameViewer.h"
 // Qt
@@ -17,7 +38,6 @@ FrameViewer::FrameViewer(const QString &title, QWidget *parent) :
     ui->canvas->setProperty("canvas", true);    // for use with style sheet styling
     setWindowTitle(_title);
     onShowHideButtonChecked(ui->showHideButton->isChecked());
-
     // show video in center
     ui->drawLineToolButton->setDisabled(true);
     ui->canvas->setAlignment(Qt::AlignCenter);
@@ -28,8 +48,8 @@ FrameViewer::FrameViewer(const QString &title, QWidget *parent) :
     _propertyAnimation.setTargetObject(this);
     _propertyAnimation.setPropertyName("bgColor");
     _propertyAnimation.setDuration(1500);
-    _propertyAnimation.setStartValue(QColor(91, 91, 91));
-    _propertyAnimation.setEndValue(QColor(91,91,91));
+    _propertyAnimation.setStartValue(QColor(0,0,0));
+    _propertyAnimation.setEndValue(QColor(0,0,0));
 //    _propertyAnimation.setEasingCurve(QEasingCurve::OutCubic);
 }
 
@@ -72,18 +92,13 @@ bool FrameViewer::updateFrame(QImage in)
 {
     if(in.isNull())
         return false;
-
-    _pixmap = QPixmap::fromImage(in);
-    ui->canvas->setPixmap(_pixmap.scaled(ui->canvasBorder->size(), Qt::KeepAspectRatio));
     ui->canvas->setImage(in);
     return true;
 }
 
 void FrameViewer::resizeEvent(QResizeEvent *event)
 {
-    if(_pixmap.isNull())
-        return;
-    ui->canvas->setPixmap(_pixmap.scaled(event->size(), Qt::KeepAspectRatio));
+    ui->canvas->resize(event->size() - QSize(9,9));
 }
 
 void FrameViewer::setVisibility(bool isVisible)
@@ -94,6 +109,7 @@ void FrameViewer::setVisibility(bool isVisible)
 
 void FrameViewer::triggerAlert(nooba::AlertType alert)
 {
+    stopAlert();    // stop any previous alert
     switch (alert) {
     case nooba::RedAlert:
         _propertyAnimation.setKeyValueAt(0.4, QColor(Qt::red));
@@ -150,13 +166,19 @@ void FrameViewer::onShowHideButtonChecked(bool isChecked)
     }
 }
 
-void FrameViewer::mousePressEvent(QMouseEvent *event)
+void FrameViewer::stopAlert()
 {
-//    _propertyAnimation.
-    _propertyAnimation.stop();
     setCanvasBGColor(QColor(91,91,91));
+    if(_propertyAnimation.state() == QAbstractAnimation::Stopped)
+        return;
+
+    _propertyAnimation.stop();
+    return;
 }
 
-
-
-
+void FrameViewer::mousePressEvent(QMouseEvent *event)
+{
+    Q_UNUSED(event)
+    stopAlert();
+    return;
+}
