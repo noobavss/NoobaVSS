@@ -15,8 +15,9 @@
 PluginLoader::PluginLoader(QObject *parent)
 	: QObject(parent),
     _basePlugin(NULL),
-    _dir("plugins")
+    _dir(QApplication::applicationDirPath())
 {
+    _dir.cd("plugins");
     // init plugin loader
     loadPluginInfo();
 }
