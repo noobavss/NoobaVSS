@@ -61,7 +61,7 @@ public:
 
 public slots:
 
-    bool connectToCamera();
+    bool connectToCamera(int deviceNumber);
     bool connectToVideoFileStream();
     void on_controlButton_clicked();
     void configurePlugins();

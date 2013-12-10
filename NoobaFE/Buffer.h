@@ -81,15 +81,17 @@ template<class T> void Buffer<T>::add(const T& data, bool dropIfFull)
     if(dropIfFull)
     {
         // Try and acquire semaphore to add item
-        if(freeSlots->tryAcquire())
+        if(!freeSlots->tryAcquire())
         {
-            // Add item to queue
-            queueProtect.lock();
-            queue.enqueue(data);
-            queueProtect.unlock();
-            // Release semaphore
-            usedSlots->release();
+            get();
         }
+
+        // Add item to queue
+        queueProtect.lock();
+        queue.enqueue(data);
+        queueProtect.unlock();
+        // Release semaphore
+        usedSlots->release();
     }
     // If buffer is full, wait on semaphore
     else

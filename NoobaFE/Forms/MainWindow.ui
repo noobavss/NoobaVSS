@@ -158,7 +158,7 @@
      <normaloff>:/Resources/super-mono-iconset/web-cam.png</normaloff>:/Resources/super-mono-iconset/web-cam.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Web Cam</string>
+    <string>&amp;Capture Device</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>

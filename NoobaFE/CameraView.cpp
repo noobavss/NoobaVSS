@@ -105,9 +105,9 @@ CameraView::~CameraView()
     return;
 }
 
-bool CameraView::connectToCamera()
+bool CameraView::connectToCamera(int deviceNumber)
 {
-    _deviceNumber = 0;
+    _deviceNumber = deviceNumber;
     setupSharedBufferForNewDevice();
 
     setWindowTitle(tr("Camera View [ %1 ]").arg(_deviceNumber));
@@ -118,7 +118,7 @@ bool CameraView::connectToCamera()
     if(!_captureThread->connectToCamera())
     {
         QMessageBox errMsg;
-        errMsg.setText(tr("Failed to open web-cam"));
+        errMsg.setText(tr("Failed to open capture device [device number: %1 ]").arg(deviceNumber));
         errMsg.setIcon(QMessageBox::Critical);
         errMsg.exec();
         return false;

@@ -24,10 +24,11 @@
 
 //Qt
 #include <QPalette>
+#include <QDebug>
 
 StatPanel::StatPanel(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::StatPanel)
+    ui(new Ui::statPanel)
 {
     ui->setupUi(this);
     ui->imageBufferBar->setValue(0);
@@ -36,6 +37,7 @@ StatPanel::StatPanel(QWidget *parent) :
     ui->processingRateLabel->setText("");
     ui->deviceNumberLabel->setText("");
     ui->cameraResolutionLabel->setText("");
+    setObjectName("statPanel");     // for use in style sheets
 }
 
 StatPanel::~StatPanel()

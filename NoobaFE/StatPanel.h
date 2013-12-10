@@ -25,7 +25,7 @@
 #include <QWidget>
 
 namespace Ui {
-class StatPanel;
+class statPanel;
 }
 
 class StatPanel : public QWidget
@@ -46,7 +46,7 @@ public:
     void setImageBufferBarSize(int min, int max);
 
 private:
-    Ui::StatPanel *ui;
+    Ui::statPanel *ui;
 };
 
 #endif // STATPANEL_H

@@ -5,7 +5,14 @@ QWidget#canvasBorder { background-color: rgb(91, 91, 91); }
 
 * { outline: none; }
 
-QFrame#viewerToolBar {
+QWidget#statPanel
+{
+    background-color: #303030;
+    color: white;
+}
+
+QFrame#viewerToolBar
+{
     background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                         stop:0 #a0a0a0, stop:1 #808080);
 }
@@ -24,8 +31,8 @@ QFrame#toolbar > QToolButton
     background-color: transparent;
 }
 
-QFrame#toolbar > QToolButton:checked {
-
+QFrame#toolbar > QToolButton:checked
+{
     background-color: rgba(90,90,90, 150);
 }
 
@@ -34,11 +41,12 @@ QFrame#toolbar > QToolButton:hover
     background-color: rgba(255,155,0, 200);
 }
 
-QStatusBar {
+QStatusBar
+{
     background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                        stop:0 #606060, stop:1 #303030);
     color: white;
- }
+}
 
 QTreeView
 {
@@ -46,13 +54,15 @@ QTreeView
     border-top: none;
 }
 
-QDockWidget {
+QDockWidget
+{
     border: 2px solid #606060;
 /*    color: #308cc6;*/
     color: #003cab;
 }
 
-QDockWidget::title {
+QDockWidget::title
+{
     text-align: left; /* align the text to the left */
     background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                     stop:0 #fcfcfc, stop:1 #f1f1f1);
@@ -60,7 +70,8 @@ QDockWidget::title {
     color: white;
 }
 
-QMainWindow::separator {
+QMainWindow::separator
+{
     background: black;
     width: 1px; /* when vertical */
     height: 1px; /* when horizontal */
@@ -72,14 +83,16 @@ QMenu {
      margin: 2px; /* some spacing around the menu */
  }
 
- QMenu::item {
+ QMenu::item
+ {
      padding: 2px 25px 2px 20px;
      border: none;/* reserve space for selection border
 
    /*  border-radius: 2px; */
  }
 
- QMenu::item:selected {
+ QMenu::item:selected
+ {
      border-color: none;
      background: #308cc6;
      color: white;
@@ -97,14 +110,16 @@ QMenu {
      left: 1px;
  }
 
- QMenu::separator {
+ QMenu::separator
+ {
      height: 2px;
      background: lightblue;
      margin-left: 10px;
      margin-right: 5px;
  }
 
- QMenu::indicator {
+ QMenu::indicator
+ {
      width: 13px;
      height: 13px;
  }
@@ -202,3 +217,11 @@ QTabBar::tab:selected {
     border-color: #9B9B9B;
     border-bottom-color: #308cc6; /* same as pane color */
 }
+
+QTreeView::item {
+    height: 22px;
+}
+
+
+
+

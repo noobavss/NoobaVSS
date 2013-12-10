@@ -24,6 +24,7 @@
 #include "PluginsConfigUI.h"
 #include "NoobaPlugin.h"
 #include "ParamConfigWind.h"
+#include "CameraView.h"
 
 // Qt includes
 #if QT_VERSION >= 0x050000
@@ -39,7 +40,7 @@
 #include <QVBoxLayout>
 #include <QDateTime>
 #include <QMapIterator>
-#include <CameraView.h>
+#include <QInputDialog>
 
 // opencv includes
 #include <opencv2/highgui/highgui.hpp>
@@ -102,7 +103,17 @@ void MainWindow::onOpenWebCam()
         return;
 
     CameraView* camView = new CameraView(_sharedImageBuffer);
-    if(camView->connectToCamera())
+    bool ok;
+    int deviceNumber = QInputDialog::getInt(this, tr("Device Number"),
+                                      tr("Device number of the capture device <br>[web cam is usually 0]"),
+                                      0, 0, 999,1, &ok);
+    if(!ok)
+    {
+        delete camView;
+        return;
+    }
+
+    if(camView->connectToCamera(deviceNumber))
     {
         addNewSourceTab(camView);
         ui->statusBar->showMessage(tr("Web cam is set as default input source."));
