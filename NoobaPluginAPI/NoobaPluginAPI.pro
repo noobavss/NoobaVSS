@@ -9,10 +9,10 @@ QT       += core gui
 TEMPLATE = lib
 CONFIG += staticlib
 
-win32:TEMPLATE = vclib
+#win32:TEMPLATE = vclib
 
-CONFIG(debug, debug|release):    message(Debug build!)
-CONFIG(release, debug|release):    message(Release build!)
+CONFIG(debug, debug|release):    message(API Debug build!)
+CONFIG(release, debug|release):    message(API Release build!)
 
 CONFIG(release, debug|release): TARGET = NoobaPluginAPI
 CONFIG(debug, debug|release): TARGET = NoobaPluginAPId

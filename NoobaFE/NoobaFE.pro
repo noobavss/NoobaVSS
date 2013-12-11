@@ -7,8 +7,8 @@ TEMPLATE = app
 QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG(debug, debug|release): message(Debug build!)
-CONFIG(release, debug|release): message(Release build!)
+CONFIG(debug, debug|release): message(FE Debug build!)
+CONFIG(release, debug|release): message(FE Release build!)
 
 CONFIG(debug, debug|release): TARGET = NoobaVSS_Debug
 CONFIG(release, debug|release): TARGET = NoobaVSS_Release
@@ -16,7 +16,7 @@ CONFIG(release, debug|release): TARGET = NoobaVSS_Release
 CONFIG(debug, debug|release): DESTDIR = ../../NoobaVSS_build/NoobaFE/Debug/
 CONFIG(release, debug|release): DESTDIR = ../../NoobaVSS_build/NoobaFE/Release/
 
-win32:TEMPLATE = vcapp
+#win32:TEMPLATE = vcapp
 
 # Input
 HEADERS += \
@@ -82,6 +82,13 @@ CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../NoobaVSS_build/NoobaPl
 
 win32{
     # need to put win32 opencv lib paths
+    INCLUDEPATH += $$OUT_PWD/../../OpenCV244/release/include
+    LIBS += -L$$OUT_PWD/../../OpenCV244/release/lib \
+    -lopencv_core244.dll \
+    -lopencv_highgui244.dll \
+    -lopencv_imgproc244.dll \
+    -lopencv_features2d244.dll \
+    -lopencv_calib3d244.dll
 }
 
 INCLUDEPATH += $$PWD/../NoobaPluginAPI
