@@ -164,7 +164,7 @@ signals:
 
 private:
 
-    inline bool versionCheckOk(NoobaPluginAPIBase* apiBase, const QString &filename, QString &errStr);
+    inline bool versionCheckOk(NoobaPluginAPI *api, const QString &filename, QString &errStr);
     inline QString getPluginAlias(const QString &pluginName);
     inline void updatePluginConnection(PluginConnData* pcd, bool isConnect);
     void updateBasePlugin(NoobaPlugin *pluginToBeRemoved);

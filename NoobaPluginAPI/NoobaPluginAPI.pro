@@ -20,19 +20,21 @@ CONFIG(debug, debug|release): TARGET = NoobaPluginAPId
 CONFIG(debug, debug|release):DESTDIR = $$PWD/../../NoobaVSS_build/NoobaPluginAPI/Debug/
 CONFIG(release, debug|release):DESTDIR = $$PWD/../../NoobaVSS_build/NoobaPluginAPI/Release/
 
-unix {
-    CONFIG += link_pkgconfig
-    PKGCONFIG += opencv
-}
-
 DEFINES += NOOBAPLUGINAPI_LIBRARY
 
 SOURCES += \
     noobapluginbase.cpp \
     noobapluginbaseprivate.cpp \
-    noobapluginapi.cpp
+    noobapluginapi.cpp \
+    procparams.cpp \
+    pluginpassdata.cpp \
+    plugininfo.cpp
 
 HEADERS += noobapluginapi.h\
         NoobaPluginAPI_global.h \
     noobapluginbase.h \
-    noobapluginbaseprivate.h
+    noobapluginbaseprivate.h \
+    nooba.h \
+    procparams.h \
+    pluginpassdata.h \
+    plugininfo.h

@@ -3,8 +3,7 @@
 
 #include <QObject>
 
-#define API_MAJOR_VERSION   0
-#define API_MINOR_VERSION   12
+
 
 class NoobaPluginAPIBasePrivate;
 
@@ -14,8 +13,7 @@ class NoobaPluginAPIBase: public QObject
 
 public:
 
-    static int APIMajorVersion() { return API_MAJOR_VERSION; }
-    static int APIMinorVersion() { return API_MINOR_VERSION; }
+
 
 protected:
 
@@ -28,4 +26,5 @@ private:
     Q_DECLARE_PRIVATE(NoobaPluginAPIBase);
 };
 
+Q_DECLARE_INTERFACE(NoobaPluginAPIBase, "NoobaVSS.NoobaPluginAPIBase/" )
 #endif // NOOBAPLUGINBASE_H

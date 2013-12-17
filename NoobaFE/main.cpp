@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     a.setApplicationName(nooba::ProgramName);
     a.setOrganizationName(nooba::Organisation);
     a.setApplicationVersion(QString("%1.%2").arg(nooba::MajorVersion).arg(nooba::MinorVersion));
-    a.setWindowIcon(QIcon(":/Resources/logo.png"));
+    a.setWindowIcon(QIcon(":/Resources/Nooba_logo.png"));
 
     MainWindow w;
     w.show();

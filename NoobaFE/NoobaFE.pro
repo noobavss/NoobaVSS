@@ -16,7 +16,12 @@ CONFIG(release, debug|release): TARGET = NoobaVSS_Release
 CONFIG(debug, debug|release): DESTDIR = ../../NoobaVSS_build/NoobaFE/Debug/
 CONFIG(release, debug|release): DESTDIR = ../../NoobaVSS_build/NoobaFE/Release/
 
+# creates visual studio files
 #win32:TEMPLATE = vcapp
+
+RESOURCES += Resources/mainwind.qrc
+# sets the application icon for windows
+RC_FILE = Resources/nooba_logo.rc
 
 # Input
 HEADERS += \
@@ -70,17 +75,12 @@ SOURCES += \
     PathLineEdit.cpp \
     FrameLabel.cpp
 
-RESOURCES += Resources/mainwind.qrc
-
 unix {
     CONFIG += link_pkgconfig
     PKGCONFIG += opencv
 }
 
-CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../NoobaVSS_build/NoobaPluginAPI/Debug/ -lNoobaPluginAPId
-CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../NoobaVSS_build/NoobaPluginAPI/Release/ -lNoobaPluginAPI
-
-win32{
+win32:CONFIG(release, debug|release){
     # need to put win32 opencv lib paths
     INCLUDEPATH += $$OUT_PWD/../../OpenCV244/release/include
     LIBS += -L$$OUT_PWD/../../OpenCV244/release/lib \
@@ -90,6 +90,19 @@ win32{
     -lopencv_features2d244.dll \
     -lopencv_calib3d244.dll
 }
+
+win32:CONFIG(debug, debug|release){
+    # need to put win32 opencv lib paths
+    INCLUDEPATH += $$OUT_PWD/../../OpenCV244/debug/include
+    LIBS += -L$$OUT_PWD/../../OpenCV244/debug/lib \
+    -lopencv_core244.dll \
+    -lopencv_highgui244.dll \
+    -lopencv_imgproc244.dll
+
+}
+
+CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../NoobaVSS_build/NoobaPluginAPI/Debug/ -lNoobaPluginAPId
+CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../NoobaVSS_build/NoobaPluginAPI/Release/ -lNoobaPluginAPI
 
 INCLUDEPATH += $$PWD/../NoobaPluginAPI
 DEPENDPATH += $$PWD/../NoobaPluginAPI

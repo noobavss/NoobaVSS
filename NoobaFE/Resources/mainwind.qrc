@@ -12,8 +12,9 @@
         <file>super-mono-iconset/button-cross.png</file>
         <file>super-mono-iconset/web-cam.png</file>
         <file>super-mono-iconset/information-balloon.png</file>
-        <file>logo.png</file>
         <file>drawLine.png</file>
         <file>show_hide.png</file>
+        <file>Nooba_logo.png</file>
+        <file>Nooba_logo.ico</file>
     </qresource>
 </RCC>

@@ -81,15 +81,14 @@ int PluginLoader::loadPluginInfo()
         if (!plugin)
             continue;
 
-        NoobaPluginAPIBase* apiBase = qobject_cast<NoobaPluginAPIBase *>(plugin);
-        if (!apiBase)
+        NoobaPluginAPI* api = qobject_cast<NoobaPluginAPI* >(plugin);
+        if(!api)
             continue;
 
-        if(!versionCheckOk(apiBase, fileName,  errStr))
+        if(!versionCheckOk(api, fileName,  errStr))
             continue;
 
         // add the plugin details to the list
-        NoobaPluginAPI* api = qobject_cast<NoobaPluginAPI* >(plugin);
         nooba::PluginData pluginData(fileName, api->getPluginInfo(),api->APIMajorVersion(), api->APIMinorVersion());
         _pluginInfoList.append(pluginData);
         qPluginLoader.unload();  // unload after getting the details of the plugin
@@ -491,11 +490,11 @@ void PluginLoader::refreshPlugins()
     }
 }
 
-bool PluginLoader::versionCheckOk(NoobaPluginAPIBase *apiBase, const QString& filename, QString& errStr)
+bool PluginLoader::versionCheckOk(NoobaPluginAPI *api, const QString& filename, QString& errStr)
 {
     // NOTE: PRIVATE function. NOT Thread safe call with caution
-    int pluginAPIMajorVer = apiBase->APIMajorVersion();
-    int pluginAPIMinorVer = apiBase->APIMinorVersion();
+    int pluginAPIMajorVer = api->APIMajorVersion();
+    int pluginAPIMinorVer = api->APIMinorVersion();
     bool ok = true;
     if(pluginAPIMajorVer > API_MAJOR_VERSION)
         ok = false;
