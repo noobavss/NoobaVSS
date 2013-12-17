@@ -66,10 +66,13 @@ private slots:
     void on_actionAbout_NoobaVSS_triggered();
     void onControlButton_clicked();
     void onMdiSubWindowActivated(QMdiSubWindow* subWindow);
+    void onCamViewClose();
 
 private:
 
     bool tabCheck();
+    void enableMenuItems(bool isEnable);
+
     void updateDockWidgets(ParamConfigWind *paramConfig, OutputWind *debugMsgWind, StatPanel* statPanel);
     QMdiSubWindow *addNewSourceTab(CameraView *camView);
     void initMDIArea();

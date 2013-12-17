@@ -58,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->menu_Window->addAction(ui->statPanelDock->toggleViewAction());
     updateDockWidgets(&_paramConfigUI, &_debugWind, &_statPanel);
     setWindowTitle(nooba::ProgramName);
+    enableMenuItems(false);
 }
 
 MainWindow::~MainWindow()
@@ -94,7 +95,6 @@ void MainWindow::onOpenFile()
     {
         delete camView;
     }
-
 }
 
 void MainWindow::onOpenWebCam()
@@ -161,6 +161,12 @@ void MainWindow::onMdiSubWindowActivated(QMdiSubWindow *subWindow)
     return;
 }
 
+void MainWindow::onCamViewClose()
+{
+    if(ui->mdiArea->subWindowList().count() == 1) // 1 is goint to close. so disable menus
+        enableMenuItems(false);
+}
+
 bool MainWindow::tabCheck()
 {
     if( ui->mdiArea->subWindowList().count() == 1)
@@ -172,7 +178,18 @@ bool MainWindow::tabCheck()
 
         return false;
     }
+    enableMenuItems(true);
     return true;
+}
+
+void MainWindow::enableMenuItems(bool isEnable)
+{
+    ui->actionNext_Frame->setEnabled(isEnable);
+    ui->actionPlay_Pause->setEnabled(isEnable);
+    ui->actionPrevious_Frame->setEnabled(isEnable);
+    ui->actionPlugins->setEnabled(isEnable);
+
+    return;
 }
 
 void MainWindow::updateDockWidgets(ParamConfigWind* paramConfig, OutputWind* debugMsgWind, StatPanel* statPanel)
@@ -223,6 +240,7 @@ QMdiSubWindow* MainWindow::addNewSourceTab(CameraView* camView)
     QMdiSubWindow* subWind = ui->mdiArea->addSubWindow(camView);
     subWind->showMaximized();
     ui->mdiArea->setActiveSubWindow(subWind);
+    connect(subWind, SIGNAL(destroyed()), this, SLOT(onCamViewClose()));
     return subWind;
 }
 
@@ -255,19 +273,27 @@ void MainWindow::onPluginAct_triggerred()
     if(!camView)
         return;
     camView->configurePlugins();
-
 }
 
 void MainWindow::on_actionAbout_NoobaVSS_triggered()
 {
     QMessageBox::about(this, "About NoobaVSS",
-        QString("<b>Nooba is an open source surveillance video <br>analysis tool</b><ul><li>API version:\t\t\t")
-        .append(QString::number(API_MAJOR_VERSION)).append(".").append(QString::number(API_MINOR_VERSION))
-        .append("</li><li>OpenCV version:\t\t\t").append(QString::number(CV_MAJOR_VERSION))
-        .append(".").append(QString::number(CV_MINOR_VERSION))
-        .append("</li><li>App version:\t\t\t").append(QString("").number(nooba::MajorVersion))
-        .append(".").append(QString::number(nooba::MinorVersion)).append("</li><li>")
-        .append("Qt version:\t\t\t").append(QT_VERSION_STR).append("</li></ul>")
-        .append("<p>Build on %1</p>").arg(QDateTime::currentDateTime().toString())
-        );
+        QString("<h2 style=\"font-family:sans-serif;\" >NoobaVSS %1.%2 </h2>"
+                "<p>Nooba Plugin API version %3.%4</p>"
+                "<p>Using OpenCV %5.%6 and Qt %7</p>"
+                "<p>Built on %8</p>"
+                "<p>Copyright (C) 2014 by the Nooba team. All rights reserved.</p>"
+                "<p><b>NoobaVSS</b> is free software: you can redistribute it and/or modify "
+                "it under the terms of the GNU General Public License as published by "
+                "the Free Software Foundation, either version 3 of the License, or "
+                "(at your option) any later version.</p>"
+                "<p>This program is distributed in the hope that it will be useful,"
+                " but <b>WITHOUT ANY WARRANTY;</b> without even the implied warranty of"
+                " <b>MERCHANTABILITY</b> or <b>FITNESS FOR A PARTICULAR PURPOSE.</b></p>")
+                       .arg(nooba::MajorVersion).arg(nooba::MinorVersion)
+                       .arg(API_MAJOR_VERSION).arg(API_MINOR_VERSION)
+                       .arg(CV_MAJOR_VERSION).arg(CV_MINOR_VERSION)
+                       .arg(QT_VERSION_STR)
+                       .arg(QDateTime::currentDateTime().toString())
+                       );
 }
