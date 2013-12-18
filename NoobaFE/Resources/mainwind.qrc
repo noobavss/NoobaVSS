@@ -16,5 +16,6 @@
         <file>show_hide.png</file>
         <file>Nooba_logo.png</file>
         <file>Nooba_logo.ico</file>
+        <file>clear.png</file>
     </qresource>
 </RCC>

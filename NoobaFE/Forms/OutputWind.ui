@@ -37,6 +37,18 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="leftMargin">
+      <number>3</number>
+     </property>
+     <property name="topMargin">
+      <number>3</number>
+     </property>
+     <property name="rightMargin">
+      <number>3</number>
+     </property>
+     <property name="bottomMargin">
+      <number>3</number>
+     </property>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -52,8 +64,15 @@
      </item>
      <item>
       <widget class="QPushButton" name="pushButton">
+       <property name="toolTip">
+        <string>Clear Output</string>
+       </property>
        <property name="text">
-        <string>Clear</string>
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../Resources/mainwind.qrc">
+         <normaloff>:/Resources/clear.png</normaloff>:/Resources/clear.png</iconset>
        </property>
       </widget>
      </item>
@@ -61,7 +80,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../Resources/mainwind.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>pushButton</sender>

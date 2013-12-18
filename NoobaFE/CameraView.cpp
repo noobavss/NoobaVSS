@@ -419,23 +419,6 @@ void CameraView::resizeEvent(QResizeEvent *event)
         ui->mdiArea->tileSubWindows();
 }
 
-QImage CameraView::cvt2QImage(const Mat &cvImg)
-{
-    QImage img;
-    if(cvImg.channels() == 1)
-    {
-        img = QImage((const unsigned char*)(cvImg.data),
-                     cvImg.cols,cvImg.rows,cvImg.step,  QImage::Format_Indexed8);
-    }
-    else
-    {
-        img = QImage((const unsigned char*)(cvImg.data),
-                     cvImg.cols,cvImg.rows,cvImg.step,  QImage::Format_RGB888);
-
-    }
-    return img;
-}
-
 void CameraView::setVideoState(nooba::VideoState state)
 {
     switch(state){

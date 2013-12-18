@@ -163,7 +163,7 @@ void MainWindow::onMdiSubWindowActivated(QMdiSubWindow *subWindow)
 
 void MainWindow::onCamViewClose()
 {
-    if(ui->mdiArea->subWindowList().count() == 1) // 1 is goint to close. so disable menus
+    if(ui->mdiArea->subWindowList().count() == 0) // 1 is goint to close. so disable menus
         enableMenuItems(false);
 }
 
@@ -277,11 +277,18 @@ void MainWindow::onPluginAct_triggerred()
 
 void MainWindow::on_actionAbout_NoobaVSS_triggered()
 {
+    QString arch;
+#if defined(Q_PROCESSOR_X86_32)
+    arch = "32 bit";
+#elif defined(Q_PROCESSOR_X86_64)
+    arch = "64 bit";
+#endif
+
     QMessageBox::about(this, "About NoobaVSS",
-        QString("<h2 style=\"font-family:sans-serif;\" >NoobaVSS %1.%2 </h2>"
-                "<p>Nooba Plugin API version %3.%4</p>"
-                "<p>Using OpenCV %5.%6 and Qt %7</p>"
-                "<p>Built on %8</p>"
+        QString("<h2 style=\"font-family:sans-serif;\" >NoobaVSS %1.%2 (%3)</h2>"
+                "<p>Nooba Plugin API version %4.%5</p>"
+                "<p>Using OpenCV %6.%7 and Qt %8</p>"
+                "<p>Built on %9</p>"
                 "<p>Copyright (C) 2014 by the Nooba team. All rights reserved.</p>"
                 "<p><b>NoobaVSS</b> is free software: you can redistribute it and/or modify "
                 "it under the terms of the GNU General Public License as published by "
@@ -291,6 +298,7 @@ void MainWindow::on_actionAbout_NoobaVSS_triggered()
                 " but <b>WITHOUT ANY WARRANTY;</b> without even the implied warranty of"
                 " <b>MERCHANTABILITY</b> or <b>FITNESS FOR A PARTICULAR PURPOSE.</b></p>")
                        .arg(nooba::MajorVersion).arg(nooba::MinorVersion)
+                       .arg(arch)
                        .arg(API_MAJOR_VERSION).arg(API_MINOR_VERSION)
                        .arg(CV_MAJOR_VERSION).arg(CV_MINOR_VERSION)
                        .arg(QT_VERSION_STR)

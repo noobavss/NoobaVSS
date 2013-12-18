@@ -97,12 +97,6 @@ private:
     };
 
     /*
-     \brief get a color QImage from cv::Mat
-     \return QImage with three color channels
-     */
-    inline QImage cvt2QImage(const cv::Mat &cvImg);
-
-    /*
      *	Updates the current video state
      *  \param state
      */
