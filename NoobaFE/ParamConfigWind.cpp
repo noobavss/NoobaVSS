@@ -72,8 +72,7 @@ void ParamConfigWind::addPlugin(NoobaPlugin *plugin)
     addToTree<StringListData* >(plugin->getStringListMap(), nooba::MultiValueParam, l1);
     addToTree<FilePathData* >(plugin->getFilePathDataMap(), nooba::FilePathParam, l1);
 
-
-    l1->setBackground(0, QBrush(QColor(150,150,150)));
+    l1->setBackground(0, QBrush(QColor(50,140,200)));
     l1->setForeground(0, QBrush(QColor(255,255,255)));
     QFont font;
     font.setBold(true);

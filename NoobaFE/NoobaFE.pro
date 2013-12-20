@@ -11,7 +11,7 @@ CONFIG(debug, debug|release): message(FE Debug build!)
 CONFIG(release, debug|release): message(FE Release build!)
 
 CONFIG(debug, debug|release): TARGET = NoobaVSS_Debug
-CONFIG(release, debug|release): TARGET = NoobaVSS_Release
+CONFIG(release, debug|release): TARGET = NoobaVSS
 
 CONFIG(debug, debug|release): DESTDIR = ../../NoobaVSS_build/NoobaFE/Debug/
 CONFIG(release, debug|release): DESTDIR = ../../NoobaVSS_build/NoobaFE/Release/

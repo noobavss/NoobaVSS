@@ -79,14 +79,8 @@
               <property name="editTriggers">
                <set>QAbstractItemView::NoEditTriggers</set>
               </property>
-              <property name="dragEnabled">
+              <property name="tabKeyNavigation">
                <bool>true</bool>
-              </property>
-              <property name="dragDropMode">
-               <enum>QAbstractItemView::DragDrop</enum>
-              </property>
-              <property name="defaultDropAction">
-               <enum>Qt::MoveAction</enum>
               </property>
               <property name="alternatingRowColors">
                <bool>true</bool>
@@ -153,14 +147,8 @@
               <property name="editTriggers">
                <set>QAbstractItemView::NoEditTriggers</set>
               </property>
-              <property name="dragEnabled">
+              <property name="tabKeyNavigation">
                <bool>true</bool>
-              </property>
-              <property name="dragDropMode">
-               <enum>QAbstractItemView::DragDrop</enum>
-              </property>
-              <property name="defaultDropAction">
-               <enum>Qt::MoveAction</enum>
               </property>
               <property name="alternatingRowColors">
                <bool>true</bool>
