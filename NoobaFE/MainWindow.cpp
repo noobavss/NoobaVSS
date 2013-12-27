@@ -290,7 +290,7 @@ void MainWindow::on_actionAbout_NoobaVSS_triggered()
                 "<p>Using OpenCV %6.%7 and Qt %8</p>"
                 "<p>Built on %9</p>"
                 "<p>Copyright (C) 2014 by the Nooba team. All rights reserved.</p>"
-                "<p>For more info visit us on <a href=\"http://www.noobavss.tk\" >www.noobavss.tk</a></p>"
+                "<p>For more info visit us on <a href=\"http://www.noobavss.info\" >www.noobavss.info</a></p>"
                 "<p><b>NoobaVSS</b> is free software: you can redistribute it and/or modify "
                 "it under the terms of the GNU General Public License as published by "
                 "the Free Software Foundation, either version 3 of the License, or "

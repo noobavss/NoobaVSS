@@ -63,12 +63,12 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="clearButton">
        <property name="toolTip">
         <string>Clear Output</string>
        </property>
        <property name="text">
-        <string/>
+        <string>Clear</string>
        </property>
        <property name="icon">
         <iconset resource="../Resources/mainwind.qrc">
@@ -85,7 +85,7 @@
  </resources>
  <connections>
   <connection>
-   <sender>pushButton</sender>
+   <sender>clearButton</sender>
    <signal>clicked()</signal>
    <receiver>textEdit</receiver>
    <slot>clear()</slot>

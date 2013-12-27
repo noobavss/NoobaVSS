@@ -1,4 +1,14 @@
+.QWidget, QDialog  {
+    background: #fcfcfc;
+}
 
+QWidget#buttonPanel
+{
+    background-color: #b1b1b1;
+}
+.QLabel {
+    color: black;
+}
 *[canvas="true"] { background-color: rgb(91, 91, 91); }
 
 QWidget#canvasBorder { background-color: rgb(91, 91, 91); }
@@ -65,8 +75,11 @@ QDockWidget::title
 {
     text-align: left; /* align the text to the left */
     background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #fcfcfc, stop:1 #f1f1f1);
-    padding-left: 5px;
+                    stop:0 #dfdfdf, stop:0.5 #f0f0f0, stop:1 #dfdfdf);
+    border: none;
+/*    border-top: 1px solid rgba(0,0,0,50);
+    border-left: 0px solid transparent;
+  */  padding-left: 5px;
     color: white;
 }
 
@@ -196,24 +209,30 @@ QTabWidget::tab-bar {
 /* Style the tab using the tab sub-control. Note that
     it reads QTabBar _not_ QTabWidget */
 QTabBar::tab {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+    background: #f1f1f1;
+    /*qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                 stop: 0 #fff, stop: 0.4 #e1e1e1,
-                                stop: 0.5 #efefef, stop: 1.0 #eee);
+                                stop: 0.5 #efefef, stop: 1.0 #eee);*/
     border: 1px solid #C4C4C3;
     border-bottom: 2px solid #909090;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    min-width: 16ex;
-    padding: 2px;
+
+/*    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;*/
+
+    min-width: 19ex;
+    padding: 4px;
 }
 
 QTabBar::tab:selected, QTabBar::tab:hover {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+    background: #fdfdfd;
+
+/*qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                 stop: 0 #fafafa, stop: 0.4 #f4f4f4,
-                                stop: 0.5 #e7e7e7, stop: 1.0 #fafafa);
+                                stop: 0.5 #e7e7e7, stop: 1.0 #fafafa);*/
 }
 
 QTabBar::tab:selected {
+    color: #083b6f;
     border-color: #9B9B9B;
     border-bottom-color: #308cc6; /* same as pane color */
 }
@@ -222,6 +241,36 @@ QTreeView::item {
     height: 22px;
 }
 
+QPushButton#applyButton, QPushButton#addButton {
 
+    background-color: qradialgradient(cx:0, cy:0, radius: 1, fx:0.5, fy:0.5, stop:0 #1f67b1, stop:1 #1f67b1);
+
+    color: white;
+    border: 1px solid darkblue ;
+    min-width: 4em;
+    padding: 5px;
+}
+
+QPushButton#applyButton:pressed, QPushButton#addButton:pressed {
+background-color: #045d82;
+border-right: 1px solid gray;
+border-bottom: 1px solid gray;
+
+}
+
+QPushButton {
+
+    background-color: rgba(225,225,225, 100);
+    color: black;
+    border: 1px solid black;
+    min-width: 4em;
+    padding: 5px;
+}
+
+QPushButton:pressed {
+    background-color: rgba(100, 100, 100, 150);
+    border-right: 1px solid gray;
+    border-bottom: 1px solid gray;
+}
 
 

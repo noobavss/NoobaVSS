@@ -17,5 +17,6 @@
         <file>Nooba_logo.png</file>
         <file>Nooba_logo.ico</file>
         <file>clear.png</file>
+        <file>background.png</file>
     </qresource>
 </RCC>
