@@ -288,7 +288,7 @@ void MainWindow::on_actionAbout_NoobaVSS_triggered()
         QString("<h2 style=\"font-family:sans-serif;\" >NoobaVSS %1.%2 (%3)</h2>"
                 "<p>Nooba Plugin API version %4.%5</p>"
                 "<p>Using OpenCV %6.%7 and Qt %8</p>"
-                "<p>Built on %9</p>"
+                "<p>Built on %9 at %10</p>"
                 "<p>Copyright (C) 2014 by the Nooba team. All rights reserved.</p>"
                 "<p>For more info visit us on <a href=\"http://www.noobavss.tk\" >www.noobavss.tk</a></p>"
                 "<p><b>NoobaVSS</b> is free software: you can redistribute it and/or modify "
@@ -303,6 +303,6 @@ void MainWindow::on_actionAbout_NoobaVSS_triggered()
                        .arg(API_MAJOR_VERSION).arg(API_MINOR_VERSION)
                        .arg(CV_MAJOR_VERSION).arg(CV_MINOR_VERSION)
                        .arg(QT_VERSION_STR)
-                       .arg(QDateTime::currentDateTime().toString())
+                       .arg(__DATE__).arg(__TIME__)
                        );
 }
